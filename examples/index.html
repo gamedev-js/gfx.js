@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Examples</title>
+    <meta charset="utf-8">
+
+    <style>
+      body {
+        background: #333;
+        margin: 5px;
+
+        position: absolute;
+        top: 0; bottom: 0; left: 0; right: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      canvas:focus {
+        outline: 0;
+      }
+
+      .flex {
+        flex: 1;
+      }
+    </style>
+
+    <script src="../node_modules/regl/dist/regl.js"></script>
+    <script src="../node_modules/input.js/dist/input.dev.js"></script>
+    <script src="../node_modules/pstats.js/dist/pstats.dev.js"></script>
+    <script src="../node_modules/vmath/dist/vmath.dev.js"></script>
+    <script src="../node_modules/scene-graph/dist/scene-graph.dev.js"></script>
+    <script src="../dist/renderer.dev.js"></script>
+    <script src="./run.js"></script>
+  </head>
+
+  <body>
+    <canvas id="canvas" class="flex" tabindex="-1"></div>
+  </body>
+</html>
