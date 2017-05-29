@@ -1,6 +1,6 @@
 {
   "name": "gfx.js",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "description": "WebGL wrappings for Graphics",
   "main": "dist/gfx.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "start": "electron",
     "server": "preview -p 8002 -e examples",
     "dev": "rollup -w -c ./script/rollup.config.js",
-    "test": "npm run build:dev && electron-node-tap --renderer ./test/*.spec.js"
+    "test": "npm run build:dev && electron-node-tap --renderer --detail ./test/*.spec.js"
   },
   "repository": {
     "type": "git",

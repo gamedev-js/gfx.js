@@ -3,6 +3,10 @@ const gfx = require('../dist/gfx.js');
 
 suite(tap, 'helper', {timeout: 20000}, t => {
   function _initGL(cb) {
+    while(document.body.firstElementChild) {
+      document.body.firstElementChild.remove();
+    }
+
     let canvasEL = document.createElement('canvas');
     let gl = canvasEL.getContext('webgl', {});
 

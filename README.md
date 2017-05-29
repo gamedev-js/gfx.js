@@ -18,6 +18,8 @@ TODO
 
 ## TODO
 
+  - [] Better shader compile & link error (regl is a good reference)
+
 ## License
 
 MIT © 2017 Johnny Wu

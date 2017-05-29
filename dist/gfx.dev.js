@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.0.0
+ * gfx.js v0.8.0
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -49,12 +49,12 @@ let enums = {
   ATTR_TYPE_FLOAT32: 5126, // gl.FLOAT
 
   // texture filter
-  FILTER_NEAREST: 9728,                 // gl.FILTER_NEAREST
-  FILTER_LINEAR: 9729,                  // gl.FILTER_LINEAR
-  FILTER_NEAREST_MIPMAP_NEAREST: 9984,  // gl.FILTER_NEAREST_MIPMAP_NEAREST
-  FILTER_LINEAR_MIPMAP_NEAREST: 9985,   // gl.FILTER_LINEAR_MIPMAP_NEAREST
-  FILTER_NEAREST_MIPMAP_LINEAR: 9986,   // gl.FILTER_NEAREST_MIPMAP_LINEAR
-  FILTER_LINEAR_MIPMAP_LINEAR: 9987,    // gl.FILTER_LINEAR_MIPMAP_LINEAR
+  FILTER_NEAREST: 9728,                 // gl.NEAREST
+  FILTER_LINEAR: 9729,                  // gl.LINEAR
+  FILTER_NEAREST_MIPMAP_NEAREST: 9984,  // gl.NEAREST_MIPMAP_NEAREST
+  FILTER_LINEAR_MIPMAP_NEAREST: 9985,   // gl.LINEAR_MIPMAP_NEAREST
+  FILTER_NEAREST_MIPMAP_LINEAR: 9986,   // gl.NEAREST_MIPMAP_LINEAR
+  FILTER_LINEAR_MIPMAP_LINEAR: 9987,    // gl.LINEAR_MIPMAP_LINEAR
 
   // texture wrap mode
   WRAP_REPEAT: 10497, // gl.REPEAT
@@ -156,6 +156,11 @@ class IndexBuffer {
    * @method destroy
    */
   destroy() {
+    if (this._id === -1) {
+      console.error('The buffer already destroyed');
+      return;
+    }
+
     let gl = this.device.gl;
     gl.deleteBuffer(this._id);
     this.device._vram.ib -= this.bytes;
@@ -237,6 +242,11 @@ class VertexBuffer {
    * @method destroy
    */
   destroy() {
+    if (this._id === -1) {
+      console.error('The buffer already destroyed');
+      return;
+    }
+
     let gl = this.device.gl;
     gl.deleteBuffer(this._id);
     this.device._vram.vb -= this.bytes;
@@ -287,11 +297,149 @@ class VertexBuffer {
 }
 
 class Shader {
-  constructor() {
+  /**
+   * @param {ef.GraphicsDevice} device - graphic device
+   * @param {object} options - shader definition
+   * @param {string} options.vert - vertex shader source code
+   * @param {string} options.frag - fragment shader shader source code
+   * @example
+   * let shader = new Shader(device, {
+   *   vert: `
+   *     attribute vec3 a_position;
+   *     void main() {
+   *       gl_Position = vec4( a_position, 1.0 );
+   *     }
+   *   `,
+   *   frag: `
+   *     precision mediump float;
+   *     void main() {
+   *       gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+   *     }
+   *   `
+   * });
+   */
+  constructor(device, options) {
+    this._device = device;
+
+    // stores gl information: { location, type }
+    this._attributes = [];
+    this._uniforms = [];
+    this._samplers = [];
+
+    this._linked = false;
+    this._vertSource = options.vert;
+    this._fragSource = options.frag;
+    this._program = null;
+  }
+
+  link() {
+    if (this._linked) {
+      return;
+    }
+
+    let gl = this._device._gl;
+
+    let vertShader = _createShader(gl, gl.VERTEX_SHADER, this._vertSource);
+    let fragShader = _createShader(gl, gl.FRAGMENT_SHADER, this._fragSource);
+
+    let program = gl.createProgram();
+    gl.attachShader(program, vertShader);
+    gl.attachShader(program, fragShader);
+    gl.linkProgram(program);
+
+    let failed = false;
+
+    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
+      console.error(`Failed to compile vertex shader: ${gl.getShaderInfoLog(vertShader)}`);
+      failed = true;
+    }
+
+    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+      console.error(`Failed to compile fragment shader: ${gl.getShaderInfoLog(fragShader)}`);
+      failed = true;
+    }
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error(`Failed to link shader program: ${gl.getProgramInfoLog(program)}`);
+      failed = true;
+    }
+
+    gl.deleteShader(vertShader);
+    gl.deleteShader(fragShader);
+
+    if (failed) {
+      return;
+    }
+
+    this._program = program;
+
+    // parse attribute
+    let numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    for (let i = 0; i < numAttributes; ++i) {
+      let info = gl.getActiveAttrib(program, i);
+      let location = gl.getAttribLocation(program, info.name);
+
+      this._attributes.push({
+        name: info.name,
+        location: location,
+        type: info.type,
+      });
+    }
+
+    // parse uniform
+    let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    for (let i = 0; i < numUniforms; ++i) {
+      let info = gl.getActiveUniform(program, i);
+      let location = gl.getUniformLocation(program, info.name);
+
+      if ((info.type === gl.SAMPLER_2D) || (info.type === gl.SAMPLER_CUBE)) {
+        this._samplers.push({
+          name: info.name,
+          location: location,
+          type: info.type,
+        });
+      } else {
+        this._uniforms.push({
+          name: info.name,
+          location: location,
+          type: info.type,
+          localId: -1,
+        });
+      }
+    }
+
+    //
+    this._linked = true;
+  }
+
+  destroy() {
+    let gl = this._device._gl;
+    gl.deleteProgram(this._program);
+
+    this._linked = false;
+    this._program = null;
+    this._attributes = [];
+    this._uniforms = [];
+    this._samplers = [];
   }
 }
 
+// ====================
+// internal
+// ====================
+
+function _createShader(gl, type, src) {
+  let shader = gl.createShader(type);
+  gl.shaderSource(shader, src);
+  gl.compileShader(shader);
+
+  return shader;
+}
+
 class Texture {
+  /**
+   * @constructor
+   */
   constructor(device) {
     this._device = device;
 
@@ -307,21 +455,49 @@ class Texture {
     this._format = enums.TEXTURE_FMT_RGBA8;
   }
 
+  /**
+   * @method destroy
+   */
   destroy() {
+    if (this._id === -1) {
+      console.error('The texture already destroyed');
+      return;
+    }
+
     let gl = this.device.gl;
     gl.deleteTexture(this._id);
 
     this.device._vram.tex -= this.bytes;
     this._id = -1;
   }
-
-  update () {
-  }
 }
 
 class Texture2D extends Texture {
+  /**
+   * @constructor
+   * @param {Object} options
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Boolean} options.mipmaps
+   * @param {Number} options.anisotropy
+   * @param {FILTER_*} options.minFilter
+   * @param {FILTER_*} options.magFilter
+   * @param {WRAP_*} options.wrapS
+   * @param {WRAP_*} options.wrapT
+   */
   constructor(device, options) {
     super(device);
+    this.update(options);
+
+    // TODO:
+    // bind();
+    //   setMipmap();
+    //   setTexInfo();
+    // bindEnd();
+  }
+
+  update(options) {
+    let gl = this._device._gl;
 
     if (options) {
       if (options.width !== undefined) {
@@ -333,7 +509,6 @@ class Texture2D extends Texture {
       if (options.mipmpas !== undefined) {
         this._mipmaps = options.mipmpas;
       }
-
       if (options.anisotropy !== undefined) {
         this._anisotropy = options.anisotropy;
       }
@@ -349,45 +524,34 @@ class Texture2D extends Texture {
       if (options.wrapT !== undefined) {
         this._wrapT = options.wrapT;
       }
-
       if (options.format !== undefined) {
         this._format = options.format;
       }
     }
-  }
-
-  update() {
-  }
-
-  setStates(info) {
-    let gl = this._device._gl;
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._id);
+      // this._setMipmap();
+      this._setTexInfo();
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  }
 
-    if (info.minFilter !== undefined && info.minFilter !== this._minFilter) {
-      this._minFilter = info.minFilter;
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, info.minFilter);
-    }
+  _setTexInfo() {
+    let gl = this._device._gl;
 
-    if (info.magFilter !== undefined && info.magFilter !== this._magFilter) {
-      this._magFilter = info.magFilter;
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, info.magFilter);
-    }
-
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, info.wrapS);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, info.wrapT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this._minFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this._magFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this._wrapS);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this._wrapT);
 
     if (this._device.hasExt('EXT_texture_filter_anisotropic')) {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, info.anisotropic);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
     }
 
-    if (info.genMipmaps) {
-      gl.hint(gl.GENERATE_MIPMAP_HINT, info.mipmapHint);
+    if (this._mipmaps) {
+      gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
       gl.generateMipmap(gl.TEXTURE_2D);
     }
-
-    gl.bindTexture(gl.TEXTURE_2D, null);
   }
 }
 
