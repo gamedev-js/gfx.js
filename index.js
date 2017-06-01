@@ -1,5 +1,10 @@
 
-import {enums, attrTypeBytes} from './lib/enums';
+import {
+  enums,
+  attrTypeBytes,
+  glFilter,
+  glTextureFmt,
+} from './lib/enums';
 import IndexBuffer from './lib/index-buffer';
 import VertexBuffer from './lib/vertex-buffer';
 import Shader from './lib/shader';
@@ -18,6 +23,8 @@ let gfx = {
 
   // functions
   attrTypeBytes,
+  glFilter,
+  glTextureFmt,
 };
 Object.assign(gfx, enums);
 

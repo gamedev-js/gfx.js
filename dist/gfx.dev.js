@@ -8,6 +8,135 @@
 var gfx = (function () {
 'use strict';
 
+const GL_NEAREST = 9728;                // gl.NEAREST
+const GL_LINEAR = 9729;                 // gl.LINEAR
+const GL_NEAREST_MIPMAP_NEAREST = 9984; // gl.NEAREST_MIPMAP_NEAREST
+const GL_LINEAR_MIPMAP_NEAREST = 9985;  // gl.LINEAR_MIPMAP_NEAREST
+const GL_NEAREST_MIPMAP_LINEAR = 9986;  // gl.NEAREST_MIPMAP_LINEAR
+const GL_LINEAR_MIPMAP_LINEAR = 9987;   // gl.LINEAR_MIPMAP_LINEAR
+
+// const GL_BYTE = 5120;                     // gl.BYTE
+const GL_UNSIGNED_BYTE = 5121;            // gl.UNSIGNED_BYTE
+// const GL_SHORT = 5122;                    // gl.SHORT
+const GL_UNSIGNED_SHORT = 5123;           // gl.UNSIGNED_SHORT
+const GL_FLOAT = 5126;                    // gl.FLOAT
+const GL_UNSIGNED_SHORT_5_6_5 = 33635;    // gl.UNSIGNED_SHORT_5_6_5
+const GL_UNSIGNED_SHORT_4_4_4_4 = 32819;  // gl.UNSIGNED_SHORT_4_4_4_4
+const GL_UNSIGNED_SHORT_5_5_5_1 = 32820;  // gl.UNSIGNED_SHORT_5_5_5_1
+const GL_HALF_FLOAT_OES = 36193;          // gl.HALF_FLOAT_OES
+
+const GL_DEPTH_COMPONENT = 6402; // gl.DEPTH_COMPONENT
+
+const GL_ALPHA = 6406;            // gl.ALPHA
+const GL_RGB = 6407;              // gl.RGB
+const GL_RGBA = 6408;             // gl.RGBA
+const GL_LUMINANCE = 6409;        // gl.LUMINANCE
+const GL_LUMINANCE_ALPHA = 6410;  // gl.LUMINANCE_ALPHA
+
+const GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;   // ext.COMPRESSED_RGB_S3TC_DXT1_EXT
+const GL_COMPRESSED_RGBA_S3TC_DXT1_EXT = 0x83F1;  // ext.COMPRESSED_RGBA_S3TC_DXT1_EXT
+const GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;  // ext.COMPRESSED_RGBA_S3TC_DXT3_EXT
+const GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3;  // ext.COMPRESSED_RGBA_S3TC_DXT5_EXT
+
+const GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG = 0x8C00;  // ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+const GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG = 0x8C01;  // ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+const GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = 0x8C02; // ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+const GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = 0x8C03; // ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+
+const GL_COMPRESSED_RGB_ETC1_WEBGL = 0x8D64; // ext.COMPRESSED_RGB_ETC1_WEBGL
+
+
+const _filterGL = [
+  [ GL_NEAREST,  GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR ],
+  [ GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR ],
+];
+
+const _textureFmtGL = [
+  // TEXTURE_FMT_RGB_DXT1: 0
+  { format: GL_RGB, internalFormat: GL_COMPRESSED_RGB_S3TC_DXT1_EXT, pixelType: null },
+
+  // TEXTURE_FMT_RGBA_DXT1: 1
+  { format: GL_RGBA, internalFormat: GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, pixelType: null },
+
+  // TEXTURE_FMT_RGBA_DXT3: 2
+  { format: GL_RGBA, internalFormat: GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, pixelType: null },
+
+  // TEXTURE_FMT_RGBA_DXT5: 3
+  { format: GL_RGBA, internalFormat: GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, pixelType: null },
+
+  // TEXTURE_FMT_RGB_ETC1: 4
+  { format: GL_RGB, internalFormat: GL_COMPRESSED_RGB_ETC1_WEBGL, pixelType: null },
+
+  // TEXTURE_FMT_RGB_PVRTC_2BPPV1: 5
+  { format: GL_RGB, internalFormat: GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG, pixelType: null },
+
+  // TEXTURE_FMT_RGBA_PVRTC_2BPPV1: 6
+  { format: GL_RGBA, internalFormat: GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, pixelType: null },
+
+  // TEXTURE_FMT_RGB_PVRTC_4BPPV1: 7
+  { format: GL_RGB, internalFormat: GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG, pixelType: null },
+
+  // TEXTURE_FMT_RGBA_PVRTC_4BPPV1: 8
+  { format: GL_RGBA, internalFormat: GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, pixelType: null },
+
+  // TEXTURE_FMT_A8: 9
+  { format: GL_ALPHA, internalFormat: GL_ALPHA, pixelType: GL_UNSIGNED_BYTE },
+
+  // TEXTURE_FMT_L8: 10
+  { format: GL_LUMINANCE, internalFormat: GL_LUMINANCE, pixelType: GL_UNSIGNED_BYTE },
+
+  // TEXTURE_FMT_L8_A8: 11
+  { format: GL_LUMINANCE_ALPHA, internalFormat: GL_LUMINANCE_ALPHA, pixelType: GL_UNSIGNED_BYTE },
+
+  // TEXTURE_FMT_R5_G6_B5: 12
+  { format: GL_RGB, internalFormat: GL_RGB, pixelType: GL_UNSIGNED_SHORT_5_6_5 },
+
+  // TEXTURE_FMT_R5_G5_B5_A1: 13
+  { format: GL_RGBA, internalFormat: GL_RGBA, pixelType: GL_UNSIGNED_SHORT_5_5_5_1 },
+
+  // TEXTURE_FMT_R4_G4_B4_A4: 14
+  { format: GL_RGBA, internalFormat: GL_RGBA, pixelType: GL_UNSIGNED_SHORT_4_4_4_4 },
+
+  // TEXTURE_FMT_RGB8: 15
+  { format: GL_RGB, internalFormat: GL_RGB, pixelType: GL_UNSIGNED_BYTE },
+
+  // TEXTURE_FMT_RGBA8: 16
+  { format: GL_RGBA, internalFormat: GL_RGBA, pixelType: GL_UNSIGNED_BYTE },
+
+  // TEXTURE_FMT_RGB16F: 17
+  { format: GL_RGB, internalFormat: GL_RGB, pixelType: GL_HALF_FLOAT_OES },
+
+  // TEXTURE_FMT_RGBA16F: 18
+  { format: GL_RGBA, internalFormat: GL_RGBA, pixelType: GL_HALF_FLOAT_OES },
+
+  // TEXTURE_FMT_RGB32F: 19
+  { format: GL_RGB, internalFormat: GL_RGB, pixelType: GL_FLOAT },
+
+  // TEXTURE_FMT_RGBA32F: 20
+  { format: GL_RGBA, internalFormat: GL_RGBA, pixelType: GL_FLOAT },
+
+  // TEXTURE_FMT_R32F: 21
+  { format: null, internalFormat: null, pixelType: null },
+
+  // TEXTURE_FMT_111110F: 22
+  { format: null, internalFormat: null, pixelType: null },
+
+  // TEXTURE_FMT_SRGB: 23
+  { format: null, internalFormat: null, pixelType: null },
+
+  // TEXTURE_FMT_SRGBA: 24
+  { format: null, internalFormat: null, pixelType: null },
+
+  // TEXTURE_FMT_DEPTH: 25
+  { format: GL_DEPTH_COMPONENT, internalFormat: GL_DEPTH_COMPONENT, pixelType: GL_UNSIGNED_SHORT },
+
+  // TEXTURE_FMT_DEPTHSTENCIL: 26
+  { format: null, internalFormat: null, pixelType: null },
+];
+
+/**
+ * enums
+ */
 let enums = {
   // buffer usage
   USAGE_STATIC: 35044,  // gl.STATIC_DRAW
@@ -49,12 +178,8 @@ let enums = {
   ATTR_TYPE_FLOAT32: 5126, // gl.FLOAT
 
   // texture filter
-  FILTER_NEAREST: 9728,                 // gl.NEAREST
-  FILTER_LINEAR: 9729,                  // gl.LINEAR
-  FILTER_NEAREST_MIPMAP_NEAREST: 9984,  // gl.NEAREST_MIPMAP_NEAREST
-  FILTER_LINEAR_MIPMAP_NEAREST: 9985,   // gl.LINEAR_MIPMAP_NEAREST
-  FILTER_NEAREST_MIPMAP_LINEAR: 9986,   // gl.NEAREST_MIPMAP_LINEAR
-  FILTER_LINEAR_MIPMAP_LINEAR: 9987,    // gl.LINEAR_MIPMAP_LINEAR
+  FILTER_NEAREST: 0,
+  FILTER_LINEAR: 1,
 
   // texture wrap mode
   WRAP_REPEAT: 10497, // gl.REPEAT
@@ -63,38 +188,43 @@ let enums = {
 
   // texture format
   // compress formats
-  TEXTURE_FMT_DXT1: 0,
-  TEXTURE_FMT_DXT3: 1,
-  TEXTURE_FMT_DXT5: 2,
-  TEXTURE_FMT_ETC1: 3,
-  TEXTURE_FMT_PVRTC_2BPP_RGB_1: 4,
-  TEXTURE_FMT_PVRTC_2BPP_RGBA_1: 5,
-  TEXTURE_FMT_PVRTC_4BPP_RGB_1: 6,
-  TEXTURE_FMT_PVRTC_4BPP_RGBA_1: 7,
+  TEXTURE_FMT_RGB_DXT1: 0,
+  TEXTURE_FMT_RGBA_DXT1: 1,
+  TEXTURE_FMT_RGBA_DXT3: 2,
+  TEXTURE_FMT_RGBA_DXT5: 3,
+  TEXTURE_FMT_RGB_ETC1: 4,
+  TEXTURE_FMT_RGB_PVRTC_2BPPV1: 5,
+  TEXTURE_FMT_RGBA_PVRTC_2BPPV1: 6,
+  TEXTURE_FMT_RGB_PVRTC_4BPPV1: 7,
+  TEXTURE_FMT_RGBA_PVRTC_4BPPV1: 8,
 
   // normal formats
-  TEXTURE_FMT_A8: 8,
-  TEXTURE_FMT_L8: 9,
-  TEXTURE_FMT_L8_A8: 10,
-  TEXTURE_FMT_R5_G6_B5: 11,
-  TEXTURE_FMT_R5_G5_B5_A1: 12,
-  TEXTURE_FMT_R4_G4_B4_A4: 13,
-  TEXTURE_FMT_RGB8: 14,
-  TEXTURE_FMT_RGBA8: 15,
-  TEXTURE_FMT_RGB16F: 16,
-  TEXTURE_FMT_RGBA16F: 17,
-  TEXTURE_FMT_RGB32F: 18,
-  TEXTURE_FMT_RGBA32F: 19,
-  TEXTURE_FMT_R32F: 20,
-  TEXTURE_FMT_111110F: 21,
-  TEXTURE_FMT_SRGB: 22,
-  TEXTURE_FMT_SRGBA: 23,
+  TEXTURE_FMT_A8: 9,
+  TEXTURE_FMT_L8: 10,
+  TEXTURE_FMT_L8_A8: 11,
+  TEXTURE_FMT_R5_G6_B5: 12,
+  TEXTURE_FMT_R5_G5_B5_A1: 13,
+  TEXTURE_FMT_R4_G4_B4_A4: 14,
+  TEXTURE_FMT_RGB8: 15,
+  TEXTURE_FMT_RGBA8: 16,
+  TEXTURE_FMT_RGB16F: 17,
+  TEXTURE_FMT_RGBA16F: 18,
+  TEXTURE_FMT_RGB32F: 19,
+  TEXTURE_FMT_RGBA32F: 20,
+  TEXTURE_FMT_R32F: 21,
+  TEXTURE_FMT_111110F: 22,
+  TEXTURE_FMT_SRGB: 23,
+  TEXTURE_FMT_SRGBA: 24,
 
   // depth formats
-  TEXTURE_FMT_DEPTH: 24,
-  TEXTURE_FMT_DEPTHSTENCIL: 25,
+  TEXTURE_FMT_DEPTH: 25,
+  TEXTURE_FMT_DEPTHSTENCIL: 26,
 };
 
+/**
+ * @method attrTypeBytes
+ * @param {ATTR_TYPE_*} attrType
+ */
 function attrTypeBytes(attrType) {
   if (attrType === enums.ATTR_TYPE_INT8) {
     return 1;
@@ -114,6 +244,36 @@ function attrTypeBytes(attrType) {
 
   console.warn(`Unknown ATTR_TYPE: ${attrType}`);
   return 0;
+}
+
+/**
+ * @method glFilter
+ * @param {WebGLContext} gl
+ * @param {FILTER_*} filter
+ * @param {FILTER_*} mipFilter
+ */
+function glFilter(gl, filter, mipFilter = -1) {
+  let result = _filterGL[filter][mipFilter+1];
+  if (result === undefined) {
+    console.warn(`Unknown FILTER: ${filter}`);
+    return mipFilter === -1 ? gl.LINEAR : gl.LINEAR_MIPMAP_LINEAR;
+  }
+
+  return result;
+}
+
+/**
+ * @method glTextureFmt
+ * @param {TEXTURE_FMT_*} fmt
+ */
+function glTextureFmt(fmt) {
+  let result = _textureFmtGL[fmt];
+  if (result === undefined) {
+    console.warn(`Unknown TEXTURE_FMT: ${fmt}`);
+    return _textureFmtGL[enums.TEXTURE_FMT_RGBA8];
+  }
+
+  return result;
 }
 
 class IndexBuffer {
@@ -445,11 +605,12 @@ class Texture {
 
     this._width = 4;
     this._height = 4;
-    this._mipmaps = true;
+    this._hasMipmap = false;
 
     this._anisotropy = 1;
-    this._minFilter = enums.FILTER_LINEAR_MIPMAP_LINEAR;
+    this._minFilter = enums.FILTER_LINEAR;
     this._magFilter = enums.FILTER_LINEAR;
+    this._mipFilter = enums.FILTER_LINEAR;
     this._wrapS = enums.WRAP_REPEAT;
     this._wrapT = enums.WRAP_REPEAT;
     this._format = enums.TEXTURE_FMT_RGBA8;
@@ -476,28 +637,25 @@ class Texture2D extends Texture {
   /**
    * @constructor
    * @param {Object} options
+   * @param {Array} options.images
+   * @param {Boolean} options.mipmap
    * @param {Number} options.width
    * @param {Number} options.height
-   * @param {Boolean} options.mipmaps
    * @param {Number} options.anisotropy
    * @param {FILTER_*} options.minFilter
    * @param {FILTER_*} options.magFilter
+   * @param {FILTER_*} options.mipFilter
    * @param {WRAP_*} options.wrapS
    * @param {WRAP_*} options.wrapT
    */
   constructor(device, options) {
     super(device);
     this.update(options);
-
-    // TODO:
-    // bind();
-    //   setMipmap();
-    //   setTexInfo();
-    // bindEnd();
   }
 
   update(options) {
     let gl = this._device._gl;
+    let genMipmap = this._hasMipmap;
 
     if (options) {
       if (options.width !== undefined) {
@@ -505,9 +663,6 @@ class Texture2D extends Texture {
       }
       if (options.height !== undefined) {
         this._height = options.height;
-      }
-      if (options.mipmpas !== undefined) {
-        this._mipmaps = options.mipmpas;
       }
       if (options.anisotropy !== undefined) {
         this._anisotropy = options.anisotropy;
@@ -518,6 +673,9 @@ class Texture2D extends Texture {
       if (options.magFilter !== undefined) {
         this._magFilter = options.magFilter;
       }
+      if (options.mipFilter !== undefined) {
+        this._mipFilter = options.mipFilter;
+      }
       if (options.wrapS !== undefined) {
         this._wrapS = options.wrapS;
       }
@@ -527,30 +685,57 @@ class Texture2D extends Texture {
       if (options.format !== undefined) {
         this._format = options.format;
       }
+
+      // check if generate mipmap
+      if (options.mipmap !== undefined) {
+        this._hasMipmap = options.mipmap;
+        genMipmap = options.mipmap;
+      }
+
+      if (options.images !== undefined) {
+        if (options.images.length > 1) {
+          genMipmap = false;
+        }
+      }
     }
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._id);
-      // this._setMipmap();
+      if (options.images !== undefined) {
+        this._setMipmap(options.images);
+      }
+
       this._setTexInfo();
+
+      if (genMipmap) {
+        gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
+        gl.generateMipmap(gl.TEXTURE_2D);
+      }
     gl.bindTexture(gl.TEXTURE_2D, null);
+  }
+
+  _setMipmap(images) {
+    let gl = this._device._gl;
+
+    // TODO
+    for (let i = 0; i < images.length; ++i) {
+      let img = images[i];
+
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    }
   }
 
   _setTexInfo() {
     let gl = this._device._gl;
 
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, this._minFilter);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, this._magFilter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, glFilter(gl, this._minFilter, this._hasMipmap ? this._mipFilter : -1));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, glFilter(gl, this._magFilter, -1));
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this._wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this._wrapT);
 
-    if (this._device.hasExt('EXT_texture_filter_anisotropic')) {
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
-    }
-
-    if (this._mipmaps) {
-      gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
-      gl.generateMipmap(gl.TEXTURE_2D);
+    if (this._device.ext('EXT_texture_filter_anisotropic')) {
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
     }
   }
 }
@@ -605,8 +790,8 @@ class Device {
     }
   }
 
-  hasExt(name) {
-    return this._extensions[name] !== undefined;
+  ext(name) {
+    return this._extensions[name];
   }
 
   // TODO: set states
@@ -627,6 +812,8 @@ let gfx = {
 
   // functions
   attrTypeBytes,
+  glFilter,
+  glTextureFmt,
 };
 Object.assign(gfx, enums);
 
