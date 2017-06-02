@@ -64,26 +64,28 @@ suite(tap, 'helper', {timeout: 20000}, t => {
 
     t.test('texture_fmt', t => {
       let ext_hf = gl.getExtension('OES_texture_half_float');
+      let ext_s3tc = gl.getExtension('WEBGL_compressed_texture_s3tc');
+      // let ext_pvrtc = gl.getExtension('WEBGL_compressed_texture_pvrtc');
 
-      // t.deepEqual(
-      //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGB_DXT1),
-      //   { format: gl.RGB, internalFormat: gl.COMPRESSED_RGB_S3TC_DXT1_EXT, pixelType: null }
-      // );
+      t.deepEqual(
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_RGB_DXT1),
+        { format: gl.RGB, internalFormat: ext_s3tc.COMPRESSED_RGB_S3TC_DXT1_EXT, pixelType: null }
+      );
 
-      // t.deepEqual(
-      //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_DXT1),
-      //   { format: gl.RGBA, internalFormat: gl.COMPRESSED_RGBA_S3TC_DXT1_EXT, pixelType: null }
-      // );
+      t.deepEqual(
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_DXT1),
+        { format: gl.RGBA, internalFormat: ext_s3tc.COMPRESSED_RGBA_S3TC_DXT1_EXT, pixelType: null }
+      );
 
-      // t.deepEqual(
-      //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_DXT3),
-      //   { format: gl.RGBA, internalFormat: gl.COMPRESSED_RGBA_S3TC_DXT3_EXT, pixelType: null }
-      // );
+      t.deepEqual(
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_DXT3),
+        { format: gl.RGBA, internalFormat: ext_s3tc.COMPRESSED_RGBA_S3TC_DXT3_EXT, pixelType: null }
+      );
 
-      // t.deepEqual(
-      //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_DXT5),
-      //   { format: gl.RGBA, internalFormat: gl.COMPRESSED_RGBA_S3TC_DXT5_EXT, pixelType: null }
-      // );
+      t.deepEqual(
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_DXT5),
+        { format: gl.RGBA, internalFormat: ext_s3tc.COMPRESSED_RGBA_S3TC_DXT5_EXT, pixelType: null }
+      );
 
       // t.deepEqual(
       //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGB_ETC1),
@@ -92,22 +94,22 @@ suite(tap, 'helper', {timeout: 20000}, t => {
 
       // t.deepEqual(
       //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGB_PVRTC_2BPPV1),
-      //   { format: gl.RGB, internalFormat: gl.COMPRESSED_RGB_PVRTC_2BPPV1_IMG, pixelType: null }
+      //   { format: gl.RGB, internalFormat: ext_pvrtc.COMPRESSED_RGB_PVRTC_2BPPV1_IMG, pixelType: null }
       // );
 
       // t.deepEqual(
       //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_PVRTC_2BPPV1),
-      //   { format: gl.RGBA, internalFormat: gl.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, pixelType: null }
+      //   { format: gl.RGBA, internalFormat: ext_pvrtc.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG, pixelType: null }
       // );
 
       // t.deepEqual(
       //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGB_PVRTC_4BPPV1),
-      //   { format: gl.RGB, internalFormat: gl.COMPRESSED_RGB_PVRTC_4BPPV1_IMG, pixelType: null }
+      //   { format: gl.RGB, internalFormat: ext_pvrtc.COMPRESSED_RGB_PVRTC_4BPPV1_IMG, pixelType: null }
       // );
 
       // t.deepEqual(
       //   gfx.glTextureFmt(gfx.TEXTURE_FMT_RGBA_PVRTC_4BPPV1),
-      //   { format: gl.RGBA, internalFormat: gl.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, pixelType: null }
+      //   { format: gl.RGBA, internalFormat: ext_pvrtc.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG, pixelType: null }
       // );
 
       t.deepEqual(
