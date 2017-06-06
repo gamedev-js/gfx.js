@@ -7,7 +7,7 @@ import {
 } from './lib/enums';
 import IndexBuffer from './lib/index-buffer';
 import VertexBuffer from './lib/vertex-buffer';
-import Shader from './lib/shader';
+import Program from './lib/program';
 import Texture from './lib/texture';
 import Texture2D from './lib/texture-2d';
 import Device from './lib/device';
@@ -16,7 +16,7 @@ let gfx = {
   // classes
   IndexBuffer,
   VertexBuffer,
-  Shader,
+  Program,
   Texture,
   Texture2D,
   Device,

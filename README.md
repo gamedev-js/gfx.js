@@ -19,6 +19,8 @@ TODO
 ## TODO
 
   - [] Better shader compile & link error (regl is a good reference)
+  - [] Update sub-image
+  - [] stats of vram.texture
 
 ## License
 

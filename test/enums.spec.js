@@ -204,5 +204,42 @@ suite(tap, 'helper', {timeout: 20000}, t => {
 
       t.end();
     });
+
+    t.test('blend func', t => {
+      t.equal(gfx.BLEND_FUNC_ADD, gl.FUNC_ADD);
+      t.equal(gfx.BLEND_FUNC_SUBTRACT, gl.FUNC_SUBTRACT);
+      t.equal(gfx.BLEND_FUNC_REVERSE_SUBTRACT, gl.FUNC_REVERSE_SUBTRACT);
+
+      t.end();
+    });
+
+    t.test('blend', t => {
+      t.equal(gfx.BLEND_ZERO, gl.ZERO);
+      t.equal(gfx.BLEND_ONE, gl.ONE);
+      t.equal(gfx.BLEND_SRC_COLOR, gl.SRC_COLOR);
+      t.equal(gfx.BLEND_ONE_MINUS_SRC_COLOR, gl.ONE_MINUS_SRC_COLOR);
+      t.equal(gfx.BLEND_DST_COLOR, gl.DST_COLOR);
+      t.equal(gfx.BLEND_ONE_MINUS_DST_COLOR, gl.ONE_MINUS_DST_COLOR);
+      t.equal(gfx.BLEND_SRC_ALPHA, gl.SRC_ALPHA);
+      t.equal(gfx.BLEND_ONE_MINUS_SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      t.equal(gfx.BLEND_DST_ALPHA, gl.DST_ALPHA);
+      t.equal(gfx.BLEND_ONE_MINUS_DST_ALPHA, gl.ONE_MINUS_DST_ALPHA);
+      t.equal(gfx.BLEND_CONSTANT_COLOR, gl.CONSTANT_COLOR);
+      t.equal(gfx.BLEND_ONE_MINUS_CONSTANT_COLOR, gl.ONE_MINUS_CONSTANT_COLOR);
+      t.equal(gfx.BLEND_CONSTANT_ALPHA, gl.CONSTANT_ALPHA);
+      t.equal(gfx.BLEND_ONE_MINUS_CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA);
+      t.equal(gfx.BLEND_SRC_ALPHA_SATURATE, gl.SRC_ALPHA_SATURATE);
+
+      t.end();
+    });
+
+    t.test('cull', t => {
+      t.equal(gfx.CULL_NONE, 0);
+      t.equal(gfx.CULL_FRONT, gl.FRONT);
+      t.equal(gfx.CULL_BACK, gl.BACK);
+      t.equal(gfx.CULL_FRONT_AND_BACK, gl.FRONT_AND_BACK);
+
+      t.end();
+    });
   });
 });
