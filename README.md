@@ -20,7 +20,7 @@ TODO
 
   - [] Better shader compile & link error (regl is a good reference)
   - [] Update sub-image
-  - [] stats of vram.texture
+  - [] stats of device._stats.texture
 
 ## License
 

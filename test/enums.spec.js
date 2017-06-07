@@ -241,5 +241,17 @@ suite(tap, 'helper', {timeout: 20000}, t => {
 
       t.end();
     });
+
+    t.test('primitive type', t => {
+      t.equal(gfx.PT_POINTS, gl.POINTS);
+      t.equal(gfx.PT_LINES, gl.LINES);
+      t.equal(gfx.PT_LINE_LOOP, gl.LINE_LOOP);
+      t.equal(gfx.PT_LINE_STRIP, gl.LINE_STRIP);
+      t.equal(gfx.PT_TRIANGLES, gl.TRIANGLES);
+      t.equal(gfx.PT_TRIANGLE_STRIP, gl.TRIANGLE_STRIP);
+      t.equal(gfx.PT_TRIANGLE_FAN, gl.TRIANGLE_FAN);
+
+      t.end();
+    });
   });
 });

@@ -25,7 +25,7 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
 
   _initDevice(device => {
     t.test('attributes', t => {
-      let shader = new gfx.Shader(device, {
+      let program = new gfx.Program(device, {
         vert: `
           attribute vec3 a_position;
           attribute vec2 a_uv0;
@@ -42,13 +42,13 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
           }
         `
       });
-      shader.link();
+      program.link();
 
-      t.equal(shader._attributes.length, 2);
-      t.equal(shader._attributes[0].name, 'a_uv0');
-      t.equal(shader._attributes[0].type, device._gl.FLOAT_VEC2);
-      t.equal(shader._attributes[1].name, 'a_position');
-      t.equal(shader._attributes[1].type, device._gl.FLOAT_VEC3);
+      t.equal(program._attributes.length, 2);
+      t.equal(program._attributes[0].name, 'a_uv0');
+      t.equal(program._attributes[0].type, device._gl.FLOAT_VEC2);
+      t.equal(program._attributes[1].name, 'a_position');
+      t.equal(program._attributes[1].type, device._gl.FLOAT_VEC3);
 
       t.end();
     });
