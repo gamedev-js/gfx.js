@@ -1,10 +1,11 @@
-
 import {
   enums,
   attrTypeBytes,
   glFilter,
   glTextureFmt,
 } from './lib/enums';
+
+import VertexFormat from './lib/vertex-format';
 import IndexBuffer from './lib/index-buffer';
 import VertexBuffer from './lib/vertex-buffer';
 import Program from './lib/program';
@@ -15,6 +16,7 @@ import Device from './lib/device';
 
 let gfx = {
   // classes
+  VertexFormat,
   IndexBuffer,
   VertexBuffer,
   Program,

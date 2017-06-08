@@ -44,7 +44,6 @@ const GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = 0x8C03; // ext.COMPRESSED_RGBA_PVRTC
 
 const GL_COMPRESSED_RGB_ETC1_WEBGL = 0x8D64; // ext.COMPRESSED_RGB_ETC1_WEBGL
 
-
 const _filterGL = [
   [ GL_NEAREST,  GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR ],
   [ GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR ],
@@ -218,6 +217,53 @@ let enums = {
   // depth formats
   TEXTURE_FMT_DEPTH: 25,
   TEXTURE_FMT_DEPTHSTENCIL: 26,
+
+  // depth-function
+  DEPTH_FUNC_NEVER: 512,    // gl.NEVER
+  DEPTH_FUNC_LESS: 513,     // gl.LESS
+  DEPTH_FUNC_EQUAL: 514,    // gl.EQUAL
+  DEPTH_FUNC_LEQUAL: 515,   // gl.LEQUAL
+  DEPTH_FUNC_GREATER: 516,  // gl.GREATER
+  DEPTH_FUNC_NOTEQUAL: 517, // gl.NOTEQUAL
+  DEPTH_FUNC_GEQUAL: 518,   // gl.GEQUAL
+  DEPTH_FUNC_ALWAYS: 519,   // gl.ALWAYS
+
+  // blend-equation
+  BLEND_FUNC_ADD: 32774,              // gl.FUNC_ADD
+  BLEND_FUNC_SUBTRACT: 32778,         // gl.FUNC_SUBTRACT
+  BLEND_FUNC_REVERSE_SUBTRACT: 32779, // gl.FUNC_REVERSE_SUBTRACT
+
+  // blend
+  BLEND_ZERO: 0,                          // gl.ZERO
+  BLEND_ONE: 1,                           // gl.ONE
+  BLEND_SRC_COLOR: 768,                   // gl.SRC_COLOR
+  BLEND_ONE_MINUS_SRC_COLOR: 769,         // gl.ONE_MINUS_SRC_COLOR
+  BLEND_DST_COLOR: 774,                   // gl.DST_COLOR
+  BLEND_ONE_MINUS_DST_COLOR: 775,         // gl.ONE_MINUS_DST_COLOR
+  BLEND_SRC_ALPHA: 770,                   // gl.SRC_ALPHA
+  BLEND_ONE_MINUS_SRC_ALPHA: 771,         // gl.ONE_MINUS_SRC_ALPHA
+  BLEND_DST_ALPHA: 772,                   // gl.DST_ALPHA
+  BLEND_ONE_MINUS_DST_ALPHA: 773,         // gl.ONE_MINUS_DST_ALPHA
+  BLEND_CONSTANT_COLOR: 32769,            // gl.CONSTANT_COLOR
+  BLEND_ONE_MINUS_CONSTANT_COLOR: 32770,  // gl.ONE_MINUS_CONSTANT_COLOR
+  BLEND_CONSTANT_ALPHA: 32771,            // gl.CONSTANT_ALPHA
+  BLEND_ONE_MINUS_CONSTANT_ALPHA: 32772,  // gl.ONE_MINUS_CONSTANT_ALPHA
+  BLEND_SRC_ALPHA_SATURATE: 776,          // gl.SRC_ALPHA_SATURATE
+
+  // cull
+  CULL_NONE: 0,
+  CULL_FRONT: 1028,
+  CULL_BACK: 1029,
+  CULL_FRONT_AND_BACK: 1032,
+
+  // primitive type
+  PT_POINTS: 0,         // gl.POINTS
+  PT_LINES: 1,          // gl.LINES
+  PT_LINE_LOOP: 2,      // gl.LINE_LOOP
+  PT_LINE_STRIP: 3,     // gl.LINE_STRIP
+  PT_TRIANGLES: 4,      // gl.TRIANGLES
+  PT_TRIANGLE_STRIP: 5, // gl.TRIANGLE_STRIP
+  PT_TRIANGLE_FAN: 6,   // gl.TRIANGLE_FAN
 };
 
 /**
@@ -275,6 +321,63 @@ function glTextureFmt(fmt) {
   return result;
 }
 
+// ====================
+// exports
+// ====================
+
+class VertexFormat {
+  /**
+   * @constructor
+   * @param {Array} infos
+   *
+   * @example
+   * let vertexFmt = new VertexFormat([
+   *   { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 3 },
+   *   { name: gfx.ATTR_UV0, type: gfx.ATTR_TYPE_FLOAT32, num: 2 },
+   *   { name: gfx.ATTR_COLOR, type: gfx.ATTR_TYPE_FLOAT32, num: 4, normalize: true },
+   * ])
+   */
+  constructor(infos) {
+    this._attr2el = {};
+    this._elements = [];
+    this._bytes = 0;
+
+    let offset = 0;
+    for (let i = 0, len = infos.length; i < len; ++i) {
+      let info = infos[i];
+      let el = {
+        name: info.name,
+        offset: offset,
+        stride: 0,
+        stream: -1,
+        type: info.type,
+        num: info.num,
+        normalize: (info.normalize === undefined) ? false : info.normalize,
+        bytes: info.num * attrTypeBytes(info.type),
+      };
+
+      this._attr2el[el.name] = el;
+      this._elements.push(el);
+
+      this._bytes += el.bytes;
+      offset += el.bytes;
+    }
+
+    for (let i = 0, len = this._elements.length; i < len; ++i) {
+      let el = this._elements[i];
+      el.stride = this._bytes;
+    }
+  }
+
+  /**
+   * @method element
+   * @param {string} attrName
+   */
+  element(attrName) {
+    return this._attr2el[attrName];
+  }
+}
+
 class IndexBuffer {
   /**
    * @constructor
@@ -290,6 +393,7 @@ class IndexBuffer {
     this._format = format;
     this._usage = usage;
     this._persist = persist;
+    this._numIndices = numIndices;
 
     // calculate bytes
     let bytes = 0;
@@ -308,7 +412,7 @@ class IndexBuffer {
     this.update(0, data);
 
     // stats
-    device._vram.ib += bytes;
+    device._stats.ib += bytes;
   }
 
   /**
@@ -322,7 +426,7 @@ class IndexBuffer {
 
     let gl = this.device.gl;
     gl.deleteBuffer(this._id);
-    this.device._vram.ib -= this.bytes;
+    this.device._stats.ib -= this.bytes;
 
     this._id = -1;
   }
@@ -338,7 +442,7 @@ class IndexBuffer {
       return;
     }
 
-    if (data && data.byteLength + offset >= this._bytes) {
+    if (data && data.byteLength + offset > this._bytes) {
       console.error('Failed to update data, bytes exceed.');
       return;
     }
@@ -384,6 +488,7 @@ class VertexBuffer {
     this._format = format;
     this._usage = usage;
     this._persist = persist;
+    this._numVertices = numVertices;
 
     // calculate bytes
     this._bytes = this._format._bytes * numVertices;
@@ -394,7 +499,7 @@ class VertexBuffer {
     this.update(0, data);
 
     // stats
-    device._vram.vb += this._bytes;
+    device._stats.vb += this._bytes;
   }
 
   /**
@@ -408,7 +513,7 @@ class VertexBuffer {
 
     let gl = this.device.gl;
     gl.deleteBuffer(this._id);
-    this.device._vram.vb -= this.bytes;
+    this.device._stats.vb -= this.bytes;
 
     this._id = -1;
   }
@@ -424,7 +529,7 @@ class VertexBuffer {
       return;
     }
 
-    if (data && data.byteLength + offset >= this._bytes) {
+    if (data && data.byteLength + offset > this._bytes) {
       console.error('Failed to update data, bytes exceed.');
       return;
     }
@@ -455,14 +560,14 @@ class VertexBuffer {
   }
 }
 
-class Shader {
+class Program {
   /**
    * @param {ef.GraphicsDevice} device - graphic device
    * @param {object} options - shader definition
    * @param {string} options.vert - vertex shader source code
    * @param {string} options.frag - fragment shader shader source code
    * @example
-   * let shader = new Shader(device, {
+   * let prog = new Program(device, {
    *   vert: `
    *     attribute vec3 a_position;
    *     void main() {
@@ -551,20 +656,11 @@ class Shader {
       let info = gl.getActiveUniform(program, i);
       let location = gl.getUniformLocation(program, info.name);
 
-      if ((info.type === gl.SAMPLER_2D) || (info.type === gl.SAMPLER_CUBE)) {
-        this._samplers.push({
-          name: info.name,
-          location: location,
-          type: info.type,
-        });
-      } else {
-        this._uniforms.push({
-          name: info.name,
-          location: location,
-          type: info.type,
-          localId: -1,
-        });
-      }
+      this._uniforms.push({
+        name: info.name,
+        location: location,
+        type: info.type,
+      });
     }
 
     //
@@ -605,6 +701,7 @@ class Texture {
     this._width = 4;
     this._height = 4;
     this._hasMipmap = false;
+    this._compressed = false;
 
     this._anisotropy = 1;
     this._minFilter = enums.FILTER_LINEAR;
@@ -612,7 +709,11 @@ class Texture {
     this._mipFilter = enums.FILTER_LINEAR;
     this._wrapS = enums.WRAP_REPEAT;
     this._wrapT = enums.WRAP_REPEAT;
+    // wrapR available in webgl2
+    // this._wrapR = enums.WRAP_REPEAT;
     this._format = enums.TEXTURE_FMT_RGBA8;
+
+    this._target = -1;
   }
 
   /**
@@ -627,7 +728,7 @@ class Texture {
     let gl = this.device.gl;
     gl.deleteTexture(this._id);
 
-    this.device._vram.tex -= this.bytes;
+    this.device._stats.tex -= this.bytes;
     this._id = -1;
   }
 }
@@ -649,9 +750,25 @@ class Texture2D extends Texture {
    */
   constructor(device, options) {
     super(device);
+    this._target = this._device._gl.TEXTURE_2D;
+
     this.update(options);
   }
 
+  /**
+   * @method update
+   * @param {Object} options
+   * @param {Array} options.images
+   * @param {Boolean} options.mipmap
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.anisotropy
+   * @param {FILTER_*} options.minFilter
+   * @param {FILTER_*} options.magFilter
+   * @param {FILTER_*} options.mipFilter
+   * @param {WRAP_*} options.wrapS
+   * @param {WRAP_*} options.wrapT
+   */
   update(options) {
     let gl = this._device._gl;
     let genMipmap = this._hasMipmap;
@@ -683,6 +800,10 @@ class Texture2D extends Texture {
       }
       if (options.format !== undefined) {
         this._format = options.format;
+        this._compressed = (
+          this._format >= enums.TEXTURE_FMT_RGB_DXT1 &&
+          this._format <= enums.TEXTURE_FMT_RGBA_PVRTC_4BPPV1
+        );
       }
 
       // check if generate mipmap
@@ -715,13 +836,54 @@ class Texture2D extends Texture {
 
   _setMipmap(images) {
     let gl = this._device._gl;
+    let glFmt = glTextureFmt(gl, this._format);
 
-    // TODO
     for (let i = 0; i < images.length; ++i) {
       let img = images[i];
 
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      if (
+        img instanceof HTMLCanvasElement ||
+        img instanceof HTMLImageElement ||
+        img instanceof HTMLVideoElement
+      ) {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          i,
+          glFmt.internalFormat,
+          glFmt.format,
+          glFmt.pixelType,
+          img
+        );
+      } else {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+
+        if (this._compressed) {
+          gl.compressedTexImage2D(
+            gl.TEXTURE_2D,
+            i,
+            glFmt.internalFormat,
+            this._width,
+            this._height,
+            0,
+            img
+          );
+        } else {
+          gl.texImage2D(
+            gl.TEXTURE_2D,
+            i,
+            glFmt.internalFormat,
+            this._width,
+            this._height,
+            0,
+            glFmt.format,
+            glFmt.pixelType,
+            img
+          );
+        }
+      }
     }
   }
 
@@ -735,6 +897,517 @@ class Texture2D extends Texture {
 
     if (this._device.ext('EXT_texture_filter_anisotropic')) {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
+    }
+  }
+}
+
+class TextureCube extends Texture {
+  /**
+   * @constructor
+   * @param {Object} options
+   * @param {Array} options.images
+   * @param {Boolean} options.mipmap
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.anisotropy
+   * @param {FILTER_*} options.minFilter
+   * @param {FILTER_*} options.magFilter
+   * @param {FILTER_*} options.mipFilter
+   * @param {WRAP_*} options.wrapS
+   * @param {WRAP_*} options.wrapT
+   * @param {WRAP_*} options.wrapR
+   */
+  constructor(device, options) {
+    super(device);
+    this._target = this._device._gl.TEXTURE_CUBE_MAP;
+
+    this.update(options);
+  }
+
+  /**
+   * @method update
+   * @param {Object} options
+   * @param {Array} options.images
+   * @param {Boolean} options.mipmap
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.anisotropy
+   * @param {FILTER_*} options.minFilter
+   * @param {FILTER_*} options.magFilter
+   * @param {FILTER_*} options.mipFilter
+   * @param {WRAP_*} options.wrapS
+   * @param {WRAP_*} options.wrapT
+   * @param {WRAP_*} options.wrapR
+   */
+  update(options) {
+    let gl = this._device._gl;
+    let genMipmap = this._hasMipmap;
+
+    if (options) {
+      if (options.width !== undefined) {
+        this._width = options.width;
+      }
+      if (options.height !== undefined) {
+        this._height = options.height;
+      }
+      if (options.anisotropy !== undefined) {
+        this._anisotropy = options.anisotropy;
+      }
+      if (options.minFilter !== undefined) {
+        this._minFilter = options.minFilter;
+      }
+      if (options.magFilter !== undefined) {
+        this._magFilter = options.magFilter;
+      }
+      if (options.mipFilter !== undefined) {
+        this._mipFilter = options.mipFilter;
+      }
+      if (options.wrapS !== undefined) {
+        this._wrapS = options.wrapS;
+      }
+      if (options.wrapT !== undefined) {
+        this._wrapT = options.wrapT;
+      }
+      // wrapR available in webgl2
+      // if (options.wrapR !== undefined) {
+      //   this._wrapR = options.wrapR;
+      // }
+      if (options.format !== undefined) {
+        this._format = options.format;
+        this._compressed = (
+          this._format >= enums.TEXTURE_FMT_RGB_DXT1 &&
+          this._format <= enums.TEXTURE_FMT_RGBA_PVRTC_4BPPV1
+        );
+      }
+
+      // check if generate mipmap
+      if (options.mipmap !== undefined) {
+        this._hasMipmap = options.mipmap;
+        genMipmap = options.mipmap;
+      }
+
+      if (options.images !== undefined) {
+        if (options.images.length > 1) {
+          genMipmap = false;
+        }
+      }
+    }
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._id);
+    if (options.images !== undefined) {
+      this._setMipmap(options.images);
+    }
+
+    this._setTexInfo();
+
+    if (genMipmap) {
+      gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
+      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    }
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+  }
+
+  // levelImages = [imagePosX, imageNegX, imagePosY, imageNegY, imagePosZ, imageNegz]
+  // images = [levelImages0, levelImages1, ...]
+  _setMipmap(images) {
+    let gl = this._device._gl;
+    let glFmt = glTextureFmt(gl, this._format);
+
+    for (let i = 0; i < images.length; ++i) {
+      let levelImages = images[i];
+      for (let face = 0; face < 6; ++face) {
+        if (
+          levelImages[face] instanceof HTMLCanvasElement ||
+          levelImages[face] instanceof HTMLImageElement ||
+          levelImages[face] instanceof HTMLVideoElement
+        ) {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          gl.texImage2D(
+            gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
+            i,
+            glFmt.internalFormat,
+            glFmt.format,
+            glFmt.pixelType,
+            levelImages[face]
+          );
+        } else {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+          if (this._compressed) {
+            gl.compressedTexImage2D(
+              gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
+              i,
+              glFmt.internalFormat,
+              this._width,
+              this._height,
+              0,
+              levelImages[face]
+            );
+          } else {
+            gl.texImage2D(
+              gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
+              i,
+              glFmt.internalFormat,
+              this._width,
+              this._height,
+              0,
+              glFmt.format,
+              glFmt.pixelType,
+              levelImages[face]
+            );
+          }
+        }
+      }
+    }
+  }
+
+  _setTexInfo() {
+    let gl = this._device._gl;
+
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, glFilter(gl, this._minFilter, this._hasMipmap ? this._mipFilter : -1));
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, glFilter(gl, this._magFilter, -1));
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, this._wrapS);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this._wrapT);
+    // wrapR available in webgl2
+    // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, this._wrapR);
+    if (this._device.ext('EXT_texture_filter_anisotropic')) {
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
+    }
+  }
+}
+
+const _defaultStates = {
+  blend: false,
+  blendSep: false,
+  blendColor: 0xffffffff,
+  blendEq: enums.BLEND_FUNC_ADD,
+  blendAlphaEq: enums.BLEND_FUNC_ADD,
+  blendSrc: enums.BLEND_ONE,
+  blendDst: enums.BLEND_ZERO,
+  blendSrcAlpha: enums.BLEND_ONE,
+  blendDstAlpha: enums.BLEND_ZERO,
+
+  depthTest: true,
+  depthWrite: true,
+  depthFunc: enums.DEPTH_FUNC_LESS,
+
+  cullMode: enums.CULL_BACK,
+
+  // bindings
+  maxStream: -1,
+  vertexBuffers: [],
+  vertexBufferOffsets: [],
+  indexBuffer: null,
+  textureUnits: [],
+  program: null,
+};
+
+class State {
+  constructor() {
+    this.vertexBuffers = [];
+    this.vertexBufferOffsets = [];
+    this.textureUnits = [];
+
+    this.set(_defaultStates);
+  }
+
+  set (cpy) {
+    // states
+    this.blend = cpy.blend;
+    this.blendSep = cpy.blendSep;
+    this.blendColor = cpy.blendColor;
+    this.blendEq = cpy.blendEq;
+    this.blendAlphaEq = cpy.blendAlphaEq;
+    this.blendSrc = cpy.blendSrc;
+    this.blendDst = cpy.blendDst;
+    this.blendSrcAlpha = cpy.blendSrcAlpha;
+    this.blendDstAlpha = cpy.blendDstAlpha;
+
+    this.depthTest = cpy.depthTest;
+    this.depthWrite = cpy.depthWrite;
+    this.depthFunc = cpy.depthFunc;
+
+    this.cullMode = cpy.cullMode;
+
+    // bindings
+    this.maxStream = cpy.maxStream;
+    for (let i = 0; i < cpy.vertexBuffers.length; ++i) {
+      this.vertexBuffers[i] = cpy.vertexBuffers[i];
+    }
+    for (let i = 0; i < cpy.vertexBufferOffsets.length; ++i) {
+      this.vertexBufferOffsets[i] = cpy.vertexBufferOffsets[i];
+    }
+    this.indexBuffer = cpy.indexBuffer;
+    for (let i = 0; i < cpy.textureUnits.length; ++i) {
+      this.textureUnits[i] = cpy.textureUnits[i];
+    }
+    this.program = cpy.program;
+  }
+
+  reset () {
+    this.set(_defaultStates);
+  }
+}
+
+const GL_INT = 5124;
+const GL_FLOAT$1 = 5126;
+const GL_FLOAT_VEC2 = 35664;
+const GL_FLOAT_VEC3 = 35665;
+const GL_FLOAT_VEC4 = 35666;
+const GL_INT_VEC2 = 35667;
+const GL_INT_VEC3 = 35668;
+const GL_INT_VEC4 = 35669;
+const GL_BOOL = 35670;
+const GL_BOOL_VEC2 = 35671;
+const GL_BOOL_VEC3 = 35672;
+const GL_BOOL_VEC4 = 35673;
+const GL_FLOAT_MAT2 = 35674;
+const GL_FLOAT_MAT3 = 35675;
+const GL_FLOAT_MAT4 = 35676;
+
+/**
+ * _type2uniformCommit
+ */
+let _type2uniformCommit = {
+  [GL_INT]: function (gl, id, value) {
+    gl.uniform1i(id, value);
+  },
+
+  [GL_FLOAT$1]: function (gl, id, value) {
+    gl.uniform1f(id, value);
+  },
+
+  [GL_FLOAT_VEC2]: function (gl, id, value) {
+    gl.uniform2fv(id, value);
+  },
+
+  [GL_FLOAT_VEC3]: function (gl, id, value) {
+    gl.uniform3fv(id, value);
+  },
+
+  [GL_FLOAT_VEC4]: function (gl, id, value) {
+    gl.uniform4fv(id, value);
+  },
+
+  [GL_INT_VEC2]: function (gl, id, value) {
+    gl.uniform2iv(id, value);
+  },
+
+  [GL_INT_VEC3]: function (gl, id, value) {
+    gl.uniform3iv(id, value);
+  },
+
+  [GL_INT_VEC4]: function (gl, id, value) {
+    gl.uniform4iv(id, value);
+  },
+
+  [GL_BOOL]: function (gl, id, value) {
+    gl.uniform1i(id, value);
+  },
+
+  [GL_BOOL_VEC2]: function (gl, id, value) {
+    gl.uniform2iv(id, value);
+  },
+
+  [GL_BOOL_VEC3]: function (gl, id, value) {
+    gl.uniform3iv(id, value);
+  },
+
+  [GL_BOOL_VEC4]: function (gl, id, value) {
+    gl.uniform4iv(id, value);
+  },
+
+  [GL_FLOAT_MAT2]: function (gl, id, value) {
+    gl.uniformMatrix2fv(id, false, value);
+  },
+
+  [GL_FLOAT_MAT3]: function (gl, id, value) {
+    gl.uniformMatrix3fv(id, false, value);
+  },
+
+  [GL_FLOAT_MAT4]: function (gl, id, value) {
+    gl.uniformMatrix4fv(id, false, value);
+  },
+};
+
+/**
+ * _commitBlendStates
+ */
+function _commitBlendStates(gl, cur, next) {
+  if (cur.blend === next.blend) {
+    return;
+  }
+
+  if (!next.blend) {
+    gl.disable(gl.BLEND);
+    return;
+  }
+
+  // enable-blend
+  gl.enable(gl.BLEND);
+
+  // blend-color
+  if (cur.blendColor !== next.blendColor) {
+    gl.blendColor(
+      (next.blendColor >> 24) / 255,
+      (next.blendColor >> 16 & 0xff) / 255,
+      (next.blendColor >> 8 & 0xff) / 255,
+      (next.blendColor & 0xff) / 255
+    );
+  }
+
+  // seprate diff, reset all
+  if (cur.blendSep !== next.blendSep) {
+    if (next.blendSep) {
+      gl.blendFuncSeparate(next.blendSrc, next.blendDst, next.blendSrcAlpha, next.blendDstAlpha);
+      gl.blendEquationSeprate(next.blendEq, next.blendAlphaEq);
+    } else {
+      gl.blendFunc(next.blendSrc, next.blendDst);
+      gl.blendEquation(next.blendEq);
+    }
+
+    return;
+  }
+
+  if (next.blendSep) {
+    // blend-func-seprate
+    if (
+      cur.blendSrc !== next.blendSrc ||
+      cur.blendDst !== next.blendDst ||
+      cur.blendSrcAlpha !== next.blendSrcAlpha ||
+      cur.blendDstAlpha !== next.blendDstAlpha
+    ) {
+      gl.blendFuncSeparate(next.blendSrc, next.blendDst, next.blendSrcAlpha, next.blendDstAlpha);
+    }
+
+    // blend-equation-seprate
+    if (
+      cur.blendEq !== next.blendEq ||
+      cur.blendAlphaEq !== next.blendAlphaEq
+    ) {
+      gl.blendEquationSeprate(next.blendEq, next.blendAlphaEq);
+    }
+  } else {
+    // blend-func
+    if (
+      cur.blendSrc !== next.blendSrc ||
+      cur.blendDst !== next.blendDst
+    ) {
+      gl.blendFunc(next.blendSrc, next.blendDst);
+    }
+
+    // blend-equation
+    if (cur.blendEq !== next.blendEq) {
+      gl.blendEquation(next.blendEq);
+    }
+  }
+}
+
+/**
+ * _commitDepthStates
+ */
+function _commitDepthStates(gl, cur, next) {
+  // commit depth write
+  if (cur.depthWrite !== next.depthWrite) {
+    gl.depthMask(next.depthWrite);
+  }
+
+  if (cur.depthTest === next.depthTest) {
+    return;
+  }
+
+  if (!next.depthTest) {
+    gl.disable(gl.DEPTH_TEST);
+    return;
+  }
+
+  // enable-depth-test
+  gl.enable(gl.DEPTH_TEST);
+
+  if (cur.depthFunc !== next.depthFunc) {
+    gl.depthFunc(next.depthFunc);
+  }
+}
+
+/**
+ * _commitCullMode
+ */
+function _commitCullMode(gl, cur, next) {
+  if (cur.cullMode === next.cullMode) {
+    return;
+  }
+
+  if (next.cullMode === enums.CULL_NONE) {
+    gl.disable(gl.CULL_FACE);
+    return;
+  }
+
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(next.cullMode);
+}
+
+/**
+ * _commitVertexBuffers
+ */
+function _commitVertexBuffers(gl, cur, next) {
+  let attrsDirty = false;
+
+  if (cur.maxStream !== next.maxStream) {
+    attrsDirty = true;
+  }
+  else if (cur.program !== next.program) {
+    attrsDirty = true;
+  }
+  else {
+    for (let i = 0; i < next.maxStream + 1; ++i) {
+      if (
+        cur.vertexBuffers[i] !== next.vertexBuffers[i] ||
+        cur.vertexBufferOffsets[i] !== next.vertexBufferOffsets[i]
+      ) {
+        attrsDirty = true;
+        break;
+      }
+    }
+  }
+
+  if (attrsDirty) {
+    for (let i = 0; i < next.maxStream + 1; ++i) {
+      let vb = next.vertexBuffers[i];
+      let vbOffset = next.vertexBufferOffsets[i];
+      if (!vb) {
+        continue;
+      }
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vb._id);
+
+      for (let i = 0; i < next.program._attributes.length; ++i) {
+        let attr = next.program._attributes[i];
+
+        let el = vb._format.element(attr.name);
+        gl.enableVertexAttribArray(attr.location);
+        gl.vertexAttribPointer(
+          attr.location,
+          el.num,
+          el.type,
+          el.normalize,
+          el.stride,
+          el.offset + vbOffset * el.stride
+        );
+      }
+    }
+  }
+}
+
+/**
+ * _commitTextures
+ */
+function _commitTextures(gl, cur, next) {
+  for (let i = 0; i < next.textureUnits.length; ++i) {
+    if (cur.textureUnits[i] !== next.textureUnits[i]) {
+      let texture = next.textureUnits[i];
+      // gl.activeTexture(gl.TEXTURE0 + i);
+      gl.bindTexture(texture._target, texture._id);
     }
   }
 }
@@ -754,9 +1427,24 @@ class Device {
       return;
     }
 
+    // statics
     this._gl = gl;
     this._extensions = {};
-    this._vram = { texture: 0, vb: 0, ib: 0 };
+    this._caps = {}; // capability
+    this._stats = {
+      texture: 0,
+      vb: 0,
+      ib: 0,
+      drawcalls: 0,
+    };
+
+    // runtime
+    this._current = new State();
+    this._next = new State();
+    this._uniforms = {}; // name: { value, num, dirty }
+    this._primitiveType = enums.PT_TRIANGLES;
+    this._vx = this._vy = this._vw = this._vh = 0;
+    this._sx = this._sy = this._sw = this._sh = 0;
 
     this._initExtensions([
       'OES_vertex_array_object',
@@ -769,6 +1457,8 @@ class Device {
       'WEBGL_compressed_texture_atc',
       'EXT_texture_filter_anisotropic'
     ]);
+    this._initCaps();
+    this._initStates();
   }
 
   _initExtensions(extensions) {
@@ -789,24 +1479,402 @@ class Device {
     }
   }
 
+  _initCaps() {
+    let gl = this._gl;
+
+    this._caps.maxVertexTextures = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+    this._caps.maxFragUniforms = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
+    this._caps.maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+  }
+
+  _initStates() {
+    let gl = this._gl;
+
+    gl.disable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ZERO);
+    gl.blendEquation(gl.FUNC_ADD);
+
+    gl.colorMask(true, true, true, true);
+
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LESS);
+    gl.depthMask(true);
+
+    // TODO:
+    // gl.disable(gl.STENCIL_TEST);
+    // this.setStencilFunc(pc.FUNC_ALWAYS, 0, 0xFF);
+    // this.setStencilOperation(pc.STENCILOP_KEEP, pc.STENCILOP_KEEP, pc.STENCILOP_KEEP, 0xFF);
+    // this.setAlphaToCoverage(false);
+    // this.setTransformFeedbackBuffer(null);
+    // this.setRaster(true);
+    // this.setDepthBias(false);
+
+    gl.clearDepth(1);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clearStencil(0);
+
+    gl.disable(gl.SCISSOR_TEST);
+  }
+
+  /**
+   * @method ext
+   * @param {string} name
+   */
   ext(name) {
     return this._extensions[name];
   }
 
-  // TODO: set states
+  // ===============================
+  // Immediate Settings
+  // ===============================
 
+  // TODO
+  // /**
+  //  * @method setFrameBuffer
+  //  * @param {Object} target - null means use the backbuffer
+  //  */
+  // setFrameBuffer(target) {
+  //   this._framebuffer = target;
+  // }
+
+  /**
+   * @method setViewport
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Number} w
+   * @param {Number} h
+   */
+  setViewport(x, y, w, h) {
+    if (
+      this._vx !== x ||
+      this._vy !== y ||
+      this._vw !== w ||
+      this._vh !== h
+    ) {
+      this._gl.viewport(x, y, w, h);
+      this._vx = x;
+      this._vy = y;
+      this._vw = w;
+      this._vh = h;
+    }
+  }
+
+  /**
+   * @method setScissor
+   * @param {Number} x
+   * @param {Number} y
+   * @param {Number} w
+   * @param {Number} h
+   */
+  setScissor(x, y, w, h) {
+    if (
+      this._sx !== x ||
+      this._sy !== y ||
+      this._sw !== w ||
+      this._sh !== h
+    ) {
+      this._gl.scissor(x, y, w, h);
+      this._sx = x;
+      this._sy = y;
+      this._sw = w;
+      this._sh = h;
+    }
+  }
+
+  /**
+   * @method clear
+   * @param {Object} opts
+   * @param {Array} opts.color
+   * @param {Number} opts.depth
+   * @param {Number} opts.stencil
+   */
+  clear(opts) {
+    let gl = this._gl;
+    let flags = 0;
+
+    if (opts.color !== undefined) {
+      flags |= gl.COLOR_BUFFER_BIT;
+      gl.clearColor(opts.color[0], opts.color[1], opts.color[2], opts.color[3]);
+    }
+
+    if (opts.depth !== undefined) {
+      flags |= gl.DEPTH_BUFFER_BIT;
+      if (!this._current.depthWrite) {
+        gl.depthMask(true);
+      }
+      gl.clearDepth(opts.depth);
+    }
+
+    if (opts.stencil !== undefined) {
+      flags |= gl.STENCIL_BUFFER_BIT;
+      gl.clearStencil(opts.stencil);
+    }
+
+    gl.clear(flags);
+
+    // restore depth-write
+    if (opts.depth !== undefined && !this._current.depthWrite) {
+      gl.depthMask(false);
+    }
+  }
+
+  // ===============================
+  // Deferred States
+  // ===============================
+
+  /**
+   * @method enableBlend
+   */
+  enableBlend() {
+    this._next.blend = true;
+  }
+
+  /**
+   * @method enableDepthTest
+   */
+  enableDepthTest() {
+    this._next.depthTest = true;
+  }
+
+  /**
+   * @method enableDepthWrite
+   */
+  enableDepthWrite() {
+    this._next.depthWrite = true;
+  }
+
+  /**
+   * @method setBlendColor
+   * @param {Number} r
+   * @param {Number} g
+   * @param {Number} b
+   * @param {Number} a
+   */
+  setBlendColor(r, g, b, a) {
+    this._next.blendColor = (r * 255) << 24 | (g * 255) << 16 | (b * 255) << 8 | a * 255;
+  }
+
+  /**
+   * @method setBlendFunction
+   * @param {BELND_*} src
+   * @param {BELND_*} dst
+   */
+  setBlendFunction(src, dst) {
+    this._next.blendSrc = src;
+    this._next.blendDst = dst;
+  }
+
+  /**
+   * @method setBlendFunctionSeprate
+   * @param {BELND_*} src
+   * @param {BELND_*} dst
+   * @param {BELND_*} srcAlpha
+   * @param {BELND_*} dstAlpha
+   */
+  setBlendFunctionSeprate(src, dst, srcAlpha, dstAlpha) {
+    this._next.blendSep = true;
+    this._next.blendSrc = src;
+    this._next.blendDst = dst;
+    this._next.blendSrcAlpha = srcAlpha;
+    this._next.blendDstAlpha = dstAlpha;
+  }
+
+  /**
+   * @method setBlendEquation
+   * @param {BELND_FUNC_*} eq
+   */
+  setBlendEquation(eq) {
+    this._next.blendEq = eq;
+  }
+
+  /**
+   * @method setBlendEquationSeprate
+   * @param {BELND_FUNC_*} eq
+   * @param {BELND_FUNC_*} alphaEq
+   */
+  setBlendEquationSeprate(eq, alphaEq) {
+    this._next.blendSep = true;
+    this._next.blendEq = eq;
+    this._next.blendAlphaEq = alphaEq;
+  }
+
+  /**
+   * @method setCullMode
+   * @param {CULL_*} mode
+   */
+  setCullMode(mode) {
+    this._next.cullMode = mode;
+  }
+
+  /**
+   * @method setVertexBuffer
+   * @param {Number} stream
+   * @param {VertexBuffer} buffer
+   * @param {Number} start - start vertex
+   */
+  setVertexBuffer(stream, buffer, start = 0) {
+    this._next.vertexBuffers[stream] = buffer;
+    this._next.vertexBufferOffsets[stream] = start;
+    if (this._next.maxStream < stream) {
+      this._next.maxStream = stream;
+    }
+  }
+
+  /**
+   * @method setIndexBuffer
+   * @param {IndexBuffer} buffer
+   */
+  setIndexBuffer(buffer) {
+    this._next.indexBuffer = buffer;
+  }
+
+  /**
+   * @method setProgram
+   * @param {Program} program
+   */
+  setProgram(program) {
+    this._next.program = program;
+  }
+
+  /**
+   * @method setTexture
+   * @param {String} name
+   * @param {Texture} texture
+   * @param {Number} stage
+   */
+  setTexture(name, texture, stage) {
+    if (stage >= this._caps.maxTextureUnits) {
+      console.warn(`Can not set texture ${name} at stage ${stage}, max texture exceed: ${this._caps.maxTextureUnits}`);
+      return;
+    }
+
+    this._next.textureUnits[stage] = texture;
+    this.setUniform(name, stage);
+  }
+
+  /**
+   * @method setUniform
+   * @param {String} name
+   * @param {*} value
+   * @param {Number} num
+   */
+  setUniform(name, value, num = 1) {
+    let uniform = this._uniforms[name];
+    if (!uniform) {
+      uniform = {
+        dirty: true,
+        value: value,
+        num: num
+      };
+    } else {
+      uniform.dirty = true;
+      uniform.value = value;
+      uniform.num = num;
+    }
+    this._uniforms[name] = uniform;
+  }
+
+  /**
+   * @method setPrimitiveType
+   * @param {PT_*} type
+   */
+  setPrimitiveType(type) {
+    this._primitiveType = type;
+  }
+
+  /**
+   * @method draw
+   * @param {Number} base
+   * @param {Number} count
+   */
   draw(base, count) {
-    // TODO
+    let cur = this._current;
+    let next = this._next;
+    let gl = this._gl;
+
+    // commit blend
+    _commitBlendStates(gl, cur, next);
+
+    // commit depth
+    _commitDepthStates(gl, cur, next);
+
+    // TODO: commit stencil
+
+    // commit cull
+    _commitCullMode(gl, cur, next);
+
+    // commit vertex-buffer
+    _commitVertexBuffers(gl, cur, next);
+
+    // commit index-buffer
+    if (cur.indexBuffer !== next.indexBuffer) {
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, next.indexBuffer ? next.indexBuffer._id : null);
+    }
+
+    // commit program
+    if (cur.program !== next.program) {
+      gl.useProgram(next.program._program);
+    }
+
+    // commit texture/sampler
+    _commitTextures(gl, cur, next);
+
+    // commit uniforms
+    for (let i = 0; i < next.program._uniforms.length; ++i) {
+      let uniformInfo = next.program._uniforms[i];
+      let uniform = this._uniforms[uniformInfo.name];
+      if (!uniform.dirty) {
+        continue;
+      }
+
+      uniform.dirty = false;
+
+      let commitFunc = _type2uniformCommit[uniformInfo.type];
+      if (!commitFunc) {
+        console.warn(`Can not find commit function for uniform ${uniformInfo.name}`);
+        continue;
+      }
+
+      commitFunc(gl, uniformInfo.location, uniform.value);
+    }
+
+    // drawPrimitives
+    if (next.indexBuffer) {
+      gl.drawElements(
+        this._primitiveType,
+        count,
+        next.indexBuffer._format,
+        base * next.indexBuffer._bytes
+      );
+    } else {
+      gl.drawArrays(
+        this._primitiveType,
+        base,
+        count
+      );
+    }
+
+    // update stats
+    this._stats.drawcalls += 1;
+
+    // reset states
+    cur.set(next);
+    next.reset();
   }
 }
 
 let gfx = {
   // classes
+  VertexFormat,
   IndexBuffer,
   VertexBuffer,
-  Shader,
+  Program,
   Texture,
   Texture2D,
+  TextureCube,
   Device,
 
   // functions
