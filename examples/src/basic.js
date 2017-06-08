@@ -1,14 +1,7 @@
-document.addEventListener('readystatechange', () => {
-  if ( document.readyState !== 'complete' ) {
-    return;
-  }
-
+(() => {
   let gfx = window.gfx;
-
-  // init
-  let canvasEL = document.getElementById('canvas');
-  let device = new gfx.Device(canvasEL);
-  let stats = new window.LStats(document.body);
+  let device = window.device;
+  let canvas = window.canvas;
 
   // init resources
   let program = new gfx.Program(device, {
@@ -41,11 +34,9 @@ document.addEventListener('readystatechange', () => {
     false
   );
 
-  // update
-  function animate() {
-    stats.tick();
-
-    device.setViewport(0, 0, canvasEL.width, canvasEL.height);
+  // tick
+  return function tick() {
+    device.setViewport(0, 0, canvas.width, canvas.height);
     device.clear({
       color: [0.1, 0.1, 0.1, 1],
       depth: 1
@@ -53,23 +44,6 @@ document.addEventListener('readystatechange', () => {
     device.setVertexBuffer(0, vertexBuffer);
     device.setUniform('color', new Float32Array([1, 0, 0, 1]));
     device.setProgram(program);
-    device.draw(0, 3);
-
-    requestAnimationFrame(animate);
-  }
-
-  function resize () {
-    let bcr = canvasEL.parentElement.getBoundingClientRect();
-    canvasEL.width = bcr.width;
-    canvasEL.height = bcr.height;
-  }
-
-  window.addEventListener('resize', () => {
-    resize();
-  });
-
-  window.requestAnimationFrame(() => {
-    resize();
-    animate();
-  });
-});
+    device.draw(0, vertexBuffer._numVertices);
+  };
+})();

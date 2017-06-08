@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/gamedev-js/gfx.js/issues",
   "dependencies": {
-    "lstats.js": "^1.2.4",
+    "lstats.js": "^1.2.5",
     "rollup-watch": "^4.0.0"
   },
   "devDependencies": {

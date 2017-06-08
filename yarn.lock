@@ -1256,9 +1256,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.1"
     yallist "^2.0.0"
 
-lstats.js@^1.2.4:
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/lstats.js/-/lstats.js-1.2.4.tgz#c0bfdeebf9de1c1fbc01a3333f6dad4bf971008f"
+lstats.js@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/lstats.js/-/lstats.js-1.2.5.tgz#1a3a30591dac37f5aded482fd45fd6cc73f31d2d"
 
 map-obj@^1.0.0, map-obj@^1.0.1:
   version "1.0.1"

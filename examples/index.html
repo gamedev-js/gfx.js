@@ -6,29 +6,64 @@
     <style>
       body {
         background: #333;
-        margin: 5px;
+        color: #888;
+        margin: 0px;
 
-        position: absolute;
-        top: 0; bottom: 0; left: 0; right: 0;
         display: flex;
         flex-direction: column;
+      }
+
+      .view {
+        position: relative;
+        flex: 1;
+        margin: 5px;
+      }
+
+      .toolbar {
+        display: flex;
+
+        margin: 5px;
+        margin-top: 0px;
+
+        font-size: 12px;
+      }
+
+      .toolbar > * {
+        margin-right: 10px;
+      }
+
+      .toolbar > *:last-child {
+        margin-right: 0px;
+      }
+
+      .fit {
+        position: absolute;
+        top: 0; bottom: 0; left: 0; right: 0;
       }
 
       canvas:focus {
         outline: 0;
       }
-
-      .flex {
-        flex: 1;
-      }
     </style>
 
     <script src="../node_modules/lstats.js/dist/lstats.min.js"></script>
     <script src="../dist/gfx.dev.js"></script>
-    <script src="./basic.js"></script>
+    <script src="./shell.js"></script>
   </head>
 
-  <body>
-    <canvas id="canvas" class="flex" tabindex="-1"></div>
+  <body class="fit">
+    <div id="view" class="view">
+      <!--<canvas id="canvas" class="fit" tabindex="-1"></canvas>-->
+    </div>
+    <div class="toolbar">
+      <div>
+        <input type="checkbox" id="showFPS"></input>FPS
+      </div>
+      <span style="flex: 1"></span>
+      <select id="exampleList">
+        <option value="./src/basic.js">Basic</option>
+        <option value="./src/bunny.js">Bunny</option>
+      </select>
+    </div>
   </body>
 </html>

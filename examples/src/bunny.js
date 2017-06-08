@@ -1,20 +1,7 @@
-## gfx.js
-
-WebGL wrappings for graphics.
-
-## Install
-
-```bash
-npm install gfx.js
-```
-
-## Usage
-
-```javascript
+(() => {
   let gfx = window.gfx;
-
-  // init
-  let device = new gfx.Device(canvas);
+  let device = window.device;
+  let canvas = window.canvas;
 
   // init resources
   let program = new gfx.Program(device, {
@@ -47,35 +34,16 @@ npm install gfx.js
     false
   );
 
-  // update
-  function animate() {
+  // tick
+  return function tick() {
     device.setViewport(0, 0, canvas.width, canvas.height);
     device.clear({
       color: [0.1, 0.1, 0.1, 1],
       depth: 1
     });
     device.setVertexBuffer(0, vertexBuffer);
-    device.setUniform('color', new Float32Array([1, 0, 0, 1]));
+    device.setUniform('color', new Float32Array([1, 1, 0, 1]));
     device.setProgram(program);
     device.draw(0, vertexBuffer._numVertices);
-
-    requestAnimationFrame(animate);
-  }
-
-  requestAnimationFrame(animate);
-});
-```
-
-## Documentation
-
-TODO
-
-## TODO
-
-  - [] Better shader compile & link error (regl is a good reference)
-  - [] Update sub-image
-  - [] stats of device._stats.texture
-
-## License
-
-MIT © 2017 Johnny Wu
+  };
+})();
