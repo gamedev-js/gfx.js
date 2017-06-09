@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.0.0
+ * gfx.js v1.0.1
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -321,6 +321,10 @@ function glTextureFmt(fmt) {
 
   return result;
 }
+
+// ====================
+// exports
+// ====================
 
 class VertexFormat {
   /**
@@ -839,6 +843,7 @@ class Texture2D extends Texture {
         gl.generateMipmap(gl.TEXTURE_2D);
       }
     gl.bindTexture(gl.TEXTURE_2D, null);
+    this._device._restoreTexture(0);
   }
 
   _setMipmap(images) {
@@ -1005,17 +1010,17 @@ class TextureCube extends Texture {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._id);
-    if (options.images !== undefined) {
-      this._setMipmap(options.images);
-    }
+      if (options.images !== undefined) {
+        this._setMipmap(options.images);
+      }
 
-    this._setTexInfo();
+      this._setTexInfo();
 
-    if (genMipmap) {
-      gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
-      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-    }
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+      if (genMipmap) {
+        gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+      }
+    this._device._restoreTexture(0);
   }
 
   // levelImages = [imagePosX, imageNegX, imagePosY, imageNegY, imagePosZ, imageNegz]
@@ -1100,8 +1105,8 @@ const _defaultStates = {
   blendSrcAlpha: enums.BLEND_ONE,
   blendDstAlpha: enums.BLEND_ZERO,
 
-  depthTest: true,
-  depthWrite: true,
+  depthTest: false,
+  depthWrite: false,
   depthFunc: enums.DEPTH_FUNC_LESS,
 
   cullMode: enums.CULL_BACK,
@@ -1516,9 +1521,9 @@ class Device {
     gl.enable(gl.CULL_FACE);
     gl.cullFace(gl.BACK);
 
-    gl.enable(gl.DEPTH_TEST);
+    gl.disable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LESS);
-    gl.depthMask(true);
+    gl.depthMask(false);
 
     // TODO:
     // gl.disable(gl.STENCIL_TEST);
@@ -1534,6 +1539,17 @@ class Device {
     gl.clearStencil(0);
 
     gl.disable(gl.SCISSOR_TEST);
+  }
+
+  _restoreTexture (unit) {
+    let gl = this._gl;
+
+    let texture = this._current.textureUnits[unit];
+    if (texture) {
+      gl.bindTexture(texture._target, texture._id);
+    } else {
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
   }
 
   /**
@@ -1843,6 +1859,11 @@ class Device {
     for (let i = 0; i < next.program._uniforms.length; ++i) {
       let uniformInfo = next.program._uniforms[i];
       let uniform = this._uniforms[uniformInfo.name];
+      if (!uniform) {
+        // console.warn(`Can not find uniform ${uniformInfo.name}`);
+        continue;
+      }
+
       if (!uniform.dirty) {
         continue;
       }

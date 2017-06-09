@@ -21,6 +21,10 @@ function _loadPromise(url) {
 }
 
 function _load(view, url) {
+  if (window.reqID) {
+    window.cancelAnimationFrame(window.reqID);
+  }
+
   _loadPromise(url).then(result => {
     if (view.firstElementChild) {
       view.firstElementChild.remove();
@@ -50,10 +54,10 @@ function _load(view, url) {
 
       tick(dt);
 
-      requestAnimationFrame(animate);
+      window.reqID = requestAnimationFrame(animate);
     }
 
-    window.requestAnimationFrame(() => {
+    window.reqID = window.requestAnimationFrame(() => {
       _resize();
       animate();
     });

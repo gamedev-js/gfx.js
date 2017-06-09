@@ -11,15 +11,21 @@
       precision mediump float;
       attribute vec3 a_position;
       uniform mat4 model, view, projection;
+      varying vec3 position;
+
       void main () {
-        gl_Position = projection * view * model * vec4(a_position, 1);
+        vec4 pos = projection * view * model * vec4(a_position, 1);
+        position = a_position.xyz;
+        gl_Position = pos;
       }
     `,
     frag: `
       precision mediump float;
       uniform vec4 color;
+      varying vec3 position;
+
       void main () {
-        gl_FragColor = color;
+        gl_FragColor = color * vec4(position, 1);
       }
     `,
   });
@@ -115,6 +121,8 @@
     });
 
     if (bunnyLoaded) {
+      device.enableDepthTest();
+      device.enableDepthWrite();
       device.setVertexBuffer(0, vertexBuffer);
       device.setIndexBuffer(indexBuffer);
       device.setUniform('model', mat4.array(new Float32Array(16), model));

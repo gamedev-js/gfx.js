@@ -1,6 +1,6 @@
 {
   "name": "gfx.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WebGL wrappings for Graphics",
   "main": "dist/gfx.js",
   "scripts": {
