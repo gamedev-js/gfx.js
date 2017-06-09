@@ -471,6 +471,10 @@ class IndexBuffer {
       }
     }
   }
+
+  get count () {
+    return this._numIndices;
+  }
 }
 
 class VertexBuffer {
@@ -557,6 +561,10 @@ class VertexBuffer {
         this._data = data;
       }
     }
+  }
+
+  get count () {
+    return this._numVertices;
   }
 }
 

@@ -3,7 +3,7 @@
   let gfx = window.gfx;
   let device = window.device;
   let canvas = window.canvas;
-  let {mat4} = window.vmath;
+  let { vec3, mat4 } = window.vmath;
 
   // init resources
   let program = new gfx.Program(device, {
@@ -28,15 +28,17 @@
   let vertexBuffer, indexBuffer;
 
   let vertexFmt = new gfx.VertexFormat([
-    { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 2 },
+    { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 3 },
   ]);
 
   let bunnyLoaded = false;
 
   resl({
-    js: {
-      type: 'text',
-      src: './assets/bunny.js'
+    manifest: {
+      js: {
+        type: 'text',
+        src: './assets/bunny.js'
+      },
     },
 
     onDone (assets) {
@@ -75,19 +77,36 @@
         indices.length,
         false
       );
+
+      bunnyLoaded = true;
     }
   });
 
+  let model = mat4.create();
   let view = mat4.create();
-  let project = mat4.create();
+  let projection = mat4.create();
+  let eye = vec3.create();
+  let center = vec3.create();
+  let up = vec3.create();
+
+  let t = 0;
 
   // tick
-  return function tick() {
-    // mat4.lookat( view,
-    //   [30 * Math.cos(t), 2.5, 30 * Math.sin(t)],
-    //   [0, 2.5, 0],
-    //   [0, 1, 0]
-    // );
+  return function tick(dt) {
+    t += dt;
+
+    mat4.lookAt(view,
+      vec3.set(eye, 30 * Math.cos(t), 2.5, 30 * Math.sin(t)),
+      vec3.set(center, 0, 2.5, 0),
+      vec3.set(up, 0, 1, 0)
+    );
+
+    mat4.perspective(projection,
+      Math.PI / 4,
+      canvas.width / canvas.height,
+      0.01,
+      1000
+    );
 
     device.setViewport(0, 0, canvas.width, canvas.height);
     device.clear({
@@ -98,10 +117,10 @@
     if (bunnyLoaded) {
       device.setVertexBuffer(0, vertexBuffer);
       device.setIndexBuffer(indexBuffer);
-      // device.setUniform('model', );
-      // device.setUniform('view', );
-      // device.setUniform('projection', );
-      device.setUniform('color', new Float32Array([1, 1, 0, 1]));
+      device.setUniform('model', mat4.array(new Float32Array(16), model));
+      device.setUniform('view', mat4.array(new Float32Array(16), view));
+      device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+      device.setUniform('color', new Float32Array([0.5, 0.5, 0.5, 1]));
       device.setProgram(program);
       device.draw(0, indexBuffer.count);
     }

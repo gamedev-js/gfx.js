@@ -34,15 +34,19 @@
     false
   );
 
+  let time = 0;
+
   // tick
-  return function tick() {
+  return function tick(dt) {
+    time += dt;
+
     device.setViewport(0, 0, canvas.width, canvas.height);
     device.clear({
       color: [0.1, 0.1, 0.1, 1],
       depth: 1
     });
     device.setVertexBuffer(0, vertexBuffer);
-    device.setUniform('color', new Float32Array([1, 0, 0, 1]));
+    device.setUniform('color', new Float32Array([1, Math.abs(Math.sin(time)), 0, 1]));
     device.setProgram(program);
     device.draw(0, vertexBuffer.count);
   };
