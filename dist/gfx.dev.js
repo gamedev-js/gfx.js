@@ -322,10 +322,6 @@ function glTextureFmt(fmt) {
   return result;
 }
 
-// ====================
-// exports
-// ====================
-
 class VertexFormat {
   /**
    * @constructor
@@ -828,6 +824,8 @@ class Texture2D extends Texture {
       }
     }
 
+    this._id = gl.createTexture();
+
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._id);
       if (options.images !== undefined) {
@@ -845,7 +843,7 @@ class Texture2D extends Texture {
 
   _setMipmap(images) {
     let gl = this._device._gl;
-    let glFmt = glTextureFmt(gl, this._format);
+    let glFmt = glTextureFmt(this._format);
 
     for (let i = 0; i < images.length; ++i) {
       let img = images[i];
@@ -904,8 +902,9 @@ class Texture2D extends Texture {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this._wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this._wrapT);
 
-    if (this._device.ext('EXT_texture_filter_anisotropic')) {
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
+    let ext = this._device.ext('EXT_texture_filter_anisotropic');
+    if (ext) {
+      gl.texParameteri(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropy);
     }
   }
 }
@@ -1002,6 +1001,8 @@ class TextureCube extends Texture {
       }
     }
 
+    this._id = gl.createTexture();
+
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._id);
     if (options.images !== undefined) {
@@ -1021,7 +1022,7 @@ class TextureCube extends Texture {
   // images = [levelImages0, levelImages1, ...]
   _setMipmap(images) {
     let gl = this._device._gl;
-    let glFmt = glTextureFmt(gl, this._format);
+    let glFmt = glTextureFmt(this._format);
 
     for (let i = 0; i < images.length; ++i) {
       let levelImages = images[i];
@@ -1080,8 +1081,10 @@ class TextureCube extends Texture {
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, this._wrapT);
     // wrapR available in webgl2
     // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, this._wrapR);
-    if (this._device.ext('EXT_texture_filter_anisotropic')) {
-      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropic);
+
+    let ext = this._device.ext('EXT_texture_filter_anisotropic');
+    if (ext) {
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, ext.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropy);
     }
   }
 }
@@ -1174,6 +1177,7 @@ const GL_BOOL_VEC4 = 35673;
 const GL_FLOAT_MAT2 = 35674;
 const GL_FLOAT_MAT3 = 35675;
 const GL_FLOAT_MAT4 = 35676;
+const GL_SAMPLER_2D = 35678;
 
 /**
  * _type2uniformCommit
@@ -1237,6 +1241,10 @@ let _type2uniformCommit = {
 
   [GL_FLOAT_MAT4]: function (gl, id, value) {
     gl.uniformMatrix4fv(id, false, value);
+  },
+
+  [GL_SAMPLER_2D]: function (gl, id, value) {
+    gl.uniform1i(id, value);
   },
 };
 
