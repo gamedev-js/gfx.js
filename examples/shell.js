@@ -34,13 +34,21 @@ function _load(view, url) {
     window.canvas = canvas;
     window.device = new window.gfx.Device(canvas);
 
-    let tick = eval(result);
+
+    let tick = eval(`${result}\n//# sourceURL=${url}`);
+    let lasttime = 0;
 
     // update
-    function animate() {
+    function animate(timestamp) {
+      if (timestamp === undefined) {
+        timestamp = 0;
+      }
+      let dt = (timestamp - lasttime)/1000;
+      lasttime = timestamp;
+
       window.stats.tick();
 
-      tick();
+      tick(dt);
 
       requestAnimationFrame(animate);
     }
