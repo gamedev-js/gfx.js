@@ -44,6 +44,6 @@
     device.setVertexBuffer(0, vertexBuffer);
     device.setUniform('color', new Float32Array([1, 0, 0, 1]));
     device.setProgram(program);
-    device.draw(0, vertexBuffer._numVertices);
+    device.draw(0, vertexBuffer.count);
   };
 })();

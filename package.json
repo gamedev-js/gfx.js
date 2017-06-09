@@ -27,17 +27,16 @@
     "url": "https://github.com/gamedev-js/gfx.js/issues"
   },
   "homepage": "https://github.com/gamedev-js/gfx.js/issues",
-  "dependencies": {
-    "lstats.js": "^1.2.5",
-    "rollup-watch": "^4.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "electron": "^1.7.3",
     "electron-node-tap": "^1.1.4",
     "fs-jetpack": "^0.13.0",
+    "lstats.js": "^1.2.5",
     "preview-server": "^1.0.7",
     "rollup": "^0.41.4",
-    "rollup-watch": "^3.2.2",
-    "uglify-es": "^3.0.15"
+    "rollup-watch": "^4.0.0",
+    "uglify-es": "^3.0.15",
+    "vmath": "^1.3.1"
   }
 }
