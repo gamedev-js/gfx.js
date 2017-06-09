@@ -5,7 +5,7 @@
   "main": "dist/gfx.js",
   "scripts": {
     "build:dev": "rollup -c ./script/rollup.config.js",
-    "build:min": "uglifyjs ./dist/gfx.dev.js --mangle --source-map ./dist/gfx.min.js.map -o ./dist/gfx.min.js",
+    "build:min": "uglifyjs ./dist/gfx.dev.js --mangle --source-map url=gfx.min.js.map -o ./dist/gfx.min.js",
     "release": "npm run build:dev && npm run build:min",
     "start": "electron ./examples",
     "server": "preview -p 8002 -e examples",
@@ -32,11 +32,12 @@
     "rollup-watch": "^4.0.0"
   },
   "devDependencies": {
-    "electron": "^1.7.1",
+    "electron": "^1.7.3",
     "electron-node-tap": "^1.1.4",
     "fs-jetpack": "^0.13.0",
     "preview-server": "^1.0.7",
     "rollup": "^0.41.4",
-    "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony"
+    "rollup-watch": "^3.2.2",
+    "uglify-es": "^3.0.15"
   }
 }
