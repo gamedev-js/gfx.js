@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.0.1
+ * gfx.js v1.0.2
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -755,6 +755,8 @@ class Texture2D extends Texture {
    * @param {FILTER_*} options.mipFilter
    * @param {WRAP_*} options.wrapS
    * @param {WRAP_*} options.wrapT
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
    */
   constructor(device, options) {
     super(device);
@@ -832,7 +834,7 @@ class Texture2D extends Texture {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._id);
       if (options.images !== undefined) {
-        this._setMipmap(options.images);
+        this._setMipmap(options.images, options.flipY, options.premultiplyAlpha);
       }
 
       this._setTexInfo();
@@ -841,11 +843,10 @@ class Texture2D extends Texture {
         gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
         gl.generateMipmap(gl.TEXTURE_2D);
       }
-    gl.bindTexture(gl.TEXTURE_2D, null);
     this._device._restoreTexture(0);
   }
 
-  _setMipmap(images) {
+  _setMipmap(images, flipY, premultiplyAlpha) {
     let gl = this._device._gl;
     let glFmt = glTextureFmt(this._format);
 
@@ -857,8 +858,17 @@ class Texture2D extends Texture {
         img instanceof HTMLImageElement ||
         img instanceof HTMLVideoElement
       ) {
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        if (flipY === undefined) {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        } else {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+        }
+
+        if (premultiplyAlpha === undefined) {
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        } else {
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+        }
 
         gl.texImage2D(
           gl.TEXTURE_2D,
@@ -869,7 +879,17 @@ class Texture2D extends Texture {
           img
         );
       } else {
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        if (flipY === undefined) {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        } else {
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+        }
+
+        if (premultiplyAlpha === undefined) {
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+        } else {
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+        }
 
         if (this._compressed) {
           gl.compressedTexImage2D(
@@ -928,6 +948,8 @@ class TextureCube extends Texture {
    * @param {WRAP_*} options.wrapS
    * @param {WRAP_*} options.wrapT
    * @param {WRAP_*} options.wrapR
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
    */
   constructor(device, options) {
     super(device);
@@ -1010,7 +1032,7 @@ class TextureCube extends Texture {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._id);
       if (options.images !== undefined) {
-        this._setMipmap(options.images);
+        this._setMipmap(options.images, options.flipY, options.premultiplyAlpha);
       }
 
       this._setTexInfo();
@@ -1024,7 +1046,7 @@ class TextureCube extends Texture {
 
   // levelImages = [imagePosX, imageNegX, imagePosY, imageNegY, imagePosZ, imageNegz]
   // images = [levelImages0, levelImages1, ...]
-  _setMipmap(images) {
+  _setMipmap(images, flipY, premultiplyAlpha) {
     let gl = this._device._gl;
     let glFmt = glTextureFmt(this._format);
 
@@ -1036,8 +1058,18 @@ class TextureCube extends Texture {
           levelImages[face] instanceof HTMLImageElement ||
           levelImages[face] instanceof HTMLVideoElement
         ) {
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          if (flipY === undefined) {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          } else {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+          }
+
+          if (premultiplyAlpha === undefined) {
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          } else {
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+          }
+
           gl.texImage2D(
             gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
             i,
@@ -1047,7 +1079,18 @@ class TextureCube extends Texture {
             levelImages[face]
           );
         } else {
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+          if (flipY === undefined) {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+          } else {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+          }
+
+          if (premultiplyAlpha === undefined) {
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          } else {
+            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+          }
+
           if (this._compressed) {
             gl.compressedTexImage2D(
               gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
@@ -1093,22 +1136,25 @@ class TextureCube extends Texture {
   }
 }
 
+// import { enums } from './enums';
+const INVALID = -1;
+
 const _defaultStates = {
   blend: false,
-  blendSep: false,
-  blendColor: 0xffffffff,
-  blendEq: enums.BLEND_FUNC_ADD,
-  blendAlphaEq: enums.BLEND_FUNC_ADD,
-  blendSrc: enums.BLEND_ONE,
-  blendDst: enums.BLEND_ZERO,
-  blendSrcAlpha: enums.BLEND_ONE,
-  blendDstAlpha: enums.BLEND_ZERO,
+  blendSep: INVALID, // 0: false, 1: true
+  blendColor: INVALID,
+  blendEq: INVALID,
+  blendAlphaEq: INVALID,
+  blendSrc: INVALID,
+  blendDst: INVALID,
+  blendSrcAlpha: INVALID,
+  blendDstAlpha: INVALID,
 
   depthTest: false,
   depthWrite: false,
-  depthFunc: enums.DEPTH_FUNC_LESS,
+  depthFunc: INVALID,
 
-  cullMode: enums.CULL_BACK,
+  cullMode: INVALID,
 
   // bindings
   maxStream: -1,
@@ -1130,21 +1176,45 @@ class State {
 
   set (cpy) {
     // states
-    this.blend = cpy.blend;
-    this.blendSep = cpy.blendSep;
-    this.blendColor = cpy.blendColor;
-    this.blendEq = cpy.blendEq;
-    this.blendAlphaEq = cpy.blendAlphaEq;
-    this.blendSrc = cpy.blendSrc;
-    this.blendDst = cpy.blendDst;
-    this.blendSrcAlpha = cpy.blendSrcAlpha;
-    this.blendDstAlpha = cpy.blendDstAlpha;
 
+    // blending
+    this.blend = cpy.blend;
+    if (cpy.blendSep !== INVALID) {
+      this.blendSep = cpy.blendSep;
+    }
+    if (cpy.blendColor !== INVALID) {
+      this.blendColor = cpy.blendColor;
+    }
+    if (cpy.blendEq !== INVALID) {
+      this.blendEq = cpy.blendEq;
+    }
+    if (cpy.blendAlphaEq !== INVALID) {
+      this.blendAlphaEq = cpy.blendAlphaEq;
+    }
+    if (cpy.blendSrc !== INVALID) {
+      this.blendSrc = cpy.blendSrc;
+    }
+    if (cpy.blendDst !== INVALID) {
+      this.blendDst = cpy.blendDst;
+    }
+    if (cpy.blendSrcAlpha !== INVALID) {
+      this.blendSrcAlpha = cpy.blendSrcAlpha;
+    }
+    if (cpy.blendDstAlpha !== INVALID) {
+      this.blendDstAlpha = cpy.blendDstAlpha;
+    }
+
+    // depth
     this.depthTest = cpy.depthTest;
     this.depthWrite = cpy.depthWrite;
-    this.depthFunc = cpy.depthFunc;
+    if (cpy.depthFunc !== INVALID) {
+      this.depthFunc = cpy.depthFunc;
+    }
 
-    this.cullMode = cpy.cullMode;
+    // cull-mode
+    if (cpy.cullMode !== INVALID) {
+      this.cullMode = cpy.cullMode;
+    }
 
     // bindings
     this.maxStream = cpy.maxStream;
@@ -1256,17 +1326,19 @@ let _type2uniformCommit = {
  * _commitBlendStates
  */
 function _commitBlendStates(gl, cur, next) {
-  if (cur.blend === next.blend) {
-    return;
+  // enable/disable blend
+  if (cur.blend !== next.blend) {
+    if (next.blend === false) {
+      gl.disable(gl.BLEND);
+      return;
+    } else {
+      gl.enable(gl.BLEND);
+    }
+  } else {
+    if (next.blend === false) {
+      return;
+    }
   }
-
-  if (!next.blend) {
-    gl.disable(gl.BLEND);
-    return;
-  }
-
-  // enable-blend
-  gl.enable(gl.BLEND);
 
   // blend-color
   if (cur.blendColor !== next.blendColor) {
@@ -1278,11 +1350,11 @@ function _commitBlendStates(gl, cur, next) {
     );
   }
 
-  // seprate diff, reset all
+  // separate diff, reset all
   if (cur.blendSep !== next.blendSep) {
     if (next.blendSep) {
       gl.blendFuncSeparate(next.blendSrc, next.blendDst, next.blendSrcAlpha, next.blendDstAlpha);
-      gl.blendEquationSeprate(next.blendEq, next.blendAlphaEq);
+      gl.blendEquationSeparate(next.blendEq, next.blendAlphaEq);
     } else {
       gl.blendFunc(next.blendSrc, next.blendDst);
       gl.blendEquation(next.blendEq);
@@ -1292,7 +1364,7 @@ function _commitBlendStates(gl, cur, next) {
   }
 
   if (next.blendSep) {
-    // blend-func-seprate
+    // blend-func-separate
     if (
       cur.blendSrc !== next.blendSrc ||
       cur.blendDst !== next.blendDst ||
@@ -1302,12 +1374,12 @@ function _commitBlendStates(gl, cur, next) {
       gl.blendFuncSeparate(next.blendSrc, next.blendDst, next.blendSrcAlpha, next.blendDstAlpha);
     }
 
-    // blend-equation-seprate
+    // blend-equation-separate
     if (
       cur.blendEq !== next.blendEq ||
       cur.blendAlphaEq !== next.blendAlphaEq
     ) {
-      gl.blendEquationSeprate(next.blendEq, next.blendAlphaEq);
+      gl.blendEquationSeparate(next.blendEq, next.blendAlphaEq);
     }
   } else {
     // blend-func
@@ -1695,19 +1767,20 @@ class Device {
    * @param {BELND_*} dst
    */
   setBlendFunction(src, dst) {
+    this._next.blendSep = 0;
     this._next.blendSrc = src;
     this._next.blendDst = dst;
   }
 
   /**
-   * @method setBlendFunctionSeprate
+   * @method setBlendFunctionSeparate
    * @param {BELND_*} src
    * @param {BELND_*} dst
    * @param {BELND_*} srcAlpha
    * @param {BELND_*} dstAlpha
    */
-  setBlendFunctionSeprate(src, dst, srcAlpha, dstAlpha) {
-    this._next.blendSep = true;
+  setBlendFunctionSeparate(src, dst, srcAlpha, dstAlpha) {
+    this._next.blendSep = 1;
     this._next.blendSrc = src;
     this._next.blendDst = dst;
     this._next.blendSrcAlpha = srcAlpha;
@@ -1719,16 +1792,17 @@ class Device {
    * @param {BELND_FUNC_*} eq
    */
   setBlendEquation(eq) {
+    this._next.blendSep = 0;
     this._next.blendEq = eq;
   }
 
   /**
-   * @method setBlendEquationSeprate
+   * @method setBlendEquationSeparate
    * @param {BELND_FUNC_*} eq
    * @param {BELND_FUNC_*} alphaEq
    */
-  setBlendEquationSeprate(eq, alphaEq) {
-    this._next.blendSep = true;
+  setBlendEquationSeparate(eq, alphaEq) {
+    this._next.blendSep = 1;
     this._next.blendEq = eq;
     this._next.blendAlphaEq = alphaEq;
   }

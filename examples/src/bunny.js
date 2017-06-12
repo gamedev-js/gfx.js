@@ -102,7 +102,7 @@
     t += dt;
 
     mat4.lookAt(view,
-      vec3.set(eye, 30 * Math.cos(t), 2.5, 30 * Math.sin(t)),
+      vec3.set(eye, 30 * Math.cos(t), 20, 30 * Math.sin(t)),
       vec3.set(center, 0, 2.5, 0),
       vec3.set(up, 0, 1, 0)
     );
