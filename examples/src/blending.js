@@ -85,7 +85,7 @@
         void main() {
           vec2 offset = vec2(time * -0.01);
           // gl_FragColor = texture2D(texture, 8.0 * (uv + offset));
-          vec4 rgba = texture2D(texture, 8.0 * (uv + offset));
+          vec4 rgba = texture2D(texture, 20.0 * (uv + offset));
           rgba.a = 1.0;
 
           gl_FragColor = rgba;
@@ -204,8 +204,6 @@
       let offsetX = 5 + hsize;
       let offsetY = 5 + hsize;
       device.enableBlend();
-      // device.setBlendFunction(gfx.BLEND_ONE, gfx.BLEND_ZERO);
-      // device.setBlendEquation(gfx.BLEND_FUNC_ADD);
       device.setBlendFunctionSeparate(gfx.BLEND_ONE, gfx.BLEND_ZERO, gfx.BLEND_ONE, gfx.BLEND_ONE);
       device.setBlendEquationSeparate(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
 
