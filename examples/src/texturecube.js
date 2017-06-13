@@ -3,7 +3,7 @@
   let device = window.device;
   let canvas = window.canvas;
   let resl = window.resl;
-  var texture = null;
+  let texture = null;
   let { vec3, mat4 } = window.vmath;
   // init resources
   let program = new gfx.Program(device, {
@@ -28,28 +28,6 @@
     `,
   });
   program.link();
-
-  let program2 = new gfx.Program(device, {
-    vert: `
-      precision mediump float;
-      uniform mat4 model, view, projection;
-      attribute vec3 a_position;
-      attribute vec3 a_color;
-      varying vec3 v_color;
-      void main () {
-        gl_Position = projection * view * model * vec4(a_position, 1.0);
-        v_color = a_color;
-      }
-    `,
-    frag: `
-      precision mediump float;
-      varying vec3 v_color;
-      void main () {
-        gl_FragColor = vec4(v_color, 1.0);
-      }
-    `,
-  });
-  program2.link();
 
   resl({
     manifest: {
@@ -79,7 +57,7 @@
       },
     },
     onDone (assets) {
-      var image = assets.image0;
+      let image = assets.image0;
       texture = new gfx.TextureCube(device, {
         width : image.width, 
         height : image.height,
@@ -89,19 +67,18 @@
   });
   let vertexFmt = new gfx.VertexFormat([
     { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 3 },
-    { name: gfx.ATTR_COLOR, type: gfx.ATTR_TYPE_FLOAT32, num: 3 }
   ]);
-  var verts = [
-    -1, -1, -1, 0, 0, 0,
-    1, -1, -1, 1, 0, 0,
-    1, 1, -1, 1, 1, 0,
-    -1, 1, -1, 0, 1, 0,
-    -1, -1, 1, 0, 0, 1,
-    1, -1, 1, 1, 0, 1,
-    1, 1, 1, 1, 1, 1,
-    -1, 1, 1, 0, 1, 1
+  let verts = [
+    -1, -1, -1,
+    1, -1, -1,
+    1, 1, -1,
+    -1, 1, -1,
+    -1, -1, 1,
+    1, -1, 1,
+    1, 1, 1,
+    -1, 1, 1
   ];
-  var indices = [
+  let indices = [
     0, 1, 2, 0, 2, 3,
     4, 5, 6, 4, 6, 7,
     0, 4, 7, 0, 7, 3,
@@ -165,7 +142,7 @@
     if (texture) {
       device.setTexture('texture', texture, 0);
     }
-    device.setProgram(texture ? program : program2);
+    device.setProgram(program);
     device.draw(0, indices.length);
   };
 })();
