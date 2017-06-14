@@ -12,6 +12,8 @@ import Program from './lib/program';
 import Texture from './lib/texture';
 import Texture2D from './lib/texture-2d';
 import TextureCube from './lib/texture-cube';
+import RenderBuffer from './lib/render-buffer';
+import FrameBuffer from './lib/frame-buffer';
 import Device from './lib/device';
 
 let gfx = {
@@ -23,6 +25,8 @@ let gfx = {
   Texture,
   Texture2D,
   TextureCube,
+  RenderBuffer,
+  FrameBuffer,
   Device,
 
   // functions
