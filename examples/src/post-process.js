@@ -21,16 +21,30 @@
         precision mediump float;
         varying vec2 uv;
         uniform sampler2D texture;
-        uniform float near;
-        uniform float far;
+
+        float angle = 1.57;
+        float scale = 2.0;
+        vec2 center = vec2(0.5, 0.5);
+        vec2 size = vec2(256, 256);
+
+        float pattern() {
+          float s = sin(angle);
+          float c = cos(angle);
+          vec2 tex = uv * size - center;
+          vec2 point = vec2(c * tex.x - s * tex.y, s * tex.x + c * tex.y) * scale;
+
+          return (sin(point.x) * sin(point.y)) * 4.0;
+        }
 
         void main() {
-          float z = texture2D(texture, uv).x;
-          float viewZ = (near * far) / ((far - near) * z - far);
-          float depth = (viewZ + near) / (near - far);
+          vec4 color = texture2D(texture, uv);
+          float p = pattern();
 
-          gl_FragColor.rgb = vec3(depth);
-				  gl_FragColor.a = 1.0;
+          // color.rgb = color.rgb * 5.0 - vec3(5.0 + p);
+          // gl_FragColor = color;
+
+          float average = (color.r + color.g + color.b) / 3.0;
+          gl_FragColor = vec4( vec3( average * 10.0 - 5.0 + p ), color.a );
         }
       `,
     });
@@ -62,17 +76,23 @@
       attribute vec3 a_position;
       uniform mat4 model, view, projection;
 
+      varying vec3 position;
+
       void main () {
         vec4 pos = projection * view * model * vec4(a_position, 1);
+        position = a_position;
+
         gl_Position = pos;
       }
     `,
       frag: `
       precision mediump float;
+      varying vec3 position;
+
       uniform vec4 color;
 
       void main () {
-        gl_FragColor = vec4(1, 1, 1, 1);
+        gl_FragColor = color * vec4(position, 1);
       }
     `,
     });
@@ -141,16 +161,21 @@
 
   let bg = _bigTriangle(device);
 
-  let depthTexture = new gfx.Texture2D(device, {
+  let depthBuffer = new gfx.RenderBuffer(device,
+    gfx.RB_FMT_D16,
+    canvas.width,
+    canvas.height
+  );
+  let colorTexture = new gfx.Texture2D(device, {
     width: canvas.width,
     height: canvas.height,
-    // format: gfx.TEXTURE_FMT_D16,
-    format: gfx.TEXTURE_FMT_D32,
+    format: gfx.TEXTURE_FMT_RGBA8,
     wrapS: gfx.WRAP_CLAMP,
     wrapT: gfx.WRAP_CLAMP,
   });
   let frameBuffer = new gfx.FrameBuffer(device, canvas.width, canvas.height, {
-    depth: depthTexture
+    colors: [colorTexture],
+    depth: depthBuffer,
   });
 
   let model = mat4.create();
@@ -177,15 +202,16 @@
       Math.PI / 4,
       canvas.width / canvas.height,
       0.01,
-      100
+      1000
     );
 
-    device.setViewport(0, 0, canvas.width, canvas.height);
+    // device.setViewport(0, 0, canvas.width, canvas.height);
 
     if (bunny) {
       device.setFrameBuffer(frameBuffer);
       device.setViewport(0, 0, canvas.width, canvas.height);
       device.clear({
+        color: [0.1, 0.1, 0.1, 1],
         depth: 1
       });
 
@@ -198,7 +224,7 @@
       device.setUniform('model', mat4.array(new Float32Array(16), model));
       device.setUniform('view', mat4.array(new Float32Array(16), view));
       device.setUniform('projection', mat4.array(new Float32Array(16), projection));
-      device.setUniform('color', new Float32Array([0.5, 0.5, 0.5, 1]));
+      device.setUniform('color', new Float32Array([0.1, 0.1, 0.1, 1]));
       device.setProgram(bunny.program);
       device.draw(0, bunny.ib.count);
 
@@ -211,7 +237,7 @@
       device.setUniform('model', mat4.array(new Float32Array(16), model));
       device.setUniform('view', mat4.array(new Float32Array(16), view));
       device.setUniform('projection', mat4.array(new Float32Array(16), projection));
-      device.setUniform('color', new Float32Array([0.5, 0.5, 0.5, 1]));
+      device.setUniform('color', new Float32Array([0.3, 0.3, 0.3, 1]));
       device.setProgram(bunny.program);
       device.draw(0, bunny.ib.count);
 
@@ -222,9 +248,7 @@
         color: [0.1, 0.1, 0.1, 1],
         depth: 1
       });
-      device.setTexture('texture', depthTexture, 0);
-      device.setUniform('near', 0.01);
-      device.setUniform('far', 100.0);
+      device.setTexture('texture', colorTexture, 0);
       device.setVertexBuffer(0, bg.vb);
       device.setProgram(bg.program);
       device.draw(0, bg.vb.count);

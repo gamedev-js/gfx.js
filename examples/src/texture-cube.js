@@ -26,7 +26,8 @@
       varying vec3 v_texcoord;
 
       void main () {
-        gl_FragColor = textureCube(texture, normalize(v_texcoord));
+        // gl_FragColor = textureCube(texture, normalize(v_texcoord));
+        gl_FragColor = textureCube(texture, v_texcoord);
       }
     `,
   });
