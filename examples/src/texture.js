@@ -3,17 +3,18 @@
   let device = window.device;
   let canvas = window.canvas;
   let resl = window.resl;
-
+  let { quat, vec3, mat4 } = window.vmath;
   let texture = null;
 
   // init resources
   let program = new gfx.Program(device, {
     vert: `
       precision mediump float;
+      uniform mat4 transform;
       attribute vec2 a_position;
       varying vec2 v_texcoord;
       void main () {
-        gl_Position = vec4(a_position, 0, 1);
+        gl_Position = transform * vec4(a_position, 0, 1);
         v_texcoord = a_position * 0.5 + 0.5;
       }
     `,
@@ -28,6 +29,19 @@
     `,
   });
   program.link();
+  let canvasElement = document.createElement('Canvas');
+  canvasElement.width = 512;
+  canvasElement.height = 512;
+  let ctx = canvasElement.getContext('2d');
+  ctx.fillStyle = 'rgb(199,237,204)';
+  ctx.fillRect(0, 0, 512, 512);
+  ctx.fillStyle = 'rgb(0,0,0)';
+  ctx.fillText('use canvas element as texture, filled by rgb(199,237,204)', 90, 256);
+  let canvasTexture = new gfx.Texture2D(device, {
+    width: 512,
+    height: 512,
+    images: [canvasElement]
+  });
 
   resl({
     manifest: {
@@ -56,7 +70,12 @@
     6,
     false
   );
-
+  let transform0 = mat4.create();
+  let transform1 = mat4.create();
+  let scale = vec3.create();
+  let trans = vec3.create();
+  mat4.fromRTS(transform0, quat.create(), vec3.set(trans, -0.5, 0, 0), vec3.set(scale, 0.5, 0.5, 0.5));
+  mat4.fromRTS(transform1, quat.create(), vec3.set(trans, 0.5, 0, 0), vec3.set(scale, 0.5, 0.5, 0.5));
   // tick
   return function tick() {
     device.setViewport(0, 0, canvas.width, canvas.height);
@@ -65,10 +84,19 @@
       depth: 1
     });
 
+    if (canvasTexture) {
+      device.setVertexBuffer(0, vertexBuffer);
+      device.setUniform('color', new Float32Array([1, 0, 0, 1]));
+      device.setTexture('texture', canvasTexture, 0);
+      device.setUniform('transform', mat4.array(new Float32Array(16), transform0));
+      device.setProgram(program);
+      device.draw(0, vertexBuffer.count);
+    }
     if (texture) {
       device.setVertexBuffer(0, vertexBuffer);
       device.setUniform('color', new Float32Array([1, 0, 0, 1]));
       device.setTexture('texture', texture, 0);
+      device.setUniform('transform', mat4.array(new Float32Array(16), transform1));
       device.setProgram(program);
       device.draw(0, vertexBuffer.count);
     }
