@@ -205,6 +205,17 @@ suite(tap, 'helper', {timeout: 20000}, t => {
       t.end();
     });
 
+    t.test('rb_fmt', t => {
+      t.equal(gfx.RB_FMT_RGBA4, gl.RGBA4);
+      t.equal(gfx.RB_FMT_RGB5_A1, gl.RGB5_A1);
+      t.equal(gfx.RB_FMT_RGB565, gl.RGB565);
+      t.equal(gfx.RB_FMT_DEPTH, gl.DEPTH_COMPONENT16);
+      t.equal(gfx.RB_FMT_STENCIL, gl.STENCIL_INDEX8);
+      t.equal(gfx.RB_FMT_DEPTH_STENCIL, gl.DEPTH_STENCIL);
+
+      t.end();
+    });
+
     t.test('blend func', t => {
       t.equal(gfx.BLEND_FUNC_ADD, gl.FUNC_ADD);
       t.equal(gfx.BLEND_FUNC_SUBTRACT, gl.FUNC_SUBTRACT);

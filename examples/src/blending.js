@@ -84,11 +84,7 @@
 
         void main() {
           vec2 offset = vec2(time * -0.01);
-          // gl_FragColor = texture2D(texture, 8.0 * (uv + offset));
-          vec4 rgba = texture2D(texture, 20.0 * (uv + offset));
-          rgba.a = 1.0;
-
-          gl_FragColor = rgba;
+          gl_FragColor = texture2D(texture, 20.0 * (uv + offset));
         }
       `,
     });

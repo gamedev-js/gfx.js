@@ -1050,6 +1050,18 @@ class TextureCube extends Texture {
     let gl = this._device._gl;
     let glFmt = glTextureFmt(this._format);
 
+    if (flipY === undefined) {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    } else {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+    }
+
+    if (premultiplyAlpha === undefined) {
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    } else {
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+    }
+
     for (let i = 0; i < images.length; ++i) {
       let levelImages = images[i];
       for (let face = 0; face < 6; ++face) {
@@ -1058,18 +1070,6 @@ class TextureCube extends Texture {
           levelImages[face] instanceof HTMLImageElement ||
           levelImages[face] instanceof HTMLVideoElement
         ) {
-          if (flipY === undefined) {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-          } else {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-          }
-
-          if (premultiplyAlpha === undefined) {
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-          } else {
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
-          }
-
           gl.texImage2D(
             gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
             i,
@@ -1079,18 +1079,6 @@ class TextureCube extends Texture {
             levelImages[face]
           );
         } else {
-          if (flipY === undefined) {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-          } else {
-            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-          }
-
-          if (premultiplyAlpha === undefined) {
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-          } else {
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
-          }
-
           if (this._compressed) {
             gl.compressedTexImage2D(
               gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
@@ -1136,7 +1124,6 @@ class TextureCube extends Texture {
   }
 }
 
-// import { enums } from './enums';
 const INVALID = -1;
 
 const _defaultStates = {
@@ -1154,7 +1141,7 @@ const _defaultStates = {
   depthWrite: false,
   depthFunc: INVALID,
 
-  cullMode: INVALID,
+  cullMode: enums.CULL_BACK,
 
   // bindings
   maxStream: -1,
@@ -1212,9 +1199,7 @@ class State {
     }
 
     // cull-mode
-    if (cpy.cullMode !== INVALID) {
-      this.cullMode = cpy.cullMode;
-    }
+    this.cullMode = cpy.cullMode;
 
     // bindings
     this.maxStream = cpy.maxStream;
@@ -1406,18 +1391,21 @@ function _commitDepthStates(gl, cur, next) {
     gl.depthMask(next.depthWrite);
   }
 
-  if (cur.depthTest === next.depthTest) {
-    return;
+  // enable/disable depth-test
+  if (cur.depthTest !== next.depthTest) {
+    if (next.depthTest === false) {
+      gl.disable(gl.DEPTH_TEST);
+      return;
+    } else {
+      gl.enable(gl.DEPTH_TEST);
+    }
+  } else {
+    if (next.depthTest === false) {
+      return;
+    }
   }
 
-  if (!next.depthTest) {
-    gl.disable(gl.DEPTH_TEST);
-    return;
-  }
-
-  // enable-depth-test
-  gl.enable(gl.DEPTH_TEST);
-
+  // depth-func
   if (cur.depthFunc !== next.depthFunc) {
     gl.depthFunc(next.depthFunc);
   }
