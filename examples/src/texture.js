@@ -29,7 +29,7 @@
     `,
   });
   program.link();
-  let canvasElement = document.createElement('Canvas');
+  let canvasElement = document.createElement('canvas');
   canvasElement.width = 512;
   canvasElement.height = 512;
   let ctx = canvasElement.getContext('2d');
@@ -72,10 +72,8 @@
   );
   let transform0 = mat4.create();
   let transform1 = mat4.create();
-  let scale = vec3.create();
-  let trans = vec3.create();
-  mat4.fromRTS(transform0, quat.create(), vec3.set(trans, -0.5, 0, 0), vec3.set(scale, 0.5, 0.5, 0.5));
-  mat4.fromRTS(transform1, quat.create(), vec3.set(trans, 0.5, 0, 0), vec3.set(scale, 0.5, 0.5, 0.5));
+  mat4.fromRTS(transform0, quat.create(), vec3.new(-0.5, 0, 0), vec3.new(0.5, 0.5, 0.5));
+  mat4.fromRTS(transform1, quat.create(), vec3.new(0.5, 0, 0), vec3.new(0.5, 0.5, 0.5));
   // tick
   return function tick() {
     device.setViewport(0, 0, canvas.width, canvas.height);
