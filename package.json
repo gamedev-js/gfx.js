@@ -1,6 +1,6 @@
 {
   "name": "gfx.js",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "WebGL wrappings for Graphics",
   "main": "dist/gfx.js",
   "scripts": {
@@ -18,8 +18,7 @@
   },
   "keywords": [
     "gfx",
-    "mouse",
-    "keyboard"
+    "webgl"
   ],
   "author": "jwu",
   "license": "MIT",

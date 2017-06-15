@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.0.3
+ * gfx.js v1.0.4
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -15,10 +15,11 @@ const GL_LINEAR_MIPMAP_NEAREST = 9985;  // gl.LINEAR_MIPMAP_NEAREST
 const GL_NEAREST_MIPMAP_LINEAR = 9986;  // gl.NEAREST_MIPMAP_LINEAR
 const GL_LINEAR_MIPMAP_LINEAR = 9987;   // gl.LINEAR_MIPMAP_LINEAR
 
-// const GL_BYTE = 5120;                     // gl.BYTE
+// const GL_BYTE = 5120;                  // gl.BYTE
 const GL_UNSIGNED_BYTE = 5121;            // gl.UNSIGNED_BYTE
-// const GL_SHORT = 5122;                    // gl.SHORT
+// const GL_SHORT = 5122;                 // gl.SHORT
 const GL_UNSIGNED_SHORT = 5123;           // gl.UNSIGNED_SHORT
+const GL_UNSIGNED_INT = 5125;             // gl.UNSIGNED_INT
 const GL_FLOAT = 5126;                    // gl.FLOAT
 const GL_UNSIGNED_SHORT_5_6_5 = 33635;    // gl.UNSIGNED_SHORT_5_6_5
 const GL_UNSIGNED_SHORT_4_4_4_4 = 32819;  // gl.UNSIGNED_SHORT_4_4_4_4
@@ -126,10 +127,13 @@ const _textureFmtGL = [
   // TEXTURE_FMT_SRGBA: 24
   { format: null, internalFormat: null, pixelType: null },
 
-  // TEXTURE_FMT_DEPTH: 25
+  // TEXTURE_FMT_D16: 25
   { format: GL_DEPTH_COMPONENT, internalFormat: GL_DEPTH_COMPONENT, pixelType: GL_UNSIGNED_SHORT },
 
-  // TEXTURE_FMT_DEPTHSTENCIL: 26
+  // TEXTURE_FMT_D24: 26
+  { format: GL_DEPTH_COMPONENT, internalFormat: GL_DEPTH_COMPONENT, pixelType: GL_UNSIGNED_INT },
+
+  // TEXTURE_FMT_D24S8: 27
   { format: null, internalFormat: null, pixelType: null },
 ];
 
@@ -216,16 +220,17 @@ let enums = {
   TEXTURE_FMT_SRGBA: 24,
 
   // depth formats
-  TEXTURE_FMT_DEPTH: 25,
-  TEXTURE_FMT_DEPTHSTENCIL: 26,
+  TEXTURE_FMT_D16: 25,
+  TEXTURE_FMT_D32: 26,
+  TEXTURE_FMT_D24S8: 27,
 
   // render-buffer format
-  RB_FMT_RGBA4: 32854,          // gl.RGBA4
-  RB_FMT_RGB5_A1: 32855,        // gl.RGB5_A1
-  RB_FMT_RGB565: 36194,         // gl.RGB565
-  RB_FMT_DEPTH: 33189,          // gl.DEPTH_COMPONENT16
-  RB_FMT_STENCIL: 36168,        // gl.STENCIL_INDEX8
-  RB_FMT_DEPTH_STENCIL: 34041,  // gl.DEPTH_STENCIL
+  RB_FMT_RGBA4: 32854,    // gl.RGBA4
+  RB_FMT_RGB5_A1: 32855,  // gl.RGB5_A1
+  RB_FMT_RGB565: 36194,   // gl.RGB565
+  RB_FMT_D16: 33189,      // gl.DEPTH_COMPONENT16
+  RB_FMT_S8: 36168,       // gl.STENCIL_INDEX8
+  RB_FMT_D24S8: 34041,    // gl.DEPTH_STENCIL
 
   // depth-function
   DEPTH_FUNC_NEVER: 512,    // gl.NEVER
@@ -750,6 +755,10 @@ class Texture {
   }
 }
 
+function _isPow2(v) {
+  return !(v & (v-1)) && (!!v);
+}
+
 class Texture2D extends Texture {
   /**
    * @constructor
@@ -933,6 +942,14 @@ class Texture2D extends Texture {
 
   _setTexInfo() {
     let gl = this._device._gl;
+    let pot = _isPow2(this._width) && _isPow2(this._height);
+
+    // WebGL1 doesn't support all wrap modes with NPOT textures
+    if (!pot && (this._wrapS !== enums.WRAP_CLAMP || this._wrapT !== enums.WRAP_CLAMP)) {
+      console.warn('WebGL1 doesn\'t support all wrap modes with NPOT textures');
+      this._wrapS = enums.WRAP_CLAMP;
+      this._wrapT = enums.WRAP_CLAMP;
+    }
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, glFilter(gl, this._minFilter, this._hasMipmap ? this._mipFilter : -1));
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, glFilter(gl, this._magFilter, -1));
@@ -1226,7 +1243,7 @@ class FrameBuffer {
 
 const INVALID = -1;
 
-const _defaultStates = {
+const _resets = {
   blend: false,
   blendSep: INVALID, // 0: false, 1: true
   blendColor: INVALID,
@@ -1254,16 +1271,39 @@ const _defaultStates = {
 
 class State {
   constructor() {
+    // blending
+    this.blend = false;
+    this.blendSep = 0;
+    this.blendColor = 0xffffffff;
+    this.blendEq = enums.BLEND_FUNC_ADD;
+    this.blendAlphaEq = enums.BLEND_FUNC_ADD;
+    this.blendSrc = enums.BLEND_ONE;
+    this.blendDst = enums.BLEND_ZERO;
+    this.blendSrcAlpha = enums.BLEND_ONE;
+    this.blendDstAlpha = enums.BLEND_ZERO;
+
+    // depth
+    this.depthTest = false;
+    this.depthWrite = false;
+    this.depthFunc = enums.DEPTH_FUNC_LESS;
+
+    // cull-mode
+    this.cullMode = enums.CULL_BACK;
+
+    // bindings
+    this.maxStream = -1;
     this.vertexBuffers = [];
     this.vertexBufferOffsets = [];
+    this.indexBuffer = null;
     this.textureUnits = [];
+    this.program = null;
+  }
 
-    this.set(_defaultStates);
+  reset () {
+    this.set(_resets);
   }
 
   set (cpy) {
-    // states
-
     // blending
     this.blend = cpy.blend;
     if (cpy.blendSep !== INVALID) {
@@ -1314,10 +1354,6 @@ class State {
       this.textureUnits[i] = cpy.textureUnits[i];
     }
     this.program = cpy.program;
-  }
-
-  reset () {
-    this.set(_defaultStates);
   }
 }
 
@@ -1569,6 +1605,11 @@ function _commitVertexBuffers(gl, cur, next) {
         let attr = next.program._attributes[i];
 
         let el = vb._format.element(attr.name);
+        if (!el) {
+          console.warn(`Can not find vertex attribute: ${attr.name}`);
+          continue;
+        }
+
         gl.enableVertexAttribArray(attr.location);
         gl.vertexAttribPointer(
           attr.location,
