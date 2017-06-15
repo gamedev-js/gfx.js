@@ -84,8 +84,8 @@
       color: [0.1, 0.1, 0.1, 1],
       depth: 1
     });
-    //draw stencil and image
 
+    // draw stencil and image
     device.setViewport(canvas.width / 6, canvas.height / 2, canvas.width / 3, canvas.height / 2);
     if (canvasTexture) {
       device.setVertexBuffer(0, vertexBuffer);
@@ -108,7 +108,7 @@
       device.draw(0, vertexBuffer.count);
     }
 
-    //back and front
+    // back and front
     device.setViewport(0, 0, canvas.width / 3, canvas.height / 2);
     if (canvasTexture) {
       device.setVertexBuffer(0, vertexBuffer);
@@ -135,7 +135,7 @@
       device.draw(0, vertexBuffer.count);
     }
 
-    //back
+    // back
     device.setViewport(canvas.width / 3, 0, canvas.width / 3, canvas.height / 2);
     if (canvasTexture) {
       device.setVertexBuffer(0, vertexBuffer);
@@ -163,7 +163,7 @@
       device.draw(0, vertexBuffer.count);
     }
 
-    //front
+    // front
     device.setViewport(canvas.width * 2 / 3, 0, canvas.width / 3, canvas.height / 2);
     if (canvasTexture) {
       device.setVertexBuffer(0, vertexBuffer);
