@@ -9,7 +9,7 @@
   // init resources
   let program = new gfx.Program(device, {
     vert: `
-      precision mediump float;
+      precision highp float;
       uniform mat4 transform;
       attribute vec2 a_position;
       varying vec2 v_texcoord;
@@ -19,7 +19,7 @@
       }
     `,
     frag: `
-      precision mediump float;
+      precision highp float;
       uniform sampler2D texture;
       uniform vec4 color;
       varying vec2 v_texcoord;

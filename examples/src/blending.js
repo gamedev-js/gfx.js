@@ -8,7 +8,7 @@
   function _quad(device) {
     let program = new gfx.Program(device, {
       vert: `
-        precision mediump float;
+        precision highp float;
         attribute vec2 a_position;
         attribute vec2 a_uv;
         varying vec2 uv;
@@ -20,7 +20,7 @@
         }
       `,
       frag: `
-        precision mediump float;
+        precision highp float;
         varying vec2 uv;
         uniform sampler2D texture;
 
@@ -67,7 +67,7 @@
   function _bigTriangle(device) {
     let program = new gfx.Program(device, {
       vert: `
-        precision mediump float;
+        precision highp float;
         attribute vec2 a_position;
         varying vec2 uv;
 
@@ -77,7 +77,7 @@
         }
       `,
       frag: `
-        precision mediump float;
+        precision highp float;
         varying vec2 uv;
         uniform sampler2D texture;
         uniform float time;

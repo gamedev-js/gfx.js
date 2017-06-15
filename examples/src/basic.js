@@ -6,14 +6,14 @@
   // init resources
   let program = new gfx.Program(device, {
     vert: `
-      precision mediump float;
+      precision highp float;
       attribute vec2 a_position;
       void main () {
         gl_Position = vec4(a_position, 0, 1);
       }
     `,
     frag: `
-      precision mediump float;
+      precision highp float;
       uniform vec4 color;
       void main () {
         gl_FragColor = color;
