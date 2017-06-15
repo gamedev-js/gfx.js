@@ -5,6 +5,7 @@
   let resl = window.resl;
   let texture = null;
   let { vec3, mat4 } = window.vmath;
+
   // init resources
   let program = new gfx.Program(device, {
     vert: `
@@ -12,6 +13,7 @@
       uniform mat4 model, view, projection;
       attribute vec3 a_position;
       varying vec3 v_texcoord;
+
       void main () {
         gl_Position = projection * view * model * vec4(a_position, 1);
         v_texcoord = a_position;
@@ -22,7 +24,9 @@
       uniform samplerCube texture;
       uniform vec4 color;
       varying vec3 v_texcoord;
+
       void main () {
+        // gl_FragColor = textureCube(texture, normalize(v_texcoord));
         gl_FragColor = textureCube(texture, v_texcoord);
       }
     `,
@@ -33,33 +37,33 @@
     manifest: {
       image0: {
         type: 'image',
-        src: './assets/skybox_posx.png'
+        src: './assets/sky/right.jpg'
       },
       image1: {
         type: 'image',
-        src: './assets/skybox_negx.png'
+        src: './assets/sky/left.jpg'
       },
       image2: {
         type: 'image',
-        src: './assets/skybox_posy.png'
+        src: './assets/sky/up.jpg'
       },
       image3: {
         type: 'image',
-        src: './assets/skybox_negy.png'
+        src: './assets/sky/down.jpg'
       },
       image4: {
         type: 'image',
-        src: './assets/skybox_posz.png'
+        src: './assets/sky/back.jpg'
       },
       image5: {
         type: 'image',
-        src: './assets/skybox_negz.png'
+        src: './assets/sky/front.jpg'
       },
     },
     onDone (assets) {
       let image = assets.image0;
       texture = new gfx.TextureCube(device, {
-        width : image.width, 
+        width : image.width,
         height : image.height,
         images : [[assets.image0,assets.image1,assets.image2,assets.image3,assets.image4,assets.image5]]
       });
@@ -102,47 +106,53 @@
     indices.length,
     false
   );
-  
+
   let model = mat4.create();
   let view = mat4.create();
   let projection = mat4.create();
   let eye = vec3.create();
   let center = vec3.create();
   let up = vec3.create();
-  // tick
-  return function tick() {
-    mat4.lookAt(view,
-      vec3.set(eye, 0, 0, 0),
-      vec3.set(center, 0, 0, 5),
-      vec3.set(up, 0, 1, 0)
-    );
+  let t = 0;
 
-    mat4.perspective(projection,
-      Math.PI / 4,
-      canvas.width / canvas.height,
-      0.01,
-      1000
-    );
-    let scaling = vec3.create();
-    vec3.set(scaling, 50, 50, 50);
-    mat4.fromScaling(model, scaling);
-    device.setViewport(0, 0, canvas.width, canvas.height);
-    device.clear({
-      color: [0.1, 0.1, 0.1, 1],
-      depth: 1
-    });
-    device.enableDepthTest();
-    device.enableDepthWrite();
-    device.setCullMode(gfx.CULL_NONE);
-    device.setUniform('model', mat4.array(new Float32Array(16), model));
-    device.setUniform('view', mat4.array(new Float32Array(16), view));
-    device.setUniform('projection', mat4.array(new Float32Array(16), projection));
-    device.setVertexBuffer(0, vertexBuffer);
-    device.setIndexBuffer(indexBuffer);
+  // tick
+  return function tick(dt) {
+    t += dt;
+
     if (texture) {
+      mat4.lookAt(view,
+        vec3.set(eye, 30 * Math.cos(t * 0.1), 0, 30 * Math.sin(t * 0.1)),
+        vec3.set(center, 0, 10, 0),
+        vec3.set(up, 0, 1, 0)
+      );
+
+      mat4.perspective(projection,
+        Math.PI / 4,
+        canvas.width / canvas.height,
+        0.01,
+        1000
+      );
+
+      let scaling = vec3.create();
+      vec3.set(scaling, 50, 50, 50);
+      mat4.fromScaling(model, scaling);
+
+      device.setViewport(0, 0, canvas.width, canvas.height);
+      device.clear({
+        color: [0.1, 0.1, 0.1, 1],
+        depth: 1
+      });
+      device.enableDepthTest();
+      device.enableDepthWrite();
+      device.setCullMode(gfx.CULL_NONE);
+      device.setUniform('model', mat4.array(new Float32Array(16), model));
+      device.setUniform('view', mat4.array(new Float32Array(16), view));
+      device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+      device.setVertexBuffer(0, vertexBuffer);
+      device.setIndexBuffer(indexBuffer);
       device.setTexture('texture', texture, 0);
+      device.setProgram(program);
+      device.draw(0, indices.length);
     }
-    device.setProgram(program);
-    device.draw(0, indices.length);
   };
 })();

@@ -38,8 +38,7 @@ function _load(view, url) {
     window.canvas = canvas;
     window.device = new window.gfx.Device(canvas);
 
-
-    let tick = eval(`${result}\n//# sourceURL=${url}`);
+    let tick = null;
     let lasttime = 0;
 
     // update
@@ -52,13 +51,17 @@ function _load(view, url) {
 
       window.stats.tick();
 
-      tick(dt);
+      if (tick) {
+        tick(dt);
+      }
 
       window.reqID = requestAnimationFrame(animate);
     }
 
     window.reqID = window.requestAnimationFrame(() => {
       _resize();
+
+      tick = eval(`${result}\n//# sourceURL=${url}`);
       animate();
     });
 

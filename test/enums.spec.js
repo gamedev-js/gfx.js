@@ -193,12 +193,17 @@ suite(tap, 'helper', {timeout: 20000}, t => {
       );
 
       t.deepEqual(
-        gfx.glTextureFmt(gfx.TEXTURE_FMT_DEPTH),
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_D16),
         { format: gl.DEPTH_COMPONENT, internalFormat: gl.DEPTH_COMPONENT, pixelType: gl.UNSIGNED_SHORT }
       );
 
       t.deepEqual(
-        gfx.glTextureFmt(gfx.TEXTURE_FMT_DEPTHSTENCIL),
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_D32),
+        { format: gl.DEPTH_COMPONENT, internalFormat: gl.DEPTH_COMPONENT, pixelType: gl.UNSIGNED_INT }
+      );
+
+      t.deepEqual(
+        gfx.glTextureFmt(gfx.TEXTURE_FMT_D24S8),
         { format: null, internalFormat: null, pixelType: null }
       );
 
@@ -209,9 +214,9 @@ suite(tap, 'helper', {timeout: 20000}, t => {
       t.equal(gfx.RB_FMT_RGBA4, gl.RGBA4);
       t.equal(gfx.RB_FMT_RGB5_A1, gl.RGB5_A1);
       t.equal(gfx.RB_FMT_RGB565, gl.RGB565);
-      t.equal(gfx.RB_FMT_DEPTH, gl.DEPTH_COMPONENT16);
-      t.equal(gfx.RB_FMT_STENCIL, gl.STENCIL_INDEX8);
-      t.equal(gfx.RB_FMT_DEPTH_STENCIL, gl.DEPTH_STENCIL);
+      t.equal(gfx.RB_FMT_D16, gl.DEPTH_COMPONENT16);
+      t.equal(gfx.RB_FMT_S8, gl.STENCIL_INDEX8);
+      t.equal(gfx.RB_FMT_D24S8, gl.DEPTH_STENCIL);
 
       t.end();
     });

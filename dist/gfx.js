@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.0.2
+ * gfx.js v1.0.4
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -14,10 +14,11 @@ const GL_LINEAR_MIPMAP_NEAREST = 9985;  // gl.LINEAR_MIPMAP_NEAREST
 const GL_NEAREST_MIPMAP_LINEAR = 9986;  // gl.NEAREST_MIPMAP_LINEAR
 const GL_LINEAR_MIPMAP_LINEAR = 9987;   // gl.LINEAR_MIPMAP_LINEAR
 
-// const GL_BYTE = 5120;                     // gl.BYTE
+// const GL_BYTE = 5120;                  // gl.BYTE
 const GL_UNSIGNED_BYTE = 5121;            // gl.UNSIGNED_BYTE
-// const GL_SHORT = 5122;                    // gl.SHORT
+// const GL_SHORT = 5122;                 // gl.SHORT
 const GL_UNSIGNED_SHORT = 5123;           // gl.UNSIGNED_SHORT
+const GL_UNSIGNED_INT = 5125;             // gl.UNSIGNED_INT
 const GL_FLOAT = 5126;                    // gl.FLOAT
 const GL_UNSIGNED_SHORT_5_6_5 = 33635;    // gl.UNSIGNED_SHORT_5_6_5
 const GL_UNSIGNED_SHORT_4_4_4_4 = 32819;  // gl.UNSIGNED_SHORT_4_4_4_4
@@ -125,10 +126,13 @@ const _textureFmtGL = [
   // TEXTURE_FMT_SRGBA: 24
   { format: null, internalFormat: null, pixelType: null },
 
-  // TEXTURE_FMT_DEPTH: 25
+  // TEXTURE_FMT_D16: 25
   { format: GL_DEPTH_COMPONENT, internalFormat: GL_DEPTH_COMPONENT, pixelType: GL_UNSIGNED_SHORT },
 
-  // TEXTURE_FMT_DEPTHSTENCIL: 26
+  // TEXTURE_FMT_D24: 26
+  { format: GL_DEPTH_COMPONENT, internalFormat: GL_DEPTH_COMPONENT, pixelType: GL_UNSIGNED_INT },
+
+  // TEXTURE_FMT_D24S8: 27
   { format: null, internalFormat: null, pixelType: null },
 ];
 
@@ -215,8 +219,17 @@ let enums = {
   TEXTURE_FMT_SRGBA: 24,
 
   // depth formats
-  TEXTURE_FMT_DEPTH: 25,
-  TEXTURE_FMT_DEPTHSTENCIL: 26,
+  TEXTURE_FMT_D16: 25,
+  TEXTURE_FMT_D32: 26,
+  TEXTURE_FMT_D24S8: 27,
+
+  // render-buffer format
+  RB_FMT_RGBA4: 32854,    // gl.RGBA4
+  RB_FMT_RGB5_A1: 32855,  // gl.RGB5_A1
+  RB_FMT_RGB565: 36194,   // gl.RGB565
+  RB_FMT_D16: 33189,      // gl.DEPTH_COMPONENT16
+  RB_FMT_S8: 36168,       // gl.STENCIL_INDEX8
+  RB_FMT_D24S8: 34041,    // gl.DEPTH_STENCIL
 
   // depth-function
   DEPTH_FUNC_NEVER: 512,    // gl.NEVER
@@ -741,14 +754,20 @@ class Texture {
   }
 }
 
+function _isPow2(v) {
+  return !(v & (v-1)) && (!!v);
+}
+
 class Texture2D extends Texture {
   /**
    * @constructor
+   * @param {Device} device
    * @param {Object} options
    * @param {Array} options.images
    * @param {Boolean} options.mipmap
    * @param {Number} options.width
    * @param {Number} options.height
+   * @param {TEXTURE_FMT_*} options.format
    * @param {Number} options.anisotropy
    * @param {FILTER_*} options.minFilter
    * @param {FILTER_*} options.magFilter
@@ -772,12 +791,15 @@ class Texture2D extends Texture {
    * @param {Boolean} options.mipmap
    * @param {Number} options.width
    * @param {Number} options.height
+   * @param {TEXTURE_FMT_*} options.format
    * @param {Number} options.anisotropy
    * @param {FILTER_*} options.minFilter
    * @param {FILTER_*} options.magFilter
    * @param {FILTER_*} options.mipFilter
    * @param {WRAP_*} options.wrapS
    * @param {WRAP_*} options.wrapT
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
    */
   update(options) {
     let gl = this._device._gl;
@@ -833,10 +855,9 @@ class Texture2D extends Texture {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._id);
-      if (options.images !== undefined) {
-        this._setMipmap(options.images, options.flipY, options.premultiplyAlpha);
-      }
-
+      // always alloc texture in GPU when we create it.
+      let images = options.images || [null];
+      this._setMipmap(images, options.flipY, options.premultiplyAlpha);
       this._setTexInfo();
 
       if (genMipmap) {
@@ -920,6 +941,14 @@ class Texture2D extends Texture {
 
   _setTexInfo() {
     let gl = this._device._gl;
+    let pot = _isPow2(this._width) && _isPow2(this._height);
+
+    // WebGL1 doesn't support all wrap modes with NPOT textures
+    if (!pot && (this._wrapS !== enums.WRAP_CLAMP || this._wrapT !== enums.WRAP_CLAMP)) {
+      console.warn('WebGL1 doesn\'t support all wrap modes with NPOT textures');
+      this._wrapS = enums.WRAP_CLAMP;
+      this._wrapT = enums.WRAP_CLAMP;
+    }
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, glFilter(gl, this._minFilter, this._hasMipmap ? this._mipFilter : -1));
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, glFilter(gl, this._magFilter, -1));
@@ -936,11 +965,13 @@ class Texture2D extends Texture {
 class TextureCube extends Texture {
   /**
    * @constructor
+   * @param {Device} device
    * @param {Object} options
    * @param {Array} options.images
    * @param {Boolean} options.mipmap
    * @param {Number} options.width
    * @param {Number} options.height
+   * @param {TEXTURE_FMT_*} options.format
    * @param {Number} options.anisotropy
    * @param {FILTER_*} options.minFilter
    * @param {FILTER_*} options.magFilter
@@ -965,6 +996,7 @@ class TextureCube extends Texture {
    * @param {Boolean} options.mipmap
    * @param {Number} options.width
    * @param {Number} options.height
+   * @param {TEXTURE_FMT_*} options.format
    * @param {Number} options.anisotropy
    * @param {FILTER_*} options.minFilter
    * @param {FILTER_*} options.magFilter
@@ -972,6 +1004,8 @@ class TextureCube extends Texture {
    * @param {WRAP_*} options.wrapS
    * @param {WRAP_*} options.wrapT
    * @param {WRAP_*} options.wrapR
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
    */
   update(options) {
     let gl = this._device._gl;
@@ -1124,9 +1158,91 @@ class TextureCube extends Texture {
   }
 }
 
+class RenderBuffer {
+  /**
+   * @constructor
+   * @param {Device} device
+   * @param {RB_FMT_*} format
+   * @param {Number} width
+   * @param {Number} height
+   */
+  constructor(device, format, width, height) {
+    this._device = device;
+    this._format = format;
+    this._width = width;
+    this._height = height;
+
+    const gl = device._gl;
+    this._rb = gl.createRenderbuffer();
+
+    gl.bindRenderbuffer(gl.RENDERBUFFER, this._rb);
+    gl.renderbufferStorage(gl.RENDERBUFFER, format, width, height);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+  }
+
+  /**
+   * @method destroy
+   */
+  destroy() {
+    if (this._rb === null) {
+      console.error('The render-buffer already destroyed');
+      return;
+    }
+
+    const gl = this._device._gl;
+
+    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    gl.deleteRenderbuffer(this._rb);
+
+    this._rb = null;
+  }
+}
+
+class FrameBuffer {
+  /**
+   * @constructor
+   * @param {Device} device
+   * @param {Number} width
+   * @param {Number} height
+   * @param {Object} options
+   * @param {Array} options.colors
+   * @param {RenderBuffer|Texture2D|TextureCube} options.depth
+   * @param {RenderBuffer|Texture2D|TextureCube} options.stencil
+   * @param {RenderBuffer|Texture2D|TextureCube} options.depthStencil
+   */
+  constructor(device, width, height, options) {
+    this._device = device;
+    this._width = width;
+    this._height = height;
+
+    this._colors = options.colors || [];
+    this._depth = options.depth || null;
+    this._stencil = options.stencil || null;
+    this._depthStencil = options.depthStencil || null;
+
+    this._fb = device._gl.createFramebuffer();
+  }
+
+  /**
+   * @method destroy
+   */
+  destroy() {
+    if (this._fb === null) {
+      console.error('The frame-buffer already destroyed');
+      return;
+    }
+
+    const gl = this._device._gl;
+
+    gl.deleteFramebuffer(this._fb);
+
+    this._fb = null;
+  }
+}
+
 const INVALID = -1;
 
-const _defaultStates = {
+const _resets = {
   blend: false,
   blendSep: INVALID, // 0: false, 1: true
   blendColor: INVALID,
@@ -1154,16 +1270,39 @@ const _defaultStates = {
 
 class State {
   constructor() {
+    // blending
+    this.blend = false;
+    this.blendSep = 0;
+    this.blendColor = 0xffffffff;
+    this.blendEq = enums.BLEND_FUNC_ADD;
+    this.blendAlphaEq = enums.BLEND_FUNC_ADD;
+    this.blendSrc = enums.BLEND_ONE;
+    this.blendDst = enums.BLEND_ZERO;
+    this.blendSrcAlpha = enums.BLEND_ONE;
+    this.blendDstAlpha = enums.BLEND_ZERO;
+
+    // depth
+    this.depthTest = false;
+    this.depthWrite = false;
+    this.depthFunc = enums.DEPTH_FUNC_LESS;
+
+    // cull-mode
+    this.cullMode = enums.CULL_BACK;
+
+    // bindings
+    this.maxStream = -1;
     this.vertexBuffers = [];
     this.vertexBufferOffsets = [];
+    this.indexBuffer = null;
     this.textureUnits = [];
+    this.program = null;
+  }
 
-    this.set(_defaultStates);
+  reset () {
+    this.set(_resets);
   }
 
   set (cpy) {
-    // states
-
     // blending
     this.blend = cpy.blend;
     if (cpy.blendSep !== INVALID) {
@@ -1215,10 +1354,6 @@ class State {
     }
     this.program = cpy.program;
   }
-
-  reset () {
-    this.set(_defaultStates);
-  }
 }
 
 const GL_INT = 5124;
@@ -1237,6 +1372,7 @@ const GL_FLOAT_MAT2 = 35674;
 const GL_FLOAT_MAT3 = 35675;
 const GL_FLOAT_MAT4 = 35676;
 const GL_SAMPLER_2D = 35678;
+const GL_SAMPLER_CUBE = 35680;
 
 /**
  * _type2uniformCommit
@@ -1303,6 +1439,10 @@ let _type2uniformCommit = {
   },
 
   [GL_SAMPLER_2D]: function (gl, id, value) {
+    gl.uniform1i(id, value);
+  },
+
+  [GL_SAMPLER_CUBE]: function (gl, id, value) {
     gl.uniform1i(id, value);
   },
 };
@@ -1436,11 +1576,9 @@ function _commitVertexBuffers(gl, cur, next) {
 
   if (cur.maxStream !== next.maxStream) {
     attrsDirty = true;
-  }
-  else if (cur.program !== next.program) {
+  } else if (cur.program !== next.program) {
     attrsDirty = true;
-  }
-  else {
+  } else {
     for (let i = 0; i < next.maxStream + 1; ++i) {
       if (
         cur.vertexBuffers[i] !== next.vertexBuffers[i] ||
@@ -1466,6 +1604,11 @@ function _commitVertexBuffers(gl, cur, next) {
         let attr = next.program._attributes[i];
 
         let el = vb._format.element(attr.name);
+        if (!el) {
+          console.warn(`Can not find vertex attribute: ${attr.name}`);
+          continue;
+        }
+
         gl.enableVertexAttribArray(attr.location);
         gl.vertexAttribPointer(
           attr.location,
@@ -1490,6 +1633,36 @@ function _commitTextures(gl, cur, next) {
       // gl.activeTexture(gl.TEXTURE0 + i);
       gl.bindTexture(texture._target, texture._id);
     }
+  }
+}
+
+/**
+ * _attach
+ */
+function _attach(gl, location, attachment, face = 0) {
+  if (attachment instanceof Texture2D) {
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      location,
+      gl.TEXTURE_2D,
+      attachment._id,
+      0
+    );
+  } else if (attachment instanceof TextureCube) {
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      location,
+      gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
+      attachment._id,
+      0
+    );
+  } else {
+    gl.framebufferRenderbuffer(
+      gl.FRAMEBUFFER,
+      location,
+      gl.RENDERBUFFER,
+      attachment._rb
+    );
   }
 }
 
@@ -1526,24 +1699,28 @@ class Device {
     this._primitiveType = enums.PT_TRIANGLES;
     this._vx = this._vy = this._vw = this._vh = 0;
     this._sx = this._sy = this._sw = this._sh = 0;
+    this._framebuffer = null;
 
     this._initExtensions([
-      'OES_vertex_array_object',
+      'EXT_texture_filter_anisotropic',
       'OES_texture_float',
+      'OES_texture_float_linear',
       'OES_texture_half_float',
       'OES_texture_half_float_linear',
-      'WEBGL_compressed_texture_s3tc',
-      'WEBGL_compressed_texture_pvrtc',
-      'WEBGL_compressed_texture_etc1',
+      'OES_vertex_array_object',
       'WEBGL_compressed_texture_atc',
-      'EXT_texture_filter_anisotropic'
+      'WEBGL_compressed_texture_etc1',
+      'WEBGL_compressed_texture_pvrtc',
+      'WEBGL_compressed_texture_s3tc',
+      'WEBGL_depth_texture',
+      'WEBGL_draw_buffers',
     ]);
     this._initCaps();
     this._initStates();
   }
 
   _initExtensions(extensions) {
-    let gl = this._gl;
+    const gl = this._gl;
 
     for (let i = 0; i < extensions.length; ++i) {
       let name = extensions[i];
@@ -1553,7 +1730,6 @@ class Device {
         if (ext) {
           this._extensions[name] = ext;
         }
-
       } catch (e) {
         console.error(e);
       }
@@ -1561,15 +1737,19 @@ class Device {
   }
 
   _initCaps() {
-    let gl = this._gl;
+    const gl = this._gl;
+    const extDrawBuffers = this.ext('WEBGL_draw_buffers');
 
     this._caps.maxVertexTextures = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
     this._caps.maxFragUniforms = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
     this._caps.maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+
+    this._caps.maxDrawBuffers = extDrawBuffers ? gl.getParameter(extDrawBuffers.MAX_DRAW_BUFFERS_WEBGL) : 1;
+    this._caps.maxColorAttachments = extDrawBuffers ? gl.getParameter(extDrawBuffers.MAX_COLOR_ATTACHMENTS_WEBGL) : 1;
   }
 
   _initStates() {
-    let gl = this._gl;
+    const gl = this._gl;
 
     gl.disable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ZERO);
@@ -1601,7 +1781,7 @@ class Device {
   }
 
   _restoreTexture (unit) {
-    let gl = this._gl;
+    const gl = this._gl;
 
     let texture = this._current.textureUnits[unit];
     if (texture) {
@@ -1623,14 +1803,78 @@ class Device {
   // Immediate Settings
   // ===============================
 
-  // TODO
-  // /**
-  //  * @method setFrameBuffer
-  //  * @param {Object} target - null means use the backbuffer
-  //  */
-  // setFrameBuffer(target) {
-  //   this._framebuffer = target;
-  // }
+  /**
+   * @method setFrameBuffer
+   * @param {FrameBuffer} fb - null means use the backbuffer
+   */
+  setFrameBuffer(fb) {
+    if (this._framebuffer === fb) {
+      return;
+    }
+
+    this._framebuffer = fb;
+    const gl = this._gl;
+
+    if (fb === null) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      return;
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb._fb);
+
+    let numColors = this._framebuffer._colors.length;
+    for (let i = 0; i < numColors; ++i) {
+      let colorBuffer = this._framebuffer._colors[i];
+      _attach(gl, gl.COLOR_ATTACHMENT0 + i, colorBuffer);
+
+      // TODO: what about cubemap face??? should be the target parameter for colorBuffer
+    }
+    for (let i = numColors; i < this._caps.maxColorAttachments; ++i) {
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.COLOR_ATTACHMENT0 + i,
+        gl.TEXTURE_2D,
+        null,
+        0
+      );
+    }
+
+    if (this._framebuffer._depth) {
+      _attach(gl, gl.DEPTH_ATTACHMENT, this._framebuffer._depth);
+    } else {
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.DEPTH_ATTACHMENT,
+        gl.TEXTURE_2D,
+        null,
+        0
+      );
+    }
+
+    if (this._framebuffer._stencil) {
+      _attach(gl, gl.STENCIL_ATTACHMENT, fb._stencil);
+    } else {
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.STENCIL_ATTACHMENT,
+        gl.TEXTURE_2D,
+        null,
+        0
+      );
+    }
+
+    if (this._framebuffer._depthStencil) {
+      _attach(gl, gl.DEPTH_STENCIL_ATTACHMENT, fb._depthStencil);
+    } else {
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.DEPTH_STENCIL_ATTACHMENT,
+        gl.TEXTURE_2D,
+        null,
+        0
+      );
+    }
+  }
 
   /**
    * @method setViewport
@@ -1684,7 +1928,7 @@ class Device {
    * @param {Number} opts.stencil
    */
   clear(opts) {
-    let gl = this._gl;
+    const gl = this._gl;
     let flags = 0;
 
     if (opts.color !== undefined) {
@@ -1885,9 +2129,9 @@ class Device {
    * @param {Number} count
    */
   draw(base, count) {
+    const gl = this._gl;
     let cur = this._current;
     let next = this._next;
-    let gl = this._gl;
 
     // commit blend
     _commitBlendStates(gl, cur, next);
@@ -1956,6 +2200,12 @@ class Device {
       );
     }
 
+    // TODO: autogen mipmap for color buffer
+    // if (this._framebuffer && this._framebuffer.colors[0].mipmap) {
+    //   gl.bindTexture(this._framebuffer.colors[i]._target, colors[i]._id);
+    //   gl.generateMipmap(this._framebuffer.colors[i]._target);
+    // }
+
     // update stats
     this._stats.drawcalls += 1;
 
@@ -1974,6 +2224,8 @@ let gfx = {
   Texture,
   Texture2D,
   TextureCube,
+  RenderBuffer,
+  FrameBuffer,
   Device,
 
   // functions
