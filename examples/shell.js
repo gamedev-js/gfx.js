@@ -85,13 +85,16 @@ document.addEventListener('readystatechange', () => {
     return;
   }
 
+  // let spector = new window.SPECTOR.Spector();
+  // spector.displayUI();
+
   let view = document.getElementById('view');
   let showFPS = document.getElementById('showFPS');
   let exampleList = document.getElementById('exampleList');
 
   // update profile
-  showFPS.checked = localStorage.getItem('showFPS') === 'true';
-  let exampleIndex = parseInt(localStorage.getItem('exampleIndex'));
+  showFPS.checked = localStorage.getItem('gfx.showFPS') === 'true';
+  let exampleIndex = parseInt(localStorage.getItem('gfx.exampleIndex'));
   if (isNaN(exampleIndex)) {
     exampleIndex = 0;
   }
@@ -109,7 +112,7 @@ document.addEventListener('readystatechange', () => {
   });
 
   showFPS.addEventListener('click', event => {
-    localStorage.setItem('showFPS', event.target.checked);
+    localStorage.setItem('gfx.showFPS', event.target.checked);
     if (event.target.checked) {
       stats.show();
     } else {
@@ -118,7 +121,7 @@ document.addEventListener('readystatechange', () => {
   });
 
   exampleList.addEventListener('change', event => {
-    localStorage.setItem('exampleIndex', event.target.selectedIndex);
+    localStorage.setItem('gfx.exampleIndex', event.target.selectedIndex);
     _load(view, exampleList.value);
   });
 });

@@ -8,7 +8,7 @@
   function _bigTriangle(device) {
     let program = new gfx.Program(device, {
       vert: `
-        precision mediump float;
+        precision highp float;
         attribute vec2 a_position;
         varying vec2 uv;
 
@@ -18,7 +18,7 @@
         }
       `,
       frag: `
-        precision mediump float;
+        precision highp float;
         varying vec2 uv;
         uniform sampler2D texture;
 
@@ -72,7 +72,7 @@
     // init resources
     let program = new gfx.Program(device, {
       vert: `
-      precision mediump float;
+      precision highp float;
       attribute vec3 a_position;
       uniform mat4 model, view, projection;
 
@@ -86,7 +86,7 @@
       }
     `,
       frag: `
-      precision mediump float;
+      precision highp float;
       varying vec3 position;
 
       uniform vec4 color;

@@ -35,7 +35,9 @@
     "preview-server": "^1.0.7",
     "rollup": "^0.41.4",
     "rollup-watch": "^4.0.0",
+    "spectorjs": "^0.2.3",
     "uglify-es": "^3.0.15",
+    "vconsole": "^2.5.2",
     "vmath": "^1.3.1"
   }
 }

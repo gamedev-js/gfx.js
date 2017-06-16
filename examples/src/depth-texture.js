@@ -8,7 +8,7 @@
   function _bigTriangle(device) {
     let program = new gfx.Program(device, {
       vert: `
-        precision mediump float;
+        precision highp float;
         attribute vec2 a_position;
         varying vec2 uv;
 
@@ -18,7 +18,7 @@
         }
       `,
       frag: `
-        precision mediump float;
+        precision highp float;
         varying vec2 uv;
         uniform sampler2D texture;
         uniform float near;
@@ -58,7 +58,7 @@
     // init resources
     let program = new gfx.Program(device, {
       vert: `
-      precision mediump float;
+      precision highp float;
       attribute vec3 a_position;
       uniform mat4 model, view, projection;
 
@@ -68,7 +68,7 @@
       }
     `,
       frag: `
-      precision mediump float;
+      precision highp float;
       uniform vec4 color;
 
       void main () {
@@ -144,8 +144,8 @@
   let depthTexture = new gfx.Texture2D(device, {
     width: canvas.width,
     height: canvas.height,
-    // format: gfx.TEXTURE_FMT_D16,
-    format: gfx.TEXTURE_FMT_D32,
+    format: gfx.TEXTURE_FMT_D16,
+    // format: gfx.TEXTURE_FMT_D32,
     wrapS: gfx.WRAP_CLAMP,
     wrapT: gfx.WRAP_CLAMP,
   });
@@ -176,7 +176,7 @@
     mat4.perspective(projection,
       Math.PI / 4,
       canvas.width / canvas.height,
-      0.01,
+      0.1,
       100
     );
 
@@ -223,7 +223,7 @@
         depth: 1
       });
       device.setTexture('texture', depthTexture, 0);
-      device.setUniform('near', 0.01);
+      device.setUniform('near', 0.1);
       device.setUniform('far', 100.0);
       device.setVertexBuffer(0, bg.vb);
       device.setProgram(bg.program);

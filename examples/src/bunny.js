@@ -8,7 +8,7 @@
   // init resources
   let program = new gfx.Program(device, {
     vert: `
-      precision mediump float;
+      precision highp float;
       attribute vec3 a_position;
       uniform mat4 model, view, projection;
       varying vec3 position;
@@ -20,7 +20,7 @@
       }
     `,
     frag: `
-      precision mediump float;
+      precision highp float;
       uniform vec4 color;
       varying vec3 position;
 

@@ -9,7 +9,7 @@
   // init resources
   let program = new gfx.Program(device, {
     vert: `
-      precision mediump float;
+      precision highp float;
       uniform mat4 model, view, projection;
       attribute vec3 a_position;
       varying vec3 v_texcoord;
@@ -20,7 +20,7 @@
       }
     `,
     frag: `
-      precision mediump float;
+      precision highp float;
       uniform samplerCube texture;
       uniform vec4 color;
       varying vec3 v_texcoord;
@@ -140,7 +140,7 @@
       device.setViewport(0, 0, canvas.width, canvas.height);
       device.clear({
         color: [0.1, 0.1, 0.1, 1],
-        depth: 1
+        depth: 1.0
       });
       device.enableDepthTest();
       device.enableDepthWrite();
