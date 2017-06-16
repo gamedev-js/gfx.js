@@ -48,7 +48,7 @@
     manifest: {
       image: {
         type: 'image',
-        src: './assets/uv_checker_01.jpg'
+        src: './assets/uv_checker_02.jpg'
       },
     },
     onDone(assets) {

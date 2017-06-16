@@ -200,8 +200,8 @@
       let offsetX = 5 + hsize;
       let offsetY = 5 + hsize;
       device.enableBlend();
-      device.setBlendFunctionSeparate(gfx.BLEND_ONE, gfx.BLEND_ZERO, gfx.BLEND_ONE, gfx.BLEND_ONE);
-      device.setBlendEquationSeparate(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
+      device.setBlendFuncSep(gfx.BLEND_ONE, gfx.BLEND_ZERO, gfx.BLEND_ONE, gfx.BLEND_ONE);
+      device.setBlendEqSep(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
 
       device.setCullMode(gfx.CULL_NONE);
       mat4.fromRTS(model, quat.create(), vec3.new(offsetX, offsetY, 0), vec3.new(size, size, 0));
@@ -215,8 +215,8 @@
       // normal
       offsetY = offsetY + 5 + size;
       device.enableBlend();
-      device.setBlendFunctionSeparate(gfx.BLEND_SRC_ALPHA, gfx.BLEND_ONE_MINUS_SRC_ALPHA, gfx.BLEND_ONE, gfx.BLEND_ONE);
-      device.setBlendEquationSeparate(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
+      device.setBlendFuncSep(gfx.BLEND_SRC_ALPHA, gfx.BLEND_ONE_MINUS_SRC_ALPHA, gfx.BLEND_ONE, gfx.BLEND_ONE);
+      device.setBlendEqSep(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
 
       device.setCullMode(gfx.CULL_NONE);
       mat4.fromRTS(model, quat.create(), vec3.new(offsetX, offsetY, 0), vec3.new(size, size, 0));
@@ -230,8 +230,8 @@
       // additive
       offsetY = offsetY + 5 + size;
       device.enableBlend();
-      device.setBlendFunctionSeparate(gfx.BLEND_SRC_ALPHA, gfx.BLEND_ONE, gfx.BLEND_ONE, gfx.BLEND_ONE);
-      device.setBlendEquationSeparate(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
+      device.setBlendFuncSep(gfx.BLEND_SRC_ALPHA, gfx.BLEND_ONE, gfx.BLEND_ONE, gfx.BLEND_ONE);
+      device.setBlendEqSep(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
 
       device.setCullMode(gfx.CULL_NONE);
       mat4.fromRTS(model, quat.create(), vec3.new(offsetX, offsetY, 0), vec3.new(size, size, 0));
@@ -245,8 +245,8 @@
       // substract
       offsetY = offsetY + 5 + size;
       device.enableBlend();
-      device.setBlendFunctionSeparate(gfx.BLEND_ZERO, gfx.BLEND_ONE_MINUS_SRC_COLOR, gfx.BLEND_ONE, gfx.BLEND_ONE);
-      device.setBlendEquationSeparate(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
+      device.setBlendFuncSep(gfx.BLEND_ZERO, gfx.BLEND_ONE_MINUS_SRC_COLOR, gfx.BLEND_ONE, gfx.BLEND_ONE);
+      device.setBlendEqSep(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
 
       device.setCullMode(gfx.CULL_NONE);
       mat4.fromRTS(model, quat.create(), vec3.new(offsetX, offsetY, 0), vec3.new(size, size, 0));
@@ -260,8 +260,8 @@
       // multiply
       offsetY = offsetY + 5 + size;
       device.enableBlend();
-      device.setBlendFunctionSeparate(gfx.BLEND_ZERO, gfx.BLEND_SRC_COLOR, gfx.BLEND_ONE, gfx.BLEND_ONE);
-      device.setBlendEquationSeparate(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
+      device.setBlendFuncSep(gfx.BLEND_ZERO, gfx.BLEND_SRC_COLOR, gfx.BLEND_ONE, gfx.BLEND_ONE);
+      device.setBlendEqSep(gfx.BLEND_FUNC_ADD, gfx.BLEND_FUNC_ADD);
 
       device.setCullMode(gfx.CULL_NONE);
       mat4.fromRTS(model, quat.create(), vec3.new(offsetX, offsetY, 0), vec3.new(size, size, 0));
