@@ -118,8 +118,8 @@
       device.setProgram(program);
       device.setCullMode(gfx.CULL_NONE);
       device.enableStencilTest();
-      device.setStencilFunc(gfx.FUNC_NEVER, 0x1, 0xFF);
-      device.setStencilOp(gfx.OP_REPLACE, gfx.OP_KEEP, gfx.OP_KEEP, 0xFF);
+      device.setStencilFunc(gfx.DS_FUNC_NEVER, 0x1, 0xFF);
+      device.setStencilOp(gfx.STENCIL_OP_REPLACE, gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, 0xFF);
       device.draw(0, vertexBuffer.count);
     }
     if (texture) {
@@ -130,8 +130,8 @@
       device.setProgram(program);
       device.setCullMode(gfx.CULL_NONE);
       device.enableStencilTest();
-      device.setStencilFunc(gfx.FUNC_EQUAL, 0x1, 0xFF);
-      device.setStencilOp(gfx.OP_KEEP, gfx.OP_KEEP, gfx.OP_KEEP, 0xFF);
+      device.setStencilFunc(gfx.DS_FUNC_EQUAL, 0x1, 0xFF);
+      device.setStencilOp(gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, 0xFF);
       device.draw(0, vertexBuffer.count);
     }
 
@@ -145,8 +145,8 @@
       device.setProgram(program);
       device.setCullMode(gfx.CULL_NONE);
       device.enableStencilTest();
-      device.setStencilFunc(gfx.FUNC_NEVER, 0x1, 0xFF);
-      device.setStencilOp(gfx.OP_REPLACE, gfx.OP_KEEP, gfx.OP_KEEP, 0xFF);
+      device.setStencilFunc(gfx.DS_FUNC_NEVER, 0x1, 0xFF);
+      device.setStencilOp(gfx.STENCIL_OP_REPLACE, gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, 0xFF);
       device.draw(0, vertexBuffer.count);
     }
     if (texture) {
@@ -157,9 +157,9 @@
       device.setProgram(program);
       device.setCullMode(gfx.CULL_NONE);
       device.enableStencilTest();
-      device.setStencilFuncBack(gfx.FUNC_EQUAL, 0x1, 0xFF);
-      device.setStencilFuncFront(gfx.FUNC_ALWAYS, 0x1, 0xFF);
-      device.setStencilOpBack(gfx.OP_KEEP, gfx.OP_KEEP, gfx.OP_KEEP, 0xFF);
+      device.setStencilFuncBack(gfx.DS_FUNC_EQUAL, 0x1, 0xFF);
+      device.setStencilFuncFront(gfx.DS_FUNC_ALWAYS, 0x1, 0xFF);
+      device.setStencilOpBack(gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, 0xFF);
       device.draw(0, vertexBuffer.count);
     }
 
@@ -173,8 +173,8 @@
       device.setProgram(program);
       device.setCullMode(gfx.CULL_NONE);
       device.enableStencilTest();
-      device.setStencilFunc(gfx.FUNC_NEVER, 0x1, 0xFF);
-      device.setStencilOp(gfx.OP_REPLACE, gfx.OP_KEEP, gfx.OP_KEEP, 0xFF);
+      device.setStencilFunc(gfx.DS_FUNC_NEVER, 0x1, 0xFF);
+      device.setStencilOp(gfx.STENCIL_OP_REPLACE, gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, 0xFF);
       device.draw(0, vertexBuffer.count);
     }
     if (texture) {
@@ -185,9 +185,9 @@
       device.setProgram(program);
       device.setCullMode(gfx.CULL_NONE);
       device.enableStencilTest();
-      device.setStencilFuncFront(gfx.FUNC_EQUAL, 0x1, 0xFF);
-      device.setStencilFuncBack(gfx.FUNC_ALWAYS, 0x1, 0xFF);
-      device.setStencilOpFront(gfx.OP_KEEP, gfx.OP_KEEP, gfx.OP_KEEP, 0xFF);
+      device.setStencilFuncFront(gfx.DS_FUNC_EQUAL, 0x1, 0xFF);
+      device.setStencilFuncBack(gfx.DS_FUNC_ALWAYS, 0x1, 0xFF);
+      device.setStencilOpFront(gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, gfx.STENCIL_OP_KEEP, 0xFF);
       device.draw(0, vertexBuffer.count);
     }
   };
