@@ -258,6 +258,32 @@ suite(tap, 'helper', {timeout: 20000}, t => {
       t.end();
     });
 
+    t.test('depth stencil function', t => {
+      t.equal(gfx.DS_FUNC_NEVER, gl.NEVER);
+      t.equal(gfx.DS_FUNC_LESS, gl.LESS);
+      t.equal(gfx.DS_FUNC_EQUAL, gl.EQUAL);
+      t.equal(gfx.DS_FUNC_LEQUAL, gl.LEQUAL);
+      t.equal(gfx.DS_FUNC_GREATER, gl.GREATER);
+      t.equal(gfx.DS_FUNC_NOTEQUAL, gl.NOTEQUAL);
+      t.equal(gfx.DS_FUNC_GEQUAL, gl.GEQUAL);
+      t.equal(gfx.DS_FUNC_ALWAYS, gl.ALWAYS);
+
+      t.end();
+    });
+
+    t.test('stencil operation', t => {
+      t.equal(gfx.STENCIL_OP_KEEP, gl.KEEP);
+      t.equal(gfx.STENCIL_OP_ZERO, gl.ZERO);
+      t.equal(gfx.STENCIL_OP_REPLACE, gl.REPLACE);
+      t.equal(gfx.STENCIL_OP_INCR, gl.INCR);
+      t.equal(gfx.STENCIL_OP_INCR_WRAP, gl.INCR_WRAP);
+      t.equal(gfx.STENCIL_OP_DECR, gl.DECR);
+      t.equal(gfx.STENCIL_OP_DECR_WRAP, gl.DECR_WRAP);
+      t.equal(gfx.STENCIL_OP_INVERT, gl.INVERT);
+
+      t.end();
+    });
+
     t.test('primitive type', t => {
       t.equal(gfx.PT_POINTS, gl.POINTS);
       t.equal(gfx.PT_LINES, gl.LINES);
