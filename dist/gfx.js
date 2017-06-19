@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.0
+ * gfx.js v1.1.1
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -1183,9 +1183,9 @@ class RenderBuffer {
     this._height = height;
 
     const gl = device._gl;
-    this._rb = gl.createRenderbuffer();
+    this._id = gl.createRenderbuffer();
 
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this._rb);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, this._id);
     gl.renderbufferStorage(gl.RENDERBUFFER, format, width, height);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
   }
@@ -1194,7 +1194,7 @@ class RenderBuffer {
    * @method destroy
    */
   destroy() {
-    if (this._rb === null) {
+    if (this._id === null) {
       console.error('The render-buffer already destroyed');
       return;
     }
@@ -1202,9 +1202,9 @@ class RenderBuffer {
     const gl = this._device._gl;
 
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.deleteRenderbuffer(this._rb);
+    gl.deleteRenderbuffer(this._id);
 
-    this._rb = null;
+    this._id = null;
   }
 }
 
@@ -1230,23 +1230,23 @@ class FrameBuffer {
     this._stencil = options.stencil || null;
     this._depthStencil = options.depthStencil || null;
 
-    this._fb = device._gl.createFramebuffer();
+    this._id = device._gl.createFramebuffer();
   }
 
   /**
    * @method destroy
    */
   destroy() {
-    if (this._fb === null) {
+    if (this._id === null) {
       console.error('The frame-buffer already destroyed');
       return;
     }
 
     const gl = this._device._gl;
 
-    gl.deleteFramebuffer(this._fb);
+    gl.deleteFramebuffer(this._id);
 
-    this._fb = null;
+    this._id = null;
   }
 }
 
@@ -1823,7 +1823,7 @@ function _attach(gl, location, attachment, face = 0) {
       gl.FRAMEBUFFER,
       location,
       gl.RENDERBUFFER,
-      attachment._rb
+      attachment._id
     );
   }
 }
@@ -1999,7 +1999,7 @@ class Device {
       return;
     }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb._fb);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb._id);
 
     let numColors = this._framebuffer._colors.length;
     for (let i = 0; i < numColors; ++i) {
