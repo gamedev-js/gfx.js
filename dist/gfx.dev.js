@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.1
+ * gfx.js v1.1.2
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -431,7 +431,7 @@ class IndexBuffer {
     this._bytes = bytes;
 
     // update
-    this._id = device._gl.createBuffer();
+    this._glID = device._gl.createBuffer();
     this._data = null;
     this.update(0, data);
 
@@ -443,16 +443,16 @@ class IndexBuffer {
    * @method destroy
    */
   destroy() {
-    if (this._id === -1) {
+    if (this._glID === -1) {
       console.error('The buffer already destroyed');
       return;
     }
 
     let gl = this.device.gl;
-    gl.deleteBuffer(this._id);
+    gl.deleteBuffer(this._glID);
     this.device._stats.ib -= this.bytes;
 
-    this._id = -1;
+    this._glID = -1;
   }
 
   /**
@@ -461,7 +461,7 @@ class IndexBuffer {
    * @param {ArrayBuffer} data
    */
   update(offset, data) {
-    if (this._id === -1) {
+    if (this._glID === -1) {
       console.error('The buffer is destroyed');
       return;
     }
@@ -474,7 +474,7 @@ class IndexBuffer {
     let gl = this._device._gl;
     let glUsage = this._usage;
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._id);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._glID);
     if (!data) {
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._bytes, glUsage);
     } else {
@@ -522,7 +522,7 @@ class VertexBuffer {
     this._bytes = this._format._bytes * numVertices;
 
     // update
-    this._id = device._gl.createBuffer();
+    this._glID = device._gl.createBuffer();
     this._data = null;
     this.update(0, data);
 
@@ -534,16 +534,16 @@ class VertexBuffer {
    * @method destroy
    */
   destroy() {
-    if (this._id === -1) {
+    if (this._glID === -1) {
       console.error('The buffer already destroyed');
       return;
     }
 
     let gl = this.device.gl;
-    gl.deleteBuffer(this._id);
+    gl.deleteBuffer(this._glID);
     this.device._stats.vb -= this.bytes;
 
-    this._id = -1;
+    this._glID = -1;
   }
 
   /**
@@ -552,7 +552,7 @@ class VertexBuffer {
    * @param {ArrayBuffer} data
    */
   update(offset, data) {
-    if (this._id === -1) {
+    if (this._glID === -1) {
       console.error('The buffer is destroyed');
       return;
     }
@@ -565,7 +565,7 @@ class VertexBuffer {
     let gl = this._device._gl;
     let glUsage = this._usage;
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this._id);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this._glID);
     if (!data) {
       gl.bufferData(gl.ARRAY_BUFFER, this._bytes, glUsage);
     } else {
@@ -591,6 +591,8 @@ class VertexBuffer {
     return this._numVertices;
   }
 }
+
+let _genID = 0;
 
 class Program {
   /**
@@ -625,7 +627,12 @@ class Program {
     this._linked = false;
     this._vertSource = options.vert;
     this._fragSource = options.frag;
-    this._program = null;
+    this._glID = null;
+    this._id = _genID++;
+  }
+
+  get id() {
+    return this._id;
   }
 
   link() {
@@ -667,7 +674,7 @@ class Program {
       return;
     }
 
-    this._program = program;
+    this._glID = program;
 
     // parse attribute
     let numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
@@ -701,10 +708,10 @@ class Program {
 
   destroy() {
     let gl = this._device._gl;
-    gl.deleteProgram(this._program);
+    gl.deleteProgram(this._glID);
 
     this._linked = false;
-    this._program = null;
+    this._glID = null;
     this._attributes = [];
     this._uniforms = [];
     this._samplers = [];
@@ -752,16 +759,16 @@ class Texture {
    * @method destroy
    */
   destroy() {
-    if (this._id === -1) {
+    if (this._glID === -1) {
       console.error('The texture already destroyed');
       return;
     }
 
     let gl = this.device.gl;
-    gl.deleteTexture(this._id);
+    gl.deleteTexture(this._glID);
 
     this.device._stats.tex -= this.bytes;
-    this._id = -1;
+    this._glID = -1;
   }
 }
 
@@ -862,10 +869,10 @@ class Texture2D extends Texture {
       }
     }
 
-    this._id = gl.createTexture();
+    this._glID = gl.createTexture();
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this._id);
+    gl.bindTexture(gl.TEXTURE_2D, this._glID);
       // always alloc texture in GPU when we create it.
       let images = options.images || [null];
       this._setMipmap(images, options.flipY, options.premultiplyAlpha);
@@ -1072,10 +1079,10 @@ class TextureCube extends Texture {
       }
     }
 
-    this._id = gl.createTexture();
+    this._glID = gl.createTexture();
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._id);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._glID);
       if (options.images !== undefined) {
         this._setMipmap(options.images, options.flipY, options.premultiplyAlpha);
       }
@@ -1184,9 +1191,9 @@ class RenderBuffer {
     this._height = height;
 
     const gl = device._gl;
-    this._id = gl.createRenderbuffer();
+    this._glID = gl.createRenderbuffer();
 
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this._id);
+    gl.bindRenderbuffer(gl.RENDERBUFFER, this._glID);
     gl.renderbufferStorage(gl.RENDERBUFFER, format, width, height);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
   }
@@ -1195,7 +1202,7 @@ class RenderBuffer {
    * @method destroy
    */
   destroy() {
-    if (this._id === null) {
+    if (this._glID === null) {
       console.error('The render-buffer already destroyed');
       return;
     }
@@ -1203,9 +1210,9 @@ class RenderBuffer {
     const gl = this._device._gl;
 
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.deleteRenderbuffer(this._id);
+    gl.deleteRenderbuffer(this._glID);
 
-    this._id = null;
+    this._glID = null;
   }
 }
 
@@ -1231,23 +1238,23 @@ class FrameBuffer {
     this._stencil = options.stencil || null;
     this._depthStencil = options.depthStencil || null;
 
-    this._id = device._gl.createFramebuffer();
+    this._glID = device._gl.createFramebuffer();
   }
 
   /**
    * @method destroy
    */
   destroy() {
-    if (this._id === null) {
+    if (this._glID === null) {
       console.error('The frame-buffer already destroyed');
       return;
     }
 
     const gl = this._device._gl;
 
-    gl.deleteFramebuffer(this._id);
+    gl.deleteFramebuffer(this._glID);
 
-    this._id = null;
+    this._glID = null;
   }
 }
 
@@ -1761,7 +1768,7 @@ function _commitVertexBuffers(gl, cur, next) {
         continue;
       }
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, vb._id);
+      gl.bindBuffer(gl.ARRAY_BUFFER, vb._glID);
 
       for (let i = 0; i < next.program._attributes.length; ++i) {
         let attr = next.program._attributes[i];
@@ -1794,7 +1801,7 @@ function _commitTextures(gl, cur, next) {
     if (cur.textureUnits[i] !== next.textureUnits[i]) {
       let texture = next.textureUnits[i];
       // gl.activeTexture(gl.TEXTURE0 + i);
-      gl.bindTexture(texture._target, texture._id);
+      gl.bindTexture(texture._target, texture._glID);
     }
   }
 }
@@ -1808,7 +1815,7 @@ function _attach(gl, location, attachment, face = 0) {
       gl.FRAMEBUFFER,
       location,
       gl.TEXTURE_2D,
-      attachment._id,
+      attachment._glID,
       0
     );
   } else if (attachment instanceof TextureCube) {
@@ -1816,7 +1823,7 @@ function _attach(gl, location, attachment, face = 0) {
       gl.FRAMEBUFFER,
       location,
       gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
-      attachment._id,
+      attachment._glID,
       0
     );
   } else {
@@ -1824,7 +1831,7 @@ function _attach(gl, location, attachment, face = 0) {
       gl.FRAMEBUFFER,
       location,
       gl.RENDERBUFFER,
-      attachment._id
+      attachment._glID
     );
   }
 }
@@ -1965,7 +1972,7 @@ class Device {
 
     let texture = this._current.textureUnits[unit];
     if (texture) {
-      gl.bindTexture(texture._target, texture._id);
+      gl.bindTexture(texture._target, texture._glID);
     } else {
       gl.bindTexture(gl.TEXTURE_2D, null);
     }
@@ -2000,7 +2007,7 @@ class Device {
       return;
     }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb._id);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb._glID);
 
     let numColors = this._framebuffer._colors.length;
     for (let i = 0; i < numColors; ++i) {
@@ -2414,13 +2421,13 @@ class Device {
 
     // commit index-buffer
     if (cur.indexBuffer !== next.indexBuffer) {
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, next.indexBuffer ? next.indexBuffer._id : null);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, next.indexBuffer ? next.indexBuffer._glID : null);
     }
 
     // commit program
     let programDirty = false;
     if (cur.program !== next.program) {
-      gl.useProgram(next.program._program);
+      gl.useProgram(next.program._glID);
       programDirty = true;
     }
 
@@ -2469,7 +2476,7 @@ class Device {
 
     // TODO: autogen mipmap for color buffer
     // if (this._framebuffer && this._framebuffer.colors[0].mipmap) {
-    //   gl.bindTexture(this._framebuffer.colors[i]._target, colors[i]._id);
+    //   gl.bindTexture(this._framebuffer.colors[i]._target, colors[i]._glID);
     //   gl.generateMipmap(this._framebuffer.colors[i]._target);
     // }
 
