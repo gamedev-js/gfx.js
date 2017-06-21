@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.2
+ * gfx.js v1.1.3
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -1279,18 +1279,18 @@ const _default = {
   stencilSep: false,
   stencilFuncFront: enums.DS_FUNC_ALWAYS,
   stencilRefFront: 0,
-  stencilMaskFront: 0xFF,
+  stencilMaskFront: 0xff,
   stencilFailOpFront: enums.STENCIL_OP_KEEP,
   stencilZFailOpFront: enums.STENCIL_OP_KEEP,
   stencilZPassOpFront: enums.STENCIL_OP_KEEP,
-  stencilWriteMaskFront: 0xFF,
+  stencilWriteMaskFront: 0xff,
   stencilFuncBack: enums.DS_FUNC_ALWAYS,
   stencilRefBack: 0,
-  stencilMaskBack: 0xFF,
+  stencilMaskBack: 0xff,
   stencilFailOpBack: enums.STENCIL_OP_KEEP,
   stencilZFailOpBack: enums.STENCIL_OP_KEEP,
   stencilZPassOpBack: enums.STENCIL_OP_KEEP,
-  stencilWriteMaskBack: 0xFF,
+  stencilWriteMaskBack: 0xff,
 
   // cull-mode
   cullMode: enums.CULL_BACK,
@@ -1936,6 +1936,7 @@ class Device {
     gl.disable(gl.BLEND);
     gl.blendFunc(gl.ONE, gl.ZERO);
     gl.blendEquation(gl.FUNC_ADD);
+    gl.blendColor(1,1,1,1);
 
     gl.colorMask(true, true, true, true);
 
@@ -2260,7 +2261,7 @@ class Device {
    * @param {Number} a
    */
   setBlendColor(r, g, b, a) {
-    this._next.blendColor = (r * 255) << 24 | (g * 255) << 16 | (b * 255) << 8 | a * 255;
+    this._next.blendColor = ((r * 255) << 24 | (g * 255) << 16 | (b * 255) << 8 | a * 255) >>> 0;
   }
 
   /**
