@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.3
+ * gfx.js v1.1.4
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -772,7 +772,7 @@ class Texture {
 }
 
 function _isPow2(v) {
-  return !(v & (v-1)) && (!!v);
+  return !(v & (v - 1)) && (!!v);
 }
 
 class Texture2D extends Texture {
@@ -872,87 +872,210 @@ class Texture2D extends Texture {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._glID);
-      // always alloc texture in GPU when we create it.
-      let images = options.images || [null];
-      this._setMipmap(images, options.flipY, options.premultiplyAlpha);
-      this._setTexInfo();
+    // always alloc texture in GPU when we create it.
+    let images = options.images || [null];
+    this._setMipmap(images, options.flipY, options.premultiplyAlpha);
+    this._setTexInfo();
 
-      if (genMipmap) {
-        gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
-        gl.generateMipmap(gl.TEXTURE_2D);
-      }
+    if (genMipmap) {
+      gl.hint(gl.GENERATE_MIPMAP_HINT, gl.NICEST);
+      gl.generateMipmap(gl.TEXTURE_2D);
+    }
     this._device._restoreTexture(0);
   }
 
-  _setMipmap(images, flipY, premultiplyAlpha) {
+  /**
+   * @method updateSubImage
+   * @param {Object} options
+   * @param {Number} options.x
+   * @param {Number} options.y
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.level
+   * @param {HTMLCanvasElement | HTMLImageElement | HTMLVideoElement | ArrayBufferView} options.image
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
+   */
+  updateSubImage(options) {
     let gl = this._device._gl;
     let glFmt = glTextureFmt(this._format);
 
-    for (let i = 0; i < images.length; ++i) {
-      let img = images[i];
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this._glID);
+    this._setSubImage(glFmt, options);
+    this._device._restoreTexture(0);
+  }
 
-      if (
-        img instanceof HTMLCanvasElement ||
-        img instanceof HTMLImageElement ||
-        img instanceof HTMLVideoElement
-      ) {
-        if (flipY === undefined) {
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        } else {
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-        }
+  /**
+   * @method updateImage
+   * @param {Object} options
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.level
+   * @param {HTMLCanvasElement | HTMLImageElement | HTMLVideoElement | ArrayBufferView} options.image
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
+   */
+  updateImage(options) {
+    let gl = this._device._gl;
+    let glFmt = glTextureFmt(this._format);
 
-        if (premultiplyAlpha === undefined) {
-          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-        } else {
-          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
-        }
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this._glID);
+    this._setImage(glFmt, options);
+    this._device._restoreTexture(0);
+  }
 
-        gl.texImage2D(
+  _setSubImage(glFmt, options) {
+    let gl = this._device._gl;
+    let flipY = options.flipY;
+    let premultiplyAlpha = options.premultiplyAlpha;
+    let img = options.image;
+
+    if (
+      img instanceof HTMLCanvasElement ||
+      img instanceof HTMLImageElement ||
+      img instanceof HTMLVideoElement
+    ) {
+      if (flipY === undefined) {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      } else {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+      }
+
+      if (premultiplyAlpha === undefined) {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      } else {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+      }
+
+      gl.texSubImage2D(gl.TEXTURE_2D, options.level, options.x, options.y, glFmt.format, glFmt.pixelType, img);
+    } else {
+      if (flipY === undefined) {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      } else {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+      }
+
+      if (premultiplyAlpha === undefined) {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      } else {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+      }
+
+      if (this._compressed) {
+        gl.compressedTexSubImage2D(gl.TEXTURE_2D,
+          options.level,
+          options.x,
+          options.y,
+          options.width,
+          options.height,
+          glFmt.format,
+          img
+        );
+      } else {
+        gl.texSubImage2D(
           gl.TEXTURE_2D,
-          i,
-          glFmt.internalFormat,
+          options.level,
+          options.x,
+          options.y,
+          options.width,
+          options.height,
           glFmt.format,
           glFmt.pixelType,
           img
         );
-      } else {
-        if (flipY === undefined) {
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-        } else {
-          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
-        }
-
-        if (premultiplyAlpha === undefined) {
-          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-        } else {
-          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
-        }
-
-        if (this._compressed) {
-          gl.compressedTexImage2D(
-            gl.TEXTURE_2D,
-            i,
-            glFmt.internalFormat,
-            this._width,
-            this._height,
-            0,
-            img
-          );
-        } else {
-          gl.texImage2D(
-            gl.TEXTURE_2D,
-            i,
-            glFmt.internalFormat,
-            this._width,
-            this._height,
-            0,
-            glFmt.format,
-            glFmt.pixelType,
-            img
-          );
-        }
       }
+    }
+  }
+
+  _setImage(glFmt, options) {
+    let gl = this._device._gl;
+    let flipY = options.flipY;
+    let premultiplyAlpha = options.premultiplyAlpha;
+    let img = options.image;
+
+    if (
+      img instanceof HTMLCanvasElement ||
+      img instanceof HTMLImageElement ||
+      img instanceof HTMLVideoElement
+    ) {
+      if (flipY === undefined) {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      } else {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+      }
+
+      if (premultiplyAlpha === undefined) {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      } else {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+      }
+
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        options.level,
+        glFmt.internalFormat,
+        glFmt.format,
+        glFmt.pixelType,
+        img
+      );
+    } else {
+      if (flipY === undefined) {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      } else {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+      }
+
+      if (premultiplyAlpha === undefined) {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      } else {
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+      }
+
+      if (this._compressed) {
+        gl.compressedTexImage2D(
+          gl.TEXTURE_2D,
+          options.level,
+          glFmt.internalFormat,
+          options.width,
+          options.height,
+          0,
+          img
+        );
+      } else {
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          options.level,
+          glFmt.internalFormat,
+          options.width,
+          options.height,
+          0,
+          glFmt.format,
+          glFmt.pixelType,
+          img
+        );
+      }
+    }
+  }
+
+  _setMipmap(images, flipY, premultiplyAlpha) {
+    let glFmt = glTextureFmt(this._format);
+    let options = {
+      width: this._width,
+      height: this._height,
+      flipY: flipY,
+      premultiplyAlpha: premultiplyAlpha,
+      level: 0,
+      image: null
+    };
+
+    for (let i = 0; i < images.length; ++i) {
+      options.level = i;
+      options.width = this._width >> i;
+      options.height = this._height >> i;
+      options.image = images[i];
+      this._setImage(glFmt, options);
     }
   }
 
@@ -1095,11 +1218,56 @@ class TextureCube extends Texture {
     this._device._restoreTexture(0);
   }
 
-  // levelImages = [imagePosX, imageNegX, imagePosY, imageNegY, imagePosZ, imageNegz]
-  // images = [levelImages0, levelImages1, ...]
-  _setMipmap(images, flipY, premultiplyAlpha) {
+  /**
+   * @method updateSubImage
+   * @param {Object} options
+   * @param {Number} options.x
+   * @param {Number} options.y
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.level
+   * @param {Number} options.faceIndex
+   * @param {HTMLCanvasElement | HTMLImageElement | HTMLVideoElement | ArrayBufferView} options.image
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
+   */
+  updateSubImage(options) {
     let gl = this._device._gl;
     let glFmt = glTextureFmt(this._format);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._glID);
+    this._setSubImage(glFmt, options);
+    this._device._restoreTexture(0);
+  }
+
+  /**
+   * @method updateImage
+   * @param {Object} options
+   * @param {Number} options.width
+   * @param {Number} options.height
+   * @param {Number} options.level
+   * @param {Number} options.faceIndex
+   * @param {HTMLCanvasElement | HTMLImageElement | HTMLVideoElement | ArrayBufferView} options.image
+   * @param {Boolean} options.flipY
+   * @param {Boolean} options.premultiplyAlpha
+   */
+  updateImage(options) {
+    let gl = this._device._gl;
+    let glFmt = glTextureFmt(this._format);
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._glID);
+    this._setImage(glFmt, options);
+    this._device._restoreTexture(0);
+  }
+
+  _setSubImage(glFmt, options) {
+    let gl = this._device._gl;
+    let flipY = options.flipY;
+    let premultiplyAlpha = options.premultiplyAlpha;
+    let faceIndex = options.faceIndex;
+    let img = options.image;
 
     if (flipY === undefined) {
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -1113,47 +1281,121 @@ class TextureCube extends Texture {
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
     }
 
+    if (
+      img instanceof HTMLCanvasElement ||
+      img instanceof HTMLImageElement ||
+      img instanceof HTMLVideoElement
+    ) {
+      gl.texSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex, options.level, options.x, options.y, glFmt.format, glFmt.pixelType, img);
+    } else {
+      if (this._compressed) {
+        gl.compressedTexSubImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+          options.level,
+          options.x,
+          options.y,
+          options.width,
+          options.height,
+          glFmt.format,
+          img
+        );
+      } else {
+        gl.texSubImage2D(
+          gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+          options.level,
+          options.x,
+          options.y,
+          options.width,
+          options.height,
+          glFmt.format,
+          glFmt.pixelType,
+          img
+        );
+      }
+    }
+  }
+
+  _setImage(glFmt, options) {
+    let gl = this._device._gl;
+    let flipY = options.flipY;
+    let premultiplyAlpha = options.premultiplyAlpha;
+    let faceIndex = options.faceIndex;
+    let img = options.image;
+
+    if (flipY === undefined) {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    } else {
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, flipY);
+    }
+
+    if (premultiplyAlpha === undefined) {
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    } else {
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, premultiplyAlpha);
+    }
+    if (
+      img instanceof HTMLCanvasElement ||
+      img instanceof HTMLImageElement ||
+      img instanceof HTMLVideoElement
+    ) {
+      gl.texImage2D(
+        gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+        options.level,
+        glFmt.internalFormat,
+        glFmt.format,
+        glFmt.pixelType,
+        img
+      );
+    } else {
+      if (this._compressed) {
+        gl.compressedTexImage2D(
+          gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+          options.level,
+          glFmt.internalFormat,
+          options.width,
+          options.height,
+          0,
+          img
+        );
+      } else {
+        gl.texImage2D(
+          gl.TEXTURE_CUBE_MAP_POSITIVE_X + faceIndex,
+          options.level,
+          glFmt.internalFormat,
+          options.width,
+          options.height,
+          0,
+          glFmt.format,
+          glFmt.pixelType,
+          img
+        );
+      }
+    }
+  }
+
+  // levelImages = [imagePosX, imageNegX, imagePosY, imageNegY, imagePosZ, imageNegz]
+  // images = [levelImages0, levelImages1, ...]
+  _setMipmap(images, flipY, premultiplyAlpha) {
+    let glFmt = glTextureFmt(this._format);
+    let options = {
+      width: this._width,
+      height: this._height,
+      faceIndex : 0,
+      flipY: flipY,
+      premultiplyAlpha: premultiplyAlpha,
+      level: 0,
+      image: null
+    };
+
     for (let i = 0; i < images.length; ++i) {
       let levelImages = images[i];
+      options.level = i;
+      options.width = this._width >> i;
+      options.height = this._height >> i;
+
       for (let face = 0; face < 6; ++face) {
-        if (
-          levelImages[face] instanceof HTMLCanvasElement ||
-          levelImages[face] instanceof HTMLImageElement ||
-          levelImages[face] instanceof HTMLVideoElement
-        ) {
-          gl.texImage2D(
-            gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
-            i,
-            glFmt.internalFormat,
-            glFmt.format,
-            glFmt.pixelType,
-            levelImages[face]
-          );
-        } else {
-          if (this._compressed) {
-            gl.compressedTexImage2D(
-              gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
-              i,
-              glFmt.internalFormat,
-              this._width,
-              this._height,
-              0,
-              levelImages[face]
-            );
-          } else {
-            gl.texImage2D(
-              gl.TEXTURE_CUBE_MAP_POSITIVE_X + face,
-              i,
-              glFmt.internalFormat,
-              this._width,
-              this._height,
-              0,
-              glFmt.format,
-              glFmt.pixelType,
-              levelImages[face]
-            );
-          }
-        }
+        options.faceIndex = face;
+        options.image = levelImages[face];
+        this._setImage(glFmt, options);
       }
     }
   }
@@ -1626,14 +1868,14 @@ function _commitStencilStates(gl, cur, next) {
     if (next.stencilSep) {
       gl.stencilFuncSeparate(gl.FRONT, next.stencilFuncFront, next.stencilRefFront, next.stencilMaskFront);
       gl.stencilMaskSeparate(gl.FRONT, next.stencilWriteMaskFront);
-      gl.stencilOpSeparate(gl.FRONT, next.stencilFailOpFront, next.stencilzFailOpFront, next.stencilzPassOpFront);
+      gl.stencilOpSeparate(gl.FRONT, next.stencilFailOpFront, next.stencilZFailOpFront, next.stencilZPassOpFront);
       gl.stencilFuncSeparate(gl.BACK, next.stencilFuncBack, next.stencilRefBack, next.stencilMaskBack);
       gl.stencilMaskSeparate(gl.BACK, next.stencilWriteMaskBack);
-      gl.stencilOpSeparate(gl.BACK, next.stencilFailOpBack, next.stencilzFailOpBack, next.stencilzPassOpBack);
+      gl.stencilOpSeparate(gl.BACK, next.stencilFailOpBack, next.stencilZFailOpBack, next.stencilZPassOpBack);
     } else {
       gl.stencilFunc(next.stencilFuncFront, next.stencilRefFront, next.stencilMaskFront);
       gl.stencilMask(next.stencilWriteMaskFront);
-      gl.stencilOp(next.stencilFailOpFront, next.stencilzFailOpFront, next.stencilzPassOpFront);
+      gl.stencilOp(next.stencilFailOpFront, next.stencilZFailOpFront, next.stencilZPassOpFront);
     }
 
     return;
@@ -1648,14 +1890,14 @@ function _commitStencilStates(gl, cur, next) {
     if (next.stencilSep) {
       gl.stencilFuncSeparate(gl.FRONT, next.stencilFuncFront, next.stencilRefFront, next.stencilMaskFront);
       gl.stencilMaskSeparate(gl.FRONT, next.stencilWriteMaskFront);
-      gl.stencilOpSeparate(gl.FRONT, next.stencilFailOpFront, next.stencilzFailOpFront, next.stencilzPassOpFront);
+      gl.stencilOpSeparate(gl.FRONT, next.stencilFailOpFront, next.stencilZFailOpFront, next.stencilZPassOpFront);
       gl.stencilFuncSeparate(gl.BACK, next.stencilFuncBack, next.stencilRefBack, next.stencilMaskBack);
       gl.stencilMaskSeparate(gl.BACK, next.stencilWriteMaskBack);
-      gl.stencilOpSeparate(gl.BACK, next.stencilFailOpBack, next.stencilzFailOpBack, next.stencilzPassOpBack);
+      gl.stencilOpSeparate(gl.BACK, next.stencilFailOpBack, next.stencilZFailOpBack, next.stencilZPassOpBack);
     } else {
       gl.stencilFunc(next.stencilFuncFront, next.stencilRefFront, next.stencilMaskFront);
       gl.stencilMask(next.stencilWriteMaskFront);
-      gl.stencilOp(next.stencilFailOpFront, next.stencilzFailOpFront, next.stencilzPassOpFront);
+      gl.stencilOp(next.stencilFailOpFront, next.stencilZFailOpFront, next.stencilZPassOpFront);
     }
     return;
   }
@@ -1674,10 +1916,10 @@ function _commitStencilStates(gl, cur, next) {
     }
     if (
       cur.stencilFailOpFront !== next.stencilFailOpFront ||
-      cur.stencilzFailOpFront !== next.stencilzFailOpFront ||
-      cur.stencilzPassOpFront !== next.stencilzPassOpFront
+      cur.stencilZFailOpFront !== next.stencilZFailOpFront ||
+      cur.stencilZPassOpFront !== next.stencilZPassOpFront
     ) {
-      gl.stencilOpSeparate(gl.FRONT, next.stencilFailOpFront, next.stencilzFailOpFront, next.stencilzPassOpFront);
+      gl.stencilOpSeparate(gl.FRONT, next.stencilFailOpFront, next.stencilZFailOpFront, next.stencilZPassOpFront);
     }
 
     // back
@@ -1693,10 +1935,10 @@ function _commitStencilStates(gl, cur, next) {
     }
     if (
       cur.stencilFailOpBack !== next.stencilFailOpBack ||
-      cur.stencilzFailOpBack !== next.stencilzFailOpBack ||
-      cur.stencilzPassOpBack !== next.stencilzPassOpBack
+      cur.stencilZFailOpBack !== next.stencilZFailOpBack ||
+      cur.stencilZPassOpBack !== next.stencilZPassOpBack
     ) {
-      gl.stencilOpSeparate(gl.BACK, next.stencilFailOpBack, next.stencilzFailOpBack, next.stencilzPassOpBack);
+      gl.stencilOpSeparate(gl.BACK, next.stencilFailOpBack, next.stencilZFailOpBack, next.stencilZPassOpBack);
     }
   } else {
     if (
@@ -1711,10 +1953,10 @@ function _commitStencilStates(gl, cur, next) {
     }
     if (
       cur.stencilFailOpFront !== next.stencilFailOpFront ||
-      cur.stencilzFailOpFront !== next.stencilzFailOpFront ||
-      cur.stencilzPassOpFront !== next.stencilzPassOpFront
+      cur.stencilZFailOpFront !== next.stencilZFailOpFront ||
+      cur.stencilZPassOpFront !== next.stencilZPassOpFront
     ) {
-      gl.stencilOp(next.stencilFailOpFront, next.stencilzFailOpFront, next.stencilzPassOpFront);
+      gl.stencilOp(next.stencilFailOpFront, next.stencilZFailOpFront, next.stencilZPassOpFront);
     }
   }
 
@@ -2210,8 +2452,8 @@ class Device {
    */
   setStencilOp(failOp, zFailOp, zPassOp, writeMask) {
     this._next.stencilFailOpFront = this._next.stencilFailOpBack = failOp;
-    this._next.stencilzFailOpFront = this._next.stencilzFailOpBack = zFailOp;
-    this._next.stencilzPassOpFront = this._next.stencilzPassOpBack = zPassOp;
+    this._next.stencilZFailOpFront = this._next.stencilZFailOpBack = zFailOp;
+    this._next.stencilZPassOpFront = this._next.stencilZPassOpBack = zPassOp;
     this._next.stencilWriteMaskFront = this._next.stencilWriteMaskBack = writeMask;
   }
 
@@ -2225,8 +2467,8 @@ class Device {
   setStencilOpFront(failOp, zFailOp, zPassOp, writeMask) {
     this._next.stencilSep = true;
     this._next.stencilFailOpFront = failOp;
-    this._next.stencilzFailOpFront = zFailOp;
-    this._next.stencilzPassOpFront = zPassOp;
+    this._next.stencilZFailOpFront = zFailOp;
+    this._next.stencilZPassOpFront = zPassOp;
     this._next.stencilWriteMaskFront = writeMask;
   }
 
@@ -2240,8 +2482,8 @@ class Device {
   setStencilOpBack(failOp, zFailOp, zPassOp, writeMask) {
     this._next.stencilSep = true;
     this._next.stencilFailOpBack = failOp;
-    this._next.stencilzFailOpBack = zFailOp;
-    this._next.stencilzPassOpBack = zPassOp;
+    this._next.stencilZFailOpBack = zFailOp;
+    this._next.stencilZPassOpBack = zPassOp;
     this._next.stencilWriteMaskBack = writeMask;
   }
 
