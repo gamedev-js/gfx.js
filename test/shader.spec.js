@@ -53,4 +53,36 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
       t.end();
     });
   });
+
+  _initDevice(device => {
+    t.test('errors', t => {
+      let program = new gfx.Program(device, {
+        vert: `
+          attribute vec3 a_position
+          attribute vec2 a_uv0;
+
+          void main() {
+            vec4 position = vec4(a_uv0.xy, a_position.z, 1.0);
+            gl_Position = vec4( a_position, 1.0 );
+          }
+        `,
+        frag: `
+          precision mediump float;
+          void main() {
+            gl_fragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+          }
+        `
+      });
+      program.link();
+
+      t.equal(program._errors.length, 4);
+      t.equal(program._errors[0].file, 0);
+      t.equal(program._errors[0].line, 3);
+
+      t.equal(program._errors[1].file, 0);
+      t.equal(program._errors[1].line, 4);
+
+      t.end();
+    });
+  });
 });
