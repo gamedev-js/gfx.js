@@ -56,6 +56,7 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
 
   _initDevice(device => {
     t.test('errors', t => {
+
       let program = new gfx.Program(device, {
         vert: `
           attribute vec3 a_position
