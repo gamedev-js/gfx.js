@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.4
+ * gfx.js v1.1.5
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -140,7 +140,7 @@ const _textureFmtGL = [
 /**
  * enums
  */
-let enums = {
+const enums = {
   // buffer usage
   USAGE_STATIC: 35044,  // gl.STATIC_DRAW
   USAGE_DYNAMIC: 35048, // gl.DYNAMIC_DRAW
@@ -594,6 +594,31 @@ class VertexBuffer {
 
 let _genID = 0;
 
+function _parseError(out, type, errorLog) {
+  errorLog.split('\n').forEach(msg => {
+    if (msg.length < 5) {
+      return;
+    }
+
+    let parts = /^ERROR\:\s+(\d+)\:(\d+)\:\s*(.*)$/.exec(msg);
+    if (parts) {
+      out.push({
+        type: type,
+        fileID: parts[1] | 0,
+        line: parts[2] | 0,
+        message: parts[3].trim()
+      });
+    } else if (msg.length > 0) {
+      out.push({
+        type: type,
+        fileID: -1,
+        line: 0,
+        message: msg
+      });
+    }
+  });
+}
+
 class Program {
   /**
    * @param {ef.GraphicsDevice} device - graphic device
@@ -623,7 +648,7 @@ class Program {
     this._attributes = [];
     this._uniforms = [];
     this._samplers = [];
-
+    this._errors = [];
     this._linked = false;
     this._vertSource = options.vert;
     this._fragSource = options.frag;
@@ -651,24 +676,32 @@ class Program {
     gl.linkProgram(program);
 
     let failed = false;
+    let errors = this._errors;
 
     if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-      console.error(`Failed to compile vertex shader: ${gl.getShaderInfoLog(vertShader)}`);
+      _parseError(errors, 'vs', gl.getShaderInfoLog(vertShader));
       failed = true;
     }
 
     if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-      console.error(`Failed to compile fragment shader: ${gl.getShaderInfoLog(fragShader)}`);
+      _parseError(errors, 'fs', gl.getShaderInfoLog(fragShader));
       failed = true;
+    }
+
+    gl.deleteShader(vertShader);
+    gl.deleteShader(fragShader);
+
+    if (failed) {
+      errors.forEach(err => {
+        console.error(`Failed to compile ${err.type} ${err.fileID} (ln ${err.line}): ${err.message}`);
+      });
+      return;
     }
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       console.error(`Failed to link shader program: ${gl.getProgramInfoLog(program)}`);
       failed = true;
     }
-
-    gl.deleteShader(vertShader);
-    gl.deleteShader(fragShader);
 
     if (failed) {
       return;
@@ -695,10 +728,15 @@ class Program {
       let info = gl.getActiveUniform(program, i);
       let location = gl.getUniformLocation(program, info.name);
 
+      // NOTE:
+      // if we define an array uniform: float foobar[10]
+      // the uniform.name will be 'foobar[0]', and the size will be 10
+
       this._uniforms.push({
         name: info.name,
         location: location,
         type: info.type,
+        size: info.size, // used when uniform is an array
       });
     }
 
@@ -2497,6 +2535,14 @@ class Device {
   }
 
   /**
+   * @method setBlendColor32
+   * @param {Number} rgba
+   */
+  setBlendColor32(rgba) {
+    this._next.blendColor = rgba;
+  }
+
+  /**
    * @method setBlendColor
    * @param {Number} r
    * @param {Number} g
@@ -2611,20 +2657,17 @@ class Device {
    * @method setUniform
    * @param {String} name
    * @param {*} value
-   * @param {Number} num
    */
-  setUniform(name, value, num = 1) {
+  setUniform(name, value) {
     let uniform = this._uniforms[name];
     if (!uniform) {
       uniform = {
         dirty: true,
         value: value,
-        num: num
       };
     } else {
       uniform.dirty = true;
       uniform.value = value;
-      uniform.num = num;
     }
     this._uniforms[name] = uniform;
   }
@@ -2691,6 +2734,8 @@ class Device {
       }
 
       uniform.dirty = false;
+
+      // TODO: please consider array uniform: uniformInfo.size > 0
 
       let commitFunc = _type2uniformCommit[uniformInfo.type];
       if (!commitFunc) {
