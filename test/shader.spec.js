@@ -76,10 +76,10 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
       program.link();
 
       t.equal(program._errors.length, 4);
-      t.equal(program._errors[0].file, 0);
+      t.equal(program._errors[0].fileID, 0);
       t.equal(program._errors[0].line, 3);
 
-      t.equal(program._errors[1].file, 0);
+      t.equal(program._errors[1].fileID, 0);
       t.equal(program._errors[1].line, 4);
 
       t.end();
