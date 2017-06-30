@@ -1,5 +1,6 @@
 'use strict';
 
+const buble = require('rollup-plugin-buble');
 const fsJetpack = require('fs-jetpack');
 const pjson = require('../package.json');
 
@@ -29,4 +30,7 @@ module.exports = {
   external: [],
   globals: {},
   sourceMap: true,
+  plugins: [
+    buble(),
+  ]
 };
