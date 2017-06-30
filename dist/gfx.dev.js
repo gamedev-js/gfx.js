@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.5
+ * gfx.js v1.1.6
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -8,50 +8,49 @@
 var gfx = (function () {
 'use strict';
 
-const GL_NEAREST = 9728;                // gl.NEAREST
-const GL_LINEAR = 9729;                 // gl.LINEAR
-const GL_NEAREST_MIPMAP_NEAREST = 9984; // gl.NEAREST_MIPMAP_NEAREST
-const GL_LINEAR_MIPMAP_NEAREST = 9985;  // gl.LINEAR_MIPMAP_NEAREST
-const GL_NEAREST_MIPMAP_LINEAR = 9986;  // gl.NEAREST_MIPMAP_LINEAR
-const GL_LINEAR_MIPMAP_LINEAR = 9987;   // gl.LINEAR_MIPMAP_LINEAR
+var GL_NEAREST = 9728;                // gl.NEAREST
+var GL_LINEAR = 9729;                 // gl.LINEAR
+var GL_NEAREST_MIPMAP_NEAREST = 9984; // gl.NEAREST_MIPMAP_NEAREST
+var GL_LINEAR_MIPMAP_NEAREST = 9985;  // gl.LINEAR_MIPMAP_NEAREST
+var GL_NEAREST_MIPMAP_LINEAR = 9986;  // gl.NEAREST_MIPMAP_LINEAR
+var GL_LINEAR_MIPMAP_LINEAR = 9987;   // gl.LINEAR_MIPMAP_LINEAR
 
 // const GL_BYTE = 5120;                  // gl.BYTE
-const GL_UNSIGNED_BYTE = 5121;            // gl.UNSIGNED_BYTE
+var GL_UNSIGNED_BYTE = 5121;            // gl.UNSIGNED_BYTE
 // const GL_SHORT = 5122;                 // gl.SHORT
-const GL_UNSIGNED_SHORT = 5123;           // gl.UNSIGNED_SHORT
-const GL_UNSIGNED_INT = 5125;             // gl.UNSIGNED_INT
-const GL_FLOAT = 5126;                    // gl.FLOAT
-const GL_UNSIGNED_SHORT_5_6_5 = 33635;    // gl.UNSIGNED_SHORT_5_6_5
-const GL_UNSIGNED_SHORT_4_4_4_4 = 32819;  // gl.UNSIGNED_SHORT_4_4_4_4
-const GL_UNSIGNED_SHORT_5_5_5_1 = 32820;  // gl.UNSIGNED_SHORT_5_5_5_1
-const GL_HALF_FLOAT_OES = 36193;          // gl.HALF_FLOAT_OES
+var GL_UNSIGNED_SHORT = 5123;           // gl.UNSIGNED_SHORT
+var GL_UNSIGNED_INT = 5125;             // gl.UNSIGNED_INT
+var GL_FLOAT = 5126;                    // gl.FLOAT
+var GL_UNSIGNED_SHORT_5_6_5 = 33635;    // gl.UNSIGNED_SHORT_5_6_5
+var GL_UNSIGNED_SHORT_4_4_4_4 = 32819;  // gl.UNSIGNED_SHORT_4_4_4_4
+var GL_UNSIGNED_SHORT_5_5_5_1 = 32820;  // gl.UNSIGNED_SHORT_5_5_5_1
+var GL_HALF_FLOAT_OES = 36193;          // gl.HALF_FLOAT_OES
 
-const GL_DEPTH_COMPONENT = 6402; // gl.DEPTH_COMPONENT
+var GL_DEPTH_COMPONENT = 6402; // gl.DEPTH_COMPONENT
 
-const GL_ALPHA = 6406;            // gl.ALPHA
-const GL_RGB = 6407;              // gl.RGB
-const GL_RGBA = 6408;             // gl.RGBA
-const GL_LUMINANCE = 6409;        // gl.LUMINANCE
-const GL_LUMINANCE_ALPHA = 6410;  // gl.LUMINANCE_ALPHA
+var GL_ALPHA = 6406;            // gl.ALPHA
+var GL_RGB = 6407;              // gl.RGB
+var GL_RGBA = 6408;             // gl.RGBA
+var GL_LUMINANCE = 6409;        // gl.LUMINANCE
+var GL_LUMINANCE_ALPHA = 6410;  // gl.LUMINANCE_ALPHA
 
-const GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;   // ext.COMPRESSED_RGB_S3TC_DXT1_EXT
-const GL_COMPRESSED_RGBA_S3TC_DXT1_EXT = 0x83F1;  // ext.COMPRESSED_RGBA_S3TC_DXT1_EXT
-const GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;  // ext.COMPRESSED_RGBA_S3TC_DXT3_EXT
-const GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3;  // ext.COMPRESSED_RGBA_S3TC_DXT5_EXT
+var GL_COMPRESSED_RGB_S3TC_DXT1_EXT = 0x83F0;   // ext.COMPRESSED_RGB_S3TC_DXT1_EXT
+var GL_COMPRESSED_RGBA_S3TC_DXT1_EXT = 0x83F1;  // ext.COMPRESSED_RGBA_S3TC_DXT1_EXT
+var GL_COMPRESSED_RGBA_S3TC_DXT3_EXT = 0x83F2;  // ext.COMPRESSED_RGBA_S3TC_DXT3_EXT
+var GL_COMPRESSED_RGBA_S3TC_DXT5_EXT = 0x83F3;  // ext.COMPRESSED_RGBA_S3TC_DXT5_EXT
 
-const GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG = 0x8C00;  // ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
-const GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG = 0x8C01;  // ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
-const GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = 0x8C02; // ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
-const GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = 0x8C03; // ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
+var GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG = 0x8C00;  // ext.COMPRESSED_RGB_PVRTC_4BPPV1_IMG
+var GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG = 0x8C01;  // ext.COMPRESSED_RGB_PVRTC_2BPPV1_IMG
+var GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG = 0x8C02; // ext.COMPRESSED_RGBA_PVRTC_4BPPV1_IMG
+var GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG = 0x8C03; // ext.COMPRESSED_RGBA_PVRTC_2BPPV1_IMG
 
-const GL_COMPRESSED_RGB_ETC1_WEBGL = 0x8D64; // ext.COMPRESSED_RGB_ETC1_WEBGL
+var GL_COMPRESSED_RGB_ETC1_WEBGL = 0x8D64; // ext.COMPRESSED_RGB_ETC1_WEBGL
 
-const _filterGL = [
+var _filterGL = [
   [ GL_NEAREST,  GL_NEAREST_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR ],
-  [ GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR ],
-];
+  [ GL_LINEAR,  GL_LINEAR_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_LINEAR ] ];
 
-const _textureFmtGL = [
+var _textureFmtGL = [
   // TEXTURE_FMT_RGB_DXT1: 0
   { format: GL_RGB, internalFormat: GL_COMPRESSED_RGB_S3TC_DXT1_EXT, pixelType: null },
 
@@ -134,13 +133,12 @@ const _textureFmtGL = [
   { format: GL_DEPTH_COMPONENT, internalFormat: GL_DEPTH_COMPONENT, pixelType: GL_UNSIGNED_INT },
 
   // TEXTURE_FMT_D24S8: 27
-  { format: null, internalFormat: null, pixelType: null },
-];
+  { format: null, internalFormat: null, pixelType: null } ];
 
 /**
  * enums
  */
-const enums = {
+var enums = {
   // buffer usage
   USAGE_STATIC: 35044,  // gl.STATIC_DRAW
   USAGE_DYNAMIC: 35048, // gl.DYNAMIC_DRAW
@@ -311,7 +309,7 @@ function attrTypeBytes(attrType) {
     return 4;
   }
 
-  console.warn(`Unknown ATTR_TYPE: ${attrType}`);
+  console.warn(("Unknown ATTR_TYPE: " + attrType));
   return 0;
 }
 
@@ -321,10 +319,12 @@ function attrTypeBytes(attrType) {
  * @param {FILTER_*} filter
  * @param {FILTER_*} mipFilter
  */
-function glFilter(gl, filter, mipFilter = -1) {
-  let result = _filterGL[filter][mipFilter+1];
+function glFilter(gl, filter, mipFilter) {
+  if ( mipFilter === void 0 ) mipFilter = -1;
+
+  var result = _filterGL[filter][mipFilter+1];
   if (result === undefined) {
-    console.warn(`Unknown FILTER: ${filter}`);
+    console.warn(("Unknown FILTER: " + filter));
     return mipFilter === -1 ? gl.LINEAR : gl.LINEAR_MIPMAP_LINEAR;
   }
 
@@ -336,9 +336,9 @@ function glFilter(gl, filter, mipFilter = -1) {
  * @param {TEXTURE_FMT_*} fmt
  */
 function glTextureFmt(fmt) {
-  let result = _textureFmtGL[fmt];
+  var result = _textureFmtGL[fmt];
   if (result === undefined) {
-    console.warn(`Unknown TEXTURE_FMT: ${fmt}`);
+    console.warn(("Unknown TEXTURE_FMT: " + fmt));
     return _textureFmtGL[enums.TEXTURE_FMT_RGBA8];
   }
 
@@ -349,258 +349,233 @@ function glTextureFmt(fmt) {
 // exports
 // ====================
 
-class VertexFormat {
-  /**
-   * @constructor
-   * @param {Array} infos
-   *
-   * @example
-   * let vertexFmt = new VertexFormat([
-   *   { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 3 },
-   *   { name: gfx.ATTR_UV0, type: gfx.ATTR_TYPE_FLOAT32, num: 2 },
-   *   { name: gfx.ATTR_COLOR, type: gfx.ATTR_TYPE_FLOAT32, num: 4, normalize: true },
-   * ])
-   */
-  constructor(infos) {
-    this._attr2el = {};
-    this._elements = [];
-    this._bytes = 0;
+var VertexFormat = function VertexFormat(infos) {
+  var this$1 = this;
 
-    let offset = 0;
-    for (let i = 0, len = infos.length; i < len; ++i) {
-      let info = infos[i];
-      let el = {
-        name: info.name,
-        offset: offset,
-        stride: 0,
-        stream: -1,
-        type: info.type,
-        num: info.num,
-        normalize: (info.normalize === undefined) ? false : info.normalize,
-        bytes: info.num * attrTypeBytes(info.type),
-      };
+  this._attr2el = {};
+  this._elements = [];
+  this._bytes = 0;
 
-      this._attr2el[el.name] = el;
-      this._elements.push(el);
+  var offset = 0;
+  for (var i = 0, len = infos.length; i < len; ++i) {
+    var info = infos[i];
+    var el = {
+      name: info.name,
+      offset: offset,
+      stride: 0,
+      stream: -1,
+      type: info.type,
+      num: info.num,
+      normalize: (info.normalize === undefined) ? false : info.normalize,
+      bytes: info.num * attrTypeBytes(info.type),
+    };
 
-      this._bytes += el.bytes;
-      offset += el.bytes;
-    }
+    this$1._attr2el[el.name] = el;
+    this$1._elements.push(el);
 
-    for (let i = 0, len = this._elements.length; i < len; ++i) {
-      let el = this._elements[i];
-      el.stride = this._bytes;
-    }
+    this$1._bytes += el.bytes;
+    offset += el.bytes;
   }
 
-  /**
-   * @method element
-   * @param {string} attrName
-   */
-  element(attrName) {
-    return this._attr2el[attrName];
+  for (var i$1 = 0, len$1 = this._elements.length; i$1 < len$1; ++i$1) {
+    var el$1 = this$1._elements[i$1];
+    el$1.stride = this$1._bytes;
   }
-}
+};
 
-class IndexBuffer {
-  /**
-   * @constructor
-   * @param {Device} device
-   * @param {INDEX_FMT_*} format
-   * @param {USAGE_*} usage
-   * @param {ArrayBuffer} data
-   * @param {Number} numIndices
-   * @param {Boolean} persist
-   */
-  constructor(device, format, usage, data, numIndices, persist) {
-    this._device = device;
-    this._format = format;
-    this._usage = usage;
-    this._persist = persist;
-    this._numIndices = numIndices;
+/**
+ * @method element
+ * @param {string} attrName
+ */
+VertexFormat.prototype.element = function element (attrName) {
+  return this._attr2el[attrName];
+};
 
-    // calculate bytes
-    let bytes = 0;
-    if (format === enums.INDEX_FMT_UINT8) {
-      bytes = numIndices;
-    } else if (format === enums.INDEX_FMT_UINT16) {
-      bytes = 2 * numIndices;
-    } else if (format === enums.INDEX_FMT_UINT32) {
-      bytes = 4 * numIndices;
-    }
-    this._bytes = bytes;
+var IndexBuffer = function IndexBuffer(device, format, usage, data, numIndices, persist) {
+  this._device = device;
+  this._format = format;
+  this._usage = usage;
+  this._persist = persist;
+  this._numIndices = numIndices;
 
-    // update
-    this._glID = device._gl.createBuffer();
-    this._data = null;
-    this.update(0, data);
-
-    // stats
-    device._stats.ib += bytes;
+  // calculate bytes
+  var bytes = 0;
+  if (format === enums.INDEX_FMT_UINT8) {
+    bytes = numIndices;
+  } else if (format === enums.INDEX_FMT_UINT16) {
+    bytes = 2 * numIndices;
+  } else if (format === enums.INDEX_FMT_UINT32) {
+    bytes = 4 * numIndices;
   }
+  this._bytes = bytes;
 
-  /**
-   * @method destroy
-   */
-  destroy() {
-    if (this._glID === -1) {
-      console.error('The buffer already destroyed');
-      return;
-    }
+  // update
+  this._glID = device._gl.createBuffer();
+  this._data = null;
+  this.update(0, data);
 
-    let gl = this.device.gl;
-    gl.deleteBuffer(this._glID);
-    this.device._stats.ib -= this.bytes;
+  // stats
+  device._stats.ib += bytes;
+};
 
-    this._glID = -1;
+var prototypeAccessors = { count: {} };
+
+/**
+ * @method destroy
+ */
+IndexBuffer.prototype.destroy = function destroy () {
+  if (this._glID === -1) {
+    console.error('The buffer already destroyed');
+    return;
   }
 
-  /**
-   * @method update
-   * @param {Number} offset
-   * @param {ArrayBuffer} data
-   */
-  update(offset, data) {
-    if (this._glID === -1) {
-      console.error('The buffer is destroyed');
-      return;
-    }
+  var gl = this.device.gl;
+  gl.deleteBuffer(this._glID);
+  this.device._stats.ib -= this.bytes;
 
-    if (data && data.byteLength + offset > this._bytes) {
-      console.error('Failed to update data, bytes exceed.');
-      return;
-    }
+  this._glID = -1;
+};
 
-    let gl = this._device._gl;
-    let glUsage = this._usage;
+/**
+ * @method update
+ * @param {Number} offset
+ * @param {ArrayBuffer} data
+ */
+IndexBuffer.prototype.update = function update (offset, data) {
+  if (this._glID === -1) {
+    console.error('The buffer is destroyed');
+    return;
+  }
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._glID);
-    if (!data) {
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._bytes, glUsage);
+  if (data && data.byteLength + offset > this._bytes) {
+    console.error('Failed to update data, bytes exceed.');
+    return;
+  }
+
+  var gl = this._device._gl;
+  var glUsage = this._usage;
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._glID);
+  if (!data) {
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._bytes, glUsage);
+  } else {
+    if (offset) {
+      gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, data, glUsage);
     } else {
-      if (offset) {
-        gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, data, glUsage);
-      } else {
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, glUsage);
-      }
-    }
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-    // store the data
-    if (this._persist) {
-      if (this._data) {
-        this._data.set(data, offset);
-      } else {
-        this._data = data;
-      }
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, glUsage);
     }
   }
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
 
-  get count () {
-    return this._numIndices;
-  }
-}
-
-class VertexBuffer {
-  /**
-   * @constructor
-   * @param {Device} device
-   * @param {VertexFormat} format
-   * @param {USAGE_*} usage
-   * @param {ArrayBuffer} data
-   * @param {Number} numVertices
-   * @param {Boolean} persist
-   */
-  constructor(device, format, usage, data, numVertices, persist) {
-    this._device = device;
-    this._format = format;
-    this._usage = usage;
-    this._persist = persist;
-    this._numVertices = numVertices;
-
-    // calculate bytes
-    this._bytes = this._format._bytes * numVertices;
-
-    // update
-    this._glID = device._gl.createBuffer();
-    this._data = null;
-    this.update(0, data);
-
-    // stats
-    device._stats.vb += this._bytes;
-  }
-
-  /**
-   * @method destroy
-   */
-  destroy() {
-    if (this._glID === -1) {
-      console.error('The buffer already destroyed');
-      return;
-    }
-
-    let gl = this.device.gl;
-    gl.deleteBuffer(this._glID);
-    this.device._stats.vb -= this.bytes;
-
-    this._glID = -1;
-  }
-
-  /**
-   * @method update
-   * @param {Number} offset
-   * @param {ArrayBuffer} data
-   */
-  update(offset, data) {
-    if (this._glID === -1) {
-      console.error('The buffer is destroyed');
-      return;
-    }
-
-    if (data && data.byteLength + offset > this._bytes) {
-      console.error('Failed to update data, bytes exceed.');
-      return;
-    }
-
-    let gl = this._device._gl;
-    let glUsage = this._usage;
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, this._glID);
-    if (!data) {
-      gl.bufferData(gl.ARRAY_BUFFER, this._bytes, glUsage);
+  // store the data
+  if (this._persist) {
+    if (this._data) {
+      this._data.set(data, offset);
     } else {
-      if (offset) {
-        gl.bufferSubData(gl.ARRAY_BUFFER, data, glUsage);
-      } else {
-        gl.bufferData(gl.ARRAY_BUFFER, data, glUsage);
-      }
-    }
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-    // store the data
-    if (this._persist) {
-      if (this._data) {
-        this._data.set(data, offset);
-      } else {
-        this._data = data;
-      }
+      this._data = data;
     }
   }
+};
 
-  get count () {
-    return this._numVertices;
+prototypeAccessors.count.get = function () {
+  return this._numIndices;
+};
+
+Object.defineProperties( IndexBuffer.prototype, prototypeAccessors );
+
+var VertexBuffer = function VertexBuffer(device, format, usage, data, numVertices, persist) {
+  this._device = device;
+  this._format = format;
+  this._usage = usage;
+  this._persist = persist;
+  this._numVertices = numVertices;
+
+  // calculate bytes
+  this._bytes = this._format._bytes * numVertices;
+
+  // update
+  this._glID = device._gl.createBuffer();
+  this._data = null;
+  this.update(0, data);
+
+  // stats
+  device._stats.vb += this._bytes;
+};
+
+var prototypeAccessors$1 = { count: {} };
+
+/**
+ * @method destroy
+ */
+VertexBuffer.prototype.destroy = function destroy () {
+  if (this._glID === -1) {
+    console.error('The buffer already destroyed');
+    return;
   }
-}
 
-let _genID = 0;
+  var gl = this.device.gl;
+  gl.deleteBuffer(this._glID);
+  this.device._stats.vb -= this.bytes;
+
+  this._glID = -1;
+};
+
+/**
+ * @method update
+ * @param {Number} offset
+ * @param {ArrayBuffer} data
+ */
+VertexBuffer.prototype.update = function update (offset, data) {
+  if (this._glID === -1) {
+    console.error('The buffer is destroyed');
+    return;
+  }
+
+  if (data && data.byteLength + offset > this._bytes) {
+    console.error('Failed to update data, bytes exceed.');
+    return;
+  }
+
+  var gl = this._device._gl;
+  var glUsage = this._usage;
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, this._glID);
+  if (!data) {
+    gl.bufferData(gl.ARRAY_BUFFER, this._bytes, glUsage);
+  } else {
+    if (offset) {
+      gl.bufferSubData(gl.ARRAY_BUFFER, data, glUsage);
+    } else {
+      gl.bufferData(gl.ARRAY_BUFFER, data, glUsage);
+    }
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  // store the data
+  if (this._persist) {
+    if (this._data) {
+      this._data.set(data, offset);
+    } else {
+      this._data = data;
+    }
+  }
+};
+
+prototypeAccessors$1.count.get = function () {
+  return this._numVertices;
+};
+
+Object.defineProperties( VertexBuffer.prototype, prototypeAccessors$1 );
+
+var _genID = 0;
 
 function _parseError(out, type, errorLog) {
-  errorLog.split('\n').forEach(msg => {
+  errorLog.split('\n').forEach(function (msg) {
     if (msg.length < 5) {
       return;
     }
 
-    let parts = /^ERROR\:\s+(\d+)\:(\d+)\:\s*(.*)$/.exec(msg);
+    var parts = /^ERROR\:\s+(\d+)\:(\d+)\:\s*(.*)$/.exec(msg);
     if (parts) {
       out.push({
         type: type,
@@ -619,226 +594,190 @@ function _parseError(out, type, errorLog) {
   });
 }
 
-class Program {
-  /**
-   * @param {ef.GraphicsDevice} device - graphic device
-   * @param {object} options - shader definition
-   * @param {string} options.vert - vertex shader source code
-   * @param {string} options.frag - fragment shader shader source code
-   * @example
-   * let prog = new Program(device, {
-   *   vert: `
-   *     attribute vec3 a_position;
-   *     void main() {
-   *       gl_Position = vec4( a_position, 1.0 );
-   *     }
-   *   `,
-   *   frag: `
-   *     precision mediump float;
-   *     void main() {
-   *       gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
-   *     }
-   *   `
-   * });
-   */
-  constructor(device, options) {
-    this._device = device;
+var Program = function Program(device, options) {
+  this._device = device;
 
-    // stores gl information: { location, type }
-    this._attributes = [];
-    this._uniforms = [];
-    this._samplers = [];
-    this._errors = [];
-    this._linked = false;
-    this._vertSource = options.vert;
-    this._fragSource = options.frag;
-    this._glID = null;
-    this._id = _genID++;
+  // stores gl information: { location, type }
+  this._attributes = [];
+  this._uniforms = [];
+  this._samplers = [];
+  this._errors = [];
+  this._linked = false;
+  this._vertSource = options.vert;
+  this._fragSource = options.frag;
+  this._glID = null;
+  this._id = _genID++;
+};
+
+var prototypeAccessors$2 = { id: {} };
+
+prototypeAccessors$2.id.get = function () {
+  return this._id;
+};
+
+Program.prototype.link = function link () {
+    var this$1 = this;
+
+  if (this._linked) {
+    return;
   }
 
-  get id() {
-    return this._id;
+  var gl = this._device._gl;
+
+  var vertShader = _createShader(gl, gl.VERTEX_SHADER, this._vertSource);
+  var fragShader = _createShader(gl, gl.FRAGMENT_SHADER, this._fragSource);
+
+  var program = gl.createProgram();
+  gl.attachShader(program, vertShader);
+  gl.attachShader(program, fragShader);
+  gl.linkProgram(program);
+
+  var failed = false;
+  var errors = this._errors;
+
+  if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
+    _parseError(errors, 'vs', gl.getShaderInfoLog(vertShader));
+    failed = true;
   }
 
-  link() {
-    if (this._linked) {
-      return;
-    }
-
-    let gl = this._device._gl;
-
-    let vertShader = _createShader(gl, gl.VERTEX_SHADER, this._vertSource);
-    let fragShader = _createShader(gl, gl.FRAGMENT_SHADER, this._fragSource);
-
-    let program = gl.createProgram();
-    gl.attachShader(program, vertShader);
-    gl.attachShader(program, fragShader);
-    gl.linkProgram(program);
-
-    let failed = false;
-    let errors = this._errors;
-
-    if (!gl.getShaderParameter(vertShader, gl.COMPILE_STATUS)) {
-      _parseError(errors, 'vs', gl.getShaderInfoLog(vertShader));
-      failed = true;
-    }
-
-    if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
-      _parseError(errors, 'fs', gl.getShaderInfoLog(fragShader));
-      failed = true;
-    }
-
-    gl.deleteShader(vertShader);
-    gl.deleteShader(fragShader);
-
-    if (failed) {
-      errors.forEach(err => {
-        console.error(`Failed to compile ${err.type} ${err.fileID} (ln ${err.line}): ${err.message}`);
-      });
-      return;
-    }
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error(`Failed to link shader program: ${gl.getProgramInfoLog(program)}`);
-      failed = true;
-    }
-
-    if (failed) {
-      return;
-    }
-
-    this._glID = program;
-
-    // parse attribute
-    let numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    for (let i = 0; i < numAttributes; ++i) {
-      let info = gl.getActiveAttrib(program, i);
-      let location = gl.getAttribLocation(program, info.name);
-
-      this._attributes.push({
-        name: info.name,
-        location: location,
-        type: info.type,
-      });
-    }
-
-    // parse uniform
-    let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-    for (let i = 0; i < numUniforms; ++i) {
-      let info = gl.getActiveUniform(program, i);
-      let location = gl.getUniformLocation(program, info.name);
-
-      // NOTE:
-      // if we define an array uniform: float foobar[10]
-      // the uniform.name will be 'foobar[0]', and the size will be 10
-
-      this._uniforms.push({
-        name: info.name,
-        location: location,
-        type: info.type,
-        size: info.size, // used when uniform is an array
-      });
-    }
-
-    //
-    this._linked = true;
+  if (!gl.getShaderParameter(fragShader, gl.COMPILE_STATUS)) {
+    _parseError(errors, 'fs', gl.getShaderInfoLog(fragShader));
+    failed = true;
   }
 
-  destroy() {
-    let gl = this._device._gl;
-    gl.deleteProgram(this._glID);
+  gl.deleteShader(vertShader);
+  gl.deleteShader(fragShader);
 
-    this._linked = false;
-    this._glID = null;
-    this._attributes = [];
-    this._uniforms = [];
-    this._samplers = [];
+  if (failed) {
+    errors.forEach(function (err) {
+      console.error(("Failed to compile " + (err.type) + " " + (err.fileID) + " (ln " + (err.line) + "): " + (err.message)));
+    });
+    return;
   }
-}
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error(("Failed to link shader program: " + (gl.getProgramInfoLog(program))));
+    failed = true;
+  }
+
+  if (failed) {
+    return;
+  }
+
+  this._glID = program;
+
+  // parse attribute
+  var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+  for (var i = 0; i < numAttributes; ++i) {
+    var info = gl.getActiveAttrib(program, i);
+    var location = gl.getAttribLocation(program, info.name);
+
+    this$1._attributes.push({
+      name: info.name,
+      location: location,
+      type: info.type,
+    });
+  }
+
+  // parse uniform
+  var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+  for (var i$1 = 0; i$1 < numUniforms; ++i$1) {
+    var info$1 = gl.getActiveUniform(program, i$1);
+    var location$1 = gl.getUniformLocation(program, info$1.name);
+
+    // NOTE:
+    // if we define an array uniform: float foobar[10]
+    // the uniform.name will be 'foobar[0]', and the size will be 10
+
+    this$1._uniforms.push({
+      name: info$1.name,
+      location: location$1,
+      type: info$1.type,
+      size: info$1.size, // used when uniform is an array
+    });
+  }
+
+  //
+  this._linked = true;
+};
+
+Program.prototype.destroy = function destroy () {
+  var gl = this._device._gl;
+  gl.deleteProgram(this._glID);
+
+  this._linked = false;
+  this._glID = null;
+  this._attributes = [];
+  this._uniforms = [];
+  this._samplers = [];
+};
+
+Object.defineProperties( Program.prototype, prototypeAccessors$2 );
 
 // ====================
 // internal
 // ====================
 
 function _createShader(gl, type, src) {
-  let shader = gl.createShader(type);
+  var shader = gl.createShader(type);
   gl.shaderSource(shader, src);
   gl.compileShader(shader);
 
   return shader;
 }
 
-class Texture {
-  /**
-   * @constructor
-   */
-  constructor(device) {
-    this._device = device;
+var Texture = function Texture(device) {
+  this._device = device;
 
-    this._width = 4;
-    this._height = 4;
-    this._hasMipmap = false;
-    this._compressed = false;
+  this._width = 4;
+  this._height = 4;
+  this._hasMipmap = false;
+  this._compressed = false;
 
-    this._anisotropy = 1;
-    this._minFilter = enums.FILTER_LINEAR;
-    this._magFilter = enums.FILTER_LINEAR;
-    this._mipFilter = enums.FILTER_LINEAR;
-    this._wrapS = enums.WRAP_REPEAT;
-    this._wrapT = enums.WRAP_REPEAT;
-    // wrapR available in webgl2
-    // this._wrapR = enums.WRAP_REPEAT;
-    this._format = enums.TEXTURE_FMT_RGBA8;
+  this._anisotropy = 1;
+  this._minFilter = enums.FILTER_LINEAR;
+  this._magFilter = enums.FILTER_LINEAR;
+  this._mipFilter = enums.FILTER_LINEAR;
+  this._wrapS = enums.WRAP_REPEAT;
+  this._wrapT = enums.WRAP_REPEAT;
+  // wrapR available in webgl2
+  // this._wrapR = enums.WRAP_REPEAT;
+  this._format = enums.TEXTURE_FMT_RGBA8;
 
-    this._target = -1;
+  this._target = -1;
+};
+
+/**
+ * @method destroy
+ */
+Texture.prototype.destroy = function destroy () {
+  if (this._glID === -1) {
+    console.error('The texture already destroyed');
+    return;
   }
 
-  /**
-   * @method destroy
-   */
-  destroy() {
-    if (this._glID === -1) {
-      console.error('The texture already destroyed');
-      return;
-    }
+  var gl = this.device.gl;
+  gl.deleteTexture(this._glID);
 
-    let gl = this.device.gl;
-    gl.deleteTexture(this._glID);
-
-    this.device._stats.tex -= this.bytes;
-    this._glID = -1;
-  }
-}
+  this.device._stats.tex -= this.bytes;
+  this._glID = -1;
+};
 
 function _isPow2(v) {
   return !(v & (v - 1)) && (!!v);
 }
 
-class Texture2D extends Texture {
-  /**
-   * @constructor
-   * @param {Device} device
-   * @param {Object} options
-   * @param {Array} options.images
-   * @param {Boolean} options.mipmap
-   * @param {Number} options.width
-   * @param {Number} options.height
-   * @param {TEXTURE_FMT_*} options.format
-   * @param {Number} options.anisotropy
-   * @param {FILTER_*} options.minFilter
-   * @param {FILTER_*} options.magFilter
-   * @param {FILTER_*} options.mipFilter
-   * @param {WRAP_*} options.wrapS
-   * @param {WRAP_*} options.wrapT
-   * @param {Boolean} options.flipY
-   * @param {Boolean} options.premultiplyAlpha
-   */
-  constructor(device, options) {
-    super(device);
+var Texture2D = (function (Texture$$1) {
+  function Texture2D(device, options) {
+    Texture$$1.call(this, device);
     this._target = this._device._gl.TEXTURE_2D;
 
     this.update(options);
   }
+
+  if ( Texture$$1 ) Texture2D.__proto__ = Texture$$1;
+  Texture2D.prototype = Object.create( Texture$$1 && Texture$$1.prototype );
+  Texture2D.prototype.constructor = Texture2D;
 
   /**
    * @method update
@@ -857,9 +796,9 @@ class Texture2D extends Texture {
    * @param {Boolean} options.flipY
    * @param {Boolean} options.premultiplyAlpha
    */
-  update(options) {
-    let gl = this._device._gl;
-    let genMipmap = this._hasMipmap;
+  Texture2D.prototype.update = function update (options) {
+    var gl = this._device._gl;
+    var genMipmap = this._hasMipmap;
 
     if (options) {
       if (options.width !== undefined) {
@@ -912,7 +851,7 @@ class Texture2D extends Texture {
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._glID);
     // always alloc texture in GPU when we create it.
-    let images = options.images || [null];
+    var images = options.images || [null];
     this._setMipmap(images, options.flipY, options.premultiplyAlpha);
     this._setTexInfo();
 
@@ -921,7 +860,7 @@ class Texture2D extends Texture {
       gl.generateMipmap(gl.TEXTURE_2D);
     }
     this._device._restoreTexture(0);
-  }
+  };
 
   /**
    * @method updateSubImage
@@ -935,15 +874,15 @@ class Texture2D extends Texture {
    * @param {Boolean} options.flipY
    * @param {Boolean} options.premultiplyAlpha
    */
-  updateSubImage(options) {
-    let gl = this._device._gl;
-    let glFmt = glTextureFmt(this._format);
+  Texture2D.prototype.updateSubImage = function updateSubImage (options) {
+    var gl = this._device._gl;
+    var glFmt = glTextureFmt(this._format);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._glID);
     this._setSubImage(glFmt, options);
     this._device._restoreTexture(0);
-  }
+  };
 
   /**
    * @method updateImage
@@ -955,21 +894,21 @@ class Texture2D extends Texture {
    * @param {Boolean} options.flipY
    * @param {Boolean} options.premultiplyAlpha
    */
-  updateImage(options) {
-    let gl = this._device._gl;
-    let glFmt = glTextureFmt(this._format);
+  Texture2D.prototype.updateImage = function updateImage (options) {
+    var gl = this._device._gl;
+    var glFmt = glTextureFmt(this._format);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this._glID);
     this._setImage(glFmt, options);
     this._device._restoreTexture(0);
-  }
+  };
 
-  _setSubImage(glFmt, options) {
-    let gl = this._device._gl;
-    let flipY = options.flipY;
-    let premultiplyAlpha = options.premultiplyAlpha;
-    let img = options.image;
+  Texture2D.prototype._setSubImage = function _setSubImage (glFmt, options) {
+    var gl = this._device._gl;
+    var flipY = options.flipY;
+    var premultiplyAlpha = options.premultiplyAlpha;
+    var img = options.image;
 
     if (
       img instanceof HTMLCanvasElement ||
@@ -1026,13 +965,13 @@ class Texture2D extends Texture {
         );
       }
     }
-  }
+  };
 
-  _setImage(glFmt, options) {
-    let gl = this._device._gl;
-    let flipY = options.flipY;
-    let premultiplyAlpha = options.premultiplyAlpha;
-    let img = options.image;
+  Texture2D.prototype._setImage = function _setImage (glFmt, options) {
+    var gl = this._device._gl;
+    var flipY = options.flipY;
+    var premultiplyAlpha = options.premultiplyAlpha;
+    var img = options.image;
 
     if (
       img instanceof HTMLCanvasElement ||
@@ -1096,11 +1035,13 @@ class Texture2D extends Texture {
         );
       }
     }
-  }
+  };
 
-  _setMipmap(images, flipY, premultiplyAlpha) {
-    let glFmt = glTextureFmt(this._format);
-    let options = {
+  Texture2D.prototype._setMipmap = function _setMipmap (images, flipY, premultiplyAlpha) {
+    var this$1 = this;
+
+    var glFmt = glTextureFmt(this._format);
+    var options = {
       width: this._width,
       height: this._height,
       flipY: flipY,
@@ -1109,18 +1050,18 @@ class Texture2D extends Texture {
       image: null
     };
 
-    for (let i = 0; i < images.length; ++i) {
+    for (var i = 0; i < images.length; ++i) {
       options.level = i;
-      options.width = this._width >> i;
-      options.height = this._height >> i;
+      options.width = this$1._width >> i;
+      options.height = this$1._height >> i;
       options.image = images[i];
-      this._setImage(glFmt, options);
+      this$1._setImage(glFmt, options);
     }
-  }
+  };
 
-  _setTexInfo() {
-    let gl = this._device._gl;
-    let pot = _isPow2(this._width) && _isPow2(this._height);
+  Texture2D.prototype._setTexInfo = function _setTexInfo () {
+    var gl = this._device._gl;
+    var pot = _isPow2(this._width) && _isPow2(this._height);
 
     // WebGL1 doesn't support all wrap modes with NPOT textures
     if (!pot && (this._wrapS !== enums.WRAP_CLAMP || this._wrapT !== enums.WRAP_CLAMP)) {
@@ -1134,39 +1075,26 @@ class Texture2D extends Texture {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, this._wrapS);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, this._wrapT);
 
-    let ext = this._device.ext('EXT_texture_filter_anisotropic');
+    var ext = this._device.ext('EXT_texture_filter_anisotropic');
     if (ext) {
       gl.texParameteri(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropy);
     }
-  }
-}
+  };
 
-class TextureCube extends Texture {
-  /**
-   * @constructor
-   * @param {Device} device
-   * @param {Object} options
-   * @param {Array} options.images
-   * @param {Boolean} options.mipmap
-   * @param {Number} options.width
-   * @param {Number} options.height
-   * @param {TEXTURE_FMT_*} options.format
-   * @param {Number} options.anisotropy
-   * @param {FILTER_*} options.minFilter
-   * @param {FILTER_*} options.magFilter
-   * @param {FILTER_*} options.mipFilter
-   * @param {WRAP_*} options.wrapS
-   * @param {WRAP_*} options.wrapT
-   * @param {WRAP_*} options.wrapR
-   * @param {Boolean} options.flipY
-   * @param {Boolean} options.premultiplyAlpha
-   */
-  constructor(device, options) {
-    super(device);
+  return Texture2D;
+}(Texture));
+
+var TextureCube = (function (Texture$$1) {
+  function TextureCube(device, options) {
+    Texture$$1.call(this, device);
     this._target = this._device._gl.TEXTURE_CUBE_MAP;
 
     this.update(options);
   }
+
+  if ( Texture$$1 ) TextureCube.__proto__ = Texture$$1;
+  TextureCube.prototype = Object.create( Texture$$1 && Texture$$1.prototype );
+  TextureCube.prototype.constructor = TextureCube;
 
   /**
    * @method update
@@ -1186,9 +1114,9 @@ class TextureCube extends Texture {
    * @param {Boolean} options.flipY
    * @param {Boolean} options.premultiplyAlpha
    */
-  update(options) {
-    let gl = this._device._gl;
-    let genMipmap = this._hasMipmap;
+  TextureCube.prototype.update = function update (options) {
+    var gl = this._device._gl;
+    var genMipmap = this._hasMipmap;
 
     if (options) {
       if (options.width !== undefined) {
@@ -1255,7 +1183,7 @@ class TextureCube extends Texture {
         gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
       }
     this._device._restoreTexture(0);
-  }
+  };
 
   /**
    * @method updateSubImage
@@ -1270,15 +1198,15 @@ class TextureCube extends Texture {
    * @param {Boolean} options.flipY
    * @param {Boolean} options.premultiplyAlpha
    */
-  updateSubImage(options) {
-    let gl = this._device._gl;
-    let glFmt = glTextureFmt(this._format);
+  TextureCube.prototype.updateSubImage = function updateSubImage (options) {
+    var gl = this._device._gl;
+    var glFmt = glTextureFmt(this._format);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._glID);
     this._setSubImage(glFmt, options);
     this._device._restoreTexture(0);
-  }
+  };
 
   /**
    * @method updateImage
@@ -1291,22 +1219,22 @@ class TextureCube extends Texture {
    * @param {Boolean} options.flipY
    * @param {Boolean} options.premultiplyAlpha
    */
-  updateImage(options) {
-    let gl = this._device._gl;
-    let glFmt = glTextureFmt(this._format);
+  TextureCube.prototype.updateImage = function updateImage (options) {
+    var gl = this._device._gl;
+    var glFmt = glTextureFmt(this._format);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_CUBE_MAP, this._glID);
     this._setImage(glFmt, options);
     this._device._restoreTexture(0);
-  }
+  };
 
-  _setSubImage(glFmt, options) {
-    let gl = this._device._gl;
-    let flipY = options.flipY;
-    let premultiplyAlpha = options.premultiplyAlpha;
-    let faceIndex = options.faceIndex;
-    let img = options.image;
+  TextureCube.prototype._setSubImage = function _setSubImage (glFmt, options) {
+    var gl = this._device._gl;
+    var flipY = options.flipY;
+    var premultiplyAlpha = options.premultiplyAlpha;
+    var faceIndex = options.faceIndex;
+    var img = options.image;
 
     if (flipY === undefined) {
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -1351,14 +1279,14 @@ class TextureCube extends Texture {
         );
       }
     }
-  }
+  };
 
-  _setImage(glFmt, options) {
-    let gl = this._device._gl;
-    let flipY = options.flipY;
-    let premultiplyAlpha = options.premultiplyAlpha;
-    let faceIndex = options.faceIndex;
-    let img = options.image;
+  TextureCube.prototype._setImage = function _setImage (glFmt, options) {
+    var gl = this._device._gl;
+    var flipY = options.flipY;
+    var premultiplyAlpha = options.premultiplyAlpha;
+    var faceIndex = options.faceIndex;
+    var img = options.image;
 
     if (flipY === undefined) {
       gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
@@ -1409,13 +1337,15 @@ class TextureCube extends Texture {
         );
       }
     }
-  }
+  };
 
   // levelImages = [imagePosX, imageNegX, imagePosY, imageNegY, imagePosZ, imageNegz]
   // images = [levelImages0, levelImages1, ...]
-  _setMipmap(images, flipY, premultiplyAlpha) {
-    let glFmt = glTextureFmt(this._format);
-    let options = {
+  TextureCube.prototype._setMipmap = function _setMipmap (images, flipY, premultiplyAlpha) {
+    var this$1 = this;
+
+    var glFmt = glTextureFmt(this._format);
+    var options = {
       width: this._width,
       height: this._height,
       faceIndex : 0,
@@ -1425,22 +1355,22 @@ class TextureCube extends Texture {
       image: null
     };
 
-    for (let i = 0; i < images.length; ++i) {
-      let levelImages = images[i];
+    for (var i = 0; i < images.length; ++i) {
+      var levelImages = images[i];
       options.level = i;
-      options.width = this._width >> i;
-      options.height = this._height >> i;
+      options.width = this$1._width >> i;
+      options.height = this$1._height >> i;
 
-      for (let face = 0; face < 6; ++face) {
+      for (var face = 0; face < 6; ++face) {
         options.faceIndex = face;
         options.image = levelImages[face];
-        this._setImage(glFmt, options);
+        this$1._setImage(glFmt, options);
       }
     }
-  }
+  };
 
-  _setTexInfo() {
-    let gl = this._device._gl;
+  TextureCube.prototype._setTexInfo = function _setTexInfo () {
+    var gl = this._device._gl;
 
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, glFilter(gl, this._minFilter, this._hasMipmap ? this._mipFilter : -1));
     gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, glFilter(gl, this._magFilter, -1));
@@ -1449,96 +1379,76 @@ class TextureCube extends Texture {
     // wrapR available in webgl2
     // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, this._wrapR);
 
-    let ext = this._device.ext('EXT_texture_filter_anisotropic');
+    var ext = this._device.ext('EXT_texture_filter_anisotropic');
     if (ext) {
       gl.texParameteri(gl.TEXTURE_CUBE_MAP, ext.TEXTURE_MAX_ANISOTROPY_EXT, this._anisotropy);
     }
-  }
-}
+  };
 
-class RenderBuffer {
-  /**
-   * @constructor
-   * @param {Device} device
-   * @param {RB_FMT_*} format
-   * @param {Number} width
-   * @param {Number} height
-   */
-  constructor(device, format, width, height) {
-    this._device = device;
-    this._format = format;
-    this._width = width;
-    this._height = height;
+  return TextureCube;
+}(Texture));
 
-    const gl = device._gl;
-    this._glID = gl.createRenderbuffer();
+var RenderBuffer = function RenderBuffer(device, format, width, height) {
+  this._device = device;
+  this._format = format;
+  this._width = width;
+  this._height = height;
 
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this._glID);
-    gl.renderbufferStorage(gl.RENDERBUFFER, format, width, height);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-  }
+  var gl = device._gl;
+  this._glID = gl.createRenderbuffer();
 
-  /**
-   * @method destroy
-   */
-  destroy() {
-    if (this._glID === null) {
-      console.error('The render-buffer already destroyed');
-      return;
-    }
+  gl.bindRenderbuffer(gl.RENDERBUFFER, this._glID);
+  gl.renderbufferStorage(gl.RENDERBUFFER, format, width, height);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+};
 
-    const gl = this._device._gl;
-
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.deleteRenderbuffer(this._glID);
-
-    this._glID = null;
-  }
-}
-
-class FrameBuffer {
-  /**
-   * @constructor
-   * @param {Device} device
-   * @param {Number} width
-   * @param {Number} height
-   * @param {Object} options
-   * @param {Array} options.colors
-   * @param {RenderBuffer|Texture2D|TextureCube} options.depth
-   * @param {RenderBuffer|Texture2D|TextureCube} options.stencil
-   * @param {RenderBuffer|Texture2D|TextureCube} options.depthStencil
-   */
-  constructor(device, width, height, options) {
-    this._device = device;
-    this._width = width;
-    this._height = height;
-
-    this._colors = options.colors || [];
-    this._depth = options.depth || null;
-    this._stencil = options.stencil || null;
-    this._depthStencil = options.depthStencil || null;
-
-    this._glID = device._gl.createFramebuffer();
+/**
+ * @method destroy
+ */
+RenderBuffer.prototype.destroy = function destroy () {
+  if (this._glID === null) {
+    console.error('The render-buffer already destroyed');
+    return;
   }
 
-  /**
-   * @method destroy
-   */
-  destroy() {
-    if (this._glID === null) {
-      console.error('The frame-buffer already destroyed');
-      return;
-    }
+  var gl = this._device._gl;
 
-    const gl = this._device._gl;
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+  gl.deleteRenderbuffer(this._glID);
 
-    gl.deleteFramebuffer(this._glID);
+  this._glID = null;
+};
 
-    this._glID = null;
+var FrameBuffer = function FrameBuffer(device, width, height, options) {
+  this._device = device;
+  this._width = width;
+  this._height = height;
+
+  this._colors = options.colors || [];
+  this._depth = options.depth || null;
+  this._stencil = options.stencil || null;
+  this._depthStencil = options.depthStencil || null;
+
+  this._glID = device._gl.createFramebuffer();
+};
+
+/**
+ * @method destroy
+ */
+FrameBuffer.prototype.destroy = function destroy () {
+  if (this._glID === null) {
+    console.error('The frame-buffer already destroyed');
+    return;
   }
-}
 
-const _default = {
+  var gl = this._device._gl;
+
+  gl.deleteFramebuffer(this._glID);
+
+  this._glID = null;
+};
+
+var _default = {
   // blend
   blend: false,
   blendSep: false,
@@ -1588,167 +1498,150 @@ const _default = {
   program: null,
 };
 
-class State {
-  constructor() {
-    // bindings
-    this.vertexBuffers = [];
-    this.vertexBufferOffsets = [];
-    this.textureUnits = [];
+var State = function State() {
+  // bindings
+  this.vertexBuffers = [];
+  this.vertexBufferOffsets = [];
+  this.textureUnits = [];
 
-    this.set(_default);
+  this.set(_default);
+};
+
+State.prototype.reset = function reset () {
+  this.set(_default);
+};
+
+State.prototype.set = function set (cpy) {
+    var this$1 = this;
+
+  // blending
+  this.blend = cpy.blend;
+  this.blendSep = cpy.blendSep;
+  this.blendColor = cpy.blendColor;
+  this.blendEq = cpy.blendEq;
+  this.blendAlphaEq = cpy.blendAlphaEq;
+  this.blendSrc = cpy.blendSrc;
+  this.blendDst = cpy.blendDst;
+  this.blendSrcAlpha = cpy.blendSrcAlpha;
+  this.blendDstAlpha = cpy.blendDstAlpha;
+
+  // depth
+  this.depthTest = cpy.depthTest;
+  this.depthWrite = cpy.depthWrite;
+  this.depthFunc = cpy.depthFunc;
+
+  // stencil
+  this.stencilTest = cpy.stencilTest;
+  this.stencilSep = cpy.stencilSep;
+  this.stencilFuncFront = cpy.stencilFuncFront;
+  this.stencilRefFront = cpy.stencilRefFront;
+  this.stencilMaskFront = cpy.stencilMaskFront;
+  this.stencilFailOpFront = cpy.stencilFailOpFront;
+  this.stencilZFailOpFront = cpy.stencilZFailOpFront;
+  this.stencilZPassOpFront = cpy.stencilZPassOpFront;
+  this.stencilWriteMaskFront = cpy.stencilWriteMaskFront;
+  this.stencilFuncBack = cpy.stencilFuncBack;
+  this.stencilRefBack = cpy.stencilRefBack;
+  this.stencilMaskBack = cpy.stencilMaskBack;
+  this.stencilFailOpBack = cpy.stencilFailOpBack;
+  this.stencilZFailOpBack = cpy.stencilZFailOpBack;
+  this.stencilZPassOpBack = cpy.stencilZPassOpBack;
+  this.stencilWriteMaskBack = cpy.stencilWriteMaskBack;
+
+  // cull-mode
+  this.cullMode = cpy.cullMode;
+
+  // primitive-type
+  this.primitiveType = cpy.primitiveType;
+
+  // bindings
+  this.maxStream = cpy.maxStream;
+  for (var i = 0; i < cpy.vertexBuffers.length; ++i) {
+    this$1.vertexBuffers[i] = cpy.vertexBuffers[i];
   }
-
-  reset () {
-    this.set(_default);
+  for (var i$1 = 0; i$1 < cpy.vertexBufferOffsets.length; ++i$1) {
+    this$1.vertexBufferOffsets[i$1] = cpy.vertexBufferOffsets[i$1];
   }
-
-  set (cpy) {
-    // blending
-    this.blend = cpy.blend;
-    this.blendSep = cpy.blendSep;
-    this.blendColor = cpy.blendColor;
-    this.blendEq = cpy.blendEq;
-    this.blendAlphaEq = cpy.blendAlphaEq;
-    this.blendSrc = cpy.blendSrc;
-    this.blendDst = cpy.blendDst;
-    this.blendSrcAlpha = cpy.blendSrcAlpha;
-    this.blendDstAlpha = cpy.blendDstAlpha;
-
-    // depth
-    this.depthTest = cpy.depthTest;
-    this.depthWrite = cpy.depthWrite;
-    this.depthFunc = cpy.depthFunc;
-
-    // stencil
-    this.stencilTest = cpy.stencilTest;
-    this.stencilSep = cpy.stencilSep;
-    this.stencilFuncFront = cpy.stencilFuncFront;
-    this.stencilRefFront = cpy.stencilRefFront;
-    this.stencilMaskFront = cpy.stencilMaskFront;
-    this.stencilFailOpFront = cpy.stencilFailOpFront;
-    this.stencilZFailOpFront = cpy.stencilZFailOpFront;
-    this.stencilZPassOpFront = cpy.stencilZPassOpFront;
-    this.stencilWriteMaskFront = cpy.stencilWriteMaskFront;
-    this.stencilFuncBack = cpy.stencilFuncBack;
-    this.stencilRefBack = cpy.stencilRefBack;
-    this.stencilMaskBack = cpy.stencilMaskBack;
-    this.stencilFailOpBack = cpy.stencilFailOpBack;
-    this.stencilZFailOpBack = cpy.stencilZFailOpBack;
-    this.stencilZPassOpBack = cpy.stencilZPassOpBack;
-    this.stencilWriteMaskBack = cpy.stencilWriteMaskBack;
-
-    // cull-mode
-    this.cullMode = cpy.cullMode;
-
-    // primitive-type
-    this.primitiveType = cpy.primitiveType;
-
-    // bindings
-    this.maxStream = cpy.maxStream;
-    for (let i = 0; i < cpy.vertexBuffers.length; ++i) {
-      this.vertexBuffers[i] = cpy.vertexBuffers[i];
-    }
-    for (let i = 0; i < cpy.vertexBufferOffsets.length; ++i) {
-      this.vertexBufferOffsets[i] = cpy.vertexBufferOffsets[i];
-    }
-    this.indexBuffer = cpy.indexBuffer;
-    for (let i = 0; i < cpy.textureUnits.length; ++i) {
-      this.textureUnits[i] = cpy.textureUnits[i];
-    }
-    this.program = cpy.program;
+  this.indexBuffer = cpy.indexBuffer;
+  for (var i$2 = 0; i$2 < cpy.textureUnits.length; ++i$2) {
+    this$1.textureUnits[i$2] = cpy.textureUnits[i$2];
   }
-}
+  this.program = cpy.program;
+};
 
-const GL_INT = 5124;
-const GL_FLOAT$1 = 5126;
-const GL_FLOAT_VEC2 = 35664;
-const GL_FLOAT_VEC3 = 35665;
-const GL_FLOAT_VEC4 = 35666;
-const GL_INT_VEC2 = 35667;
-const GL_INT_VEC3 = 35668;
-const GL_INT_VEC4 = 35669;
-const GL_BOOL = 35670;
-const GL_BOOL_VEC2 = 35671;
-const GL_BOOL_VEC3 = 35672;
-const GL_BOOL_VEC4 = 35673;
-const GL_FLOAT_MAT2 = 35674;
-const GL_FLOAT_MAT3 = 35675;
-const GL_FLOAT_MAT4 = 35676;
-const GL_SAMPLER_2D = 35678;
-const GL_SAMPLER_CUBE = 35680;
+var GL_INT = 5124;
+var GL_FLOAT$1 = 5126;
+var GL_FLOAT_VEC2 = 35664;
+var GL_FLOAT_VEC3 = 35665;
+var GL_FLOAT_VEC4 = 35666;
+var GL_INT_VEC2 = 35667;
+var GL_INT_VEC3 = 35668;
+var GL_INT_VEC4 = 35669;
+var GL_BOOL = 35670;
+var GL_BOOL_VEC2 = 35671;
+var GL_BOOL_VEC3 = 35672;
+var GL_BOOL_VEC4 = 35673;
+var GL_FLOAT_MAT2 = 35674;
+var GL_FLOAT_MAT3 = 35675;
+var GL_FLOAT_MAT4 = 35676;
+var GL_SAMPLER_2D = 35678;
+var GL_SAMPLER_CUBE = 35680;
 
 /**
  * _type2uniformCommit
  */
-let _type2uniformCommit = {
-  [GL_INT]: function (gl, id, value) {
+var _type2uniformCommit = {};
+_type2uniformCommit[GL_INT] = function (gl, id, value) {
     gl.uniform1i(id, value);
-  },
-
-  [GL_FLOAT$1]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT$1] = function (gl, id, value) {
     gl.uniform1f(id, value);
-  },
-
-  [GL_FLOAT_VEC2]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT_VEC2] = function (gl, id, value) {
     gl.uniform2fv(id, value);
-  },
-
-  [GL_FLOAT_VEC3]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT_VEC3] = function (gl, id, value) {
     gl.uniform3fv(id, value);
-  },
-
-  [GL_FLOAT_VEC4]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT_VEC4] = function (gl, id, value) {
     gl.uniform4fv(id, value);
-  },
-
-  [GL_INT_VEC2]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_INT_VEC2] = function (gl, id, value) {
     gl.uniform2iv(id, value);
-  },
-
-  [GL_INT_VEC3]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_INT_VEC3] = function (gl, id, value) {
     gl.uniform3iv(id, value);
-  },
-
-  [GL_INT_VEC4]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_INT_VEC4] = function (gl, id, value) {
     gl.uniform4iv(id, value);
-  },
-
-  [GL_BOOL]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_BOOL] = function (gl, id, value) {
     gl.uniform1i(id, value);
-  },
-
-  [GL_BOOL_VEC2]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_BOOL_VEC2] = function (gl, id, value) {
     gl.uniform2iv(id, value);
-  },
-
-  [GL_BOOL_VEC3]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_BOOL_VEC3] = function (gl, id, value) {
     gl.uniform3iv(id, value);
-  },
-
-  [GL_BOOL_VEC4]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_BOOL_VEC4] = function (gl, id, value) {
     gl.uniform4iv(id, value);
-  },
-
-  [GL_FLOAT_MAT2]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT_MAT2] = function (gl, id, value) {
     gl.uniformMatrix2fv(id, false, value);
-  },
-
-  [GL_FLOAT_MAT3]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT_MAT3] = function (gl, id, value) {
     gl.uniformMatrix3fv(id, false, value);
-  },
-
-  [GL_FLOAT_MAT4]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_FLOAT_MAT4] = function (gl, id, value) {
     gl.uniformMatrix4fv(id, false, value);
-  },
-
-  [GL_SAMPLER_2D]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_SAMPLER_2D] = function (gl, id, value) {
     gl.uniform1i(id, value);
-  },
-
-  [GL_SAMPLER_CUBE]: function (gl, id, value) {
+  };
+_type2uniformCommit[GL_SAMPLER_CUBE] = function (gl, id, value) {
     gl.uniform1i(id, value);
-  },
-};
+  };
 
 /**
  * _commitBlendStates
@@ -2022,14 +1915,14 @@ function _commitCullMode(gl, cur, next) {
  * _commitVertexBuffers
  */
 function _commitVertexBuffers(gl, cur, next) {
-  let attrsDirty = false;
+  var attrsDirty = false;
 
   if (cur.maxStream !== next.maxStream) {
     attrsDirty = true;
   } else if (cur.program !== next.program) {
     attrsDirty = true;
   } else {
-    for (let i = 0; i < next.maxStream + 1; ++i) {
+    for (var i = 0; i < next.maxStream + 1; ++i) {
       if (
         cur.vertexBuffers[i] !== next.vertexBuffers[i] ||
         cur.vertexBufferOffsets[i] !== next.vertexBufferOffsets[i]
@@ -2041,21 +1934,21 @@ function _commitVertexBuffers(gl, cur, next) {
   }
 
   if (attrsDirty) {
-    for (let i = 0; i < next.maxStream + 1; ++i) {
-      let vb = next.vertexBuffers[i];
-      let vbOffset = next.vertexBufferOffsets[i];
+    for (var i$1 = 0; i$1 < next.maxStream + 1; ++i$1) {
+      var vb = next.vertexBuffers[i$1];
+      var vbOffset = next.vertexBufferOffsets[i$1];
       if (!vb) {
         continue;
       }
 
       gl.bindBuffer(gl.ARRAY_BUFFER, vb._glID);
 
-      for (let i = 0; i < next.program._attributes.length; ++i) {
-        let attr = next.program._attributes[i];
+      for (var j = 0; j < next.program._attributes.length; ++j) {
+        var attr = next.program._attributes[j];
 
-        let el = vb._format.element(attr.name);
+        var el = vb._format.element(attr.name);
         if (!el) {
-          console.warn(`Can not find vertex attribute: ${attr.name}`);
+          console.warn(("Can not find vertex attribute: " + (attr.name)));
           continue;
         }
 
@@ -2077,9 +1970,9 @@ function _commitVertexBuffers(gl, cur, next) {
  * _commitTextures
  */
 function _commitTextures(gl, cur, next) {
-  for (let i = 0; i < next.textureUnits.length; ++i) {
+  for (var i = 0; i < next.textureUnits.length; ++i) {
     if (cur.textureUnits[i] !== next.textureUnits[i]) {
-      let texture = next.textureUnits[i];
+      var texture = next.textureUnits[i];
       // gl.activeTexture(gl.TEXTURE0 + i);
       gl.bindTexture(texture._target, texture._glID);
     }
@@ -2089,7 +1982,9 @@ function _commitTextures(gl, cur, next) {
 /**
  * _attach
  */
-function _attach(gl, location, attachment, face = 0) {
+function _attach(gl, location, attachment, face) {
+  if ( face === void 0 ) face = 0;
+
   if (attachment instanceof Texture2D) {
     gl.framebufferTexture2D(
       gl.FRAMEBUFFER,
@@ -2116,684 +2011,697 @@ function _attach(gl, location, attachment, face = 0) {
   }
 }
 
-class Device {
-  /**
-   * @param {HTMLElement} canvasEL
-   * @param {object} opts
-   */
-  constructor(canvasEL, opts) {
-    let gl;
+var Device = function Device(canvasEL, opts) {
+  var gl;
 
-    // default options
-    opts = opts || {};
-    if (opts.alpha === undefined) {
-      opts.alpha = false;
-    }
-    if (opts.stencil === undefined) {
-      opts.stencil = true;
-    }
-    if (opts.depth === undefined) {
-      opts.depth = true;
-    }
+  // default options
+  opts = opts || {};
+  if (opts.alpha === undefined) {
+    opts.alpha = false;
+  }
+  if (opts.stencil === undefined) {
+    opts.stencil = true;
+  }
+  if (opts.depth === undefined) {
+    opts.depth = true;
+  }
+  if (opts.antialias === undefined) {
+    opts.antialias = false;
+  }
+  // NOTE: it is said the performance improved in mobile device with this flag off.
+  if (opts.preserveDrawingBuffer === undefined) {
+    opts.preserveDrawingBuffer = false;
+  }
+
+
+  try {
+    gl = canvasEL.getContext('webgl', opts);
+  } catch (err) {
+    console.error(err);
+    return;
+  }
+
+  // statics
+  this._gl = gl;
+  this._extensions = {};
+  this._caps = {}; // capability
+  this._stats = {
+    texture: 0,
+    vb: 0,
+    ib: 0,
+    drawcalls: 0,
+  };
+
+  // runtime
+  this._current = new State();
+  this._next = new State();
+  this._uniforms = {}; // name: { value, num, dirty }
+  this._vx = this._vy = this._vw = this._vh = 0;
+  this._sx = this._sy = this._sw = this._sh = 0;
+  this._framebuffer = null;
+
+  this._initExtensions([
+    'EXT_texture_filter_anisotropic',
+    'OES_standard_derivatives',
+    'OES_texture_float',
+    'OES_texture_float_linear',
+    'OES_texture_half_float',
+    'OES_texture_half_float_linear',
+    'OES_vertex_array_object',
+    'WEBGL_compressed_texture_atc',
+    'WEBGL_compressed_texture_etc1',
+    'WEBGL_compressed_texture_pvrtc',
+    'WEBGL_compressed_texture_s3tc',
+    'WEBGL_depth_texture',
+    'WEBGL_draw_buffers' ]);
+  this._initCaps();
+  this._initStates();
+};
+
+Device.prototype._initExtensions = function _initExtensions (extensions) {
+    var this$1 = this;
+
+  var gl = this._gl;
+
+  for (var i = 0; i < extensions.length; ++i) {
+    var name = extensions[i];
 
     try {
-      gl = canvasEL.getContext('webgl', opts);
-    } catch (err) {
-      console.error(err);
-      return;
+      var ext = gl.getExtension(name);
+      if (ext) {
+        this$1._extensions[name] = ext;
+      }
+    } catch (e) {
+      console.error(e);
     }
+  }
+};
 
-    // statics
-    this._gl = gl;
-    this._extensions = {};
-    this._caps = {}; // capability
-    this._stats = {
-      texture: 0,
-      vb: 0,
-      ib: 0,
-      drawcalls: 0,
+Device.prototype._initCaps = function _initCaps () {
+  var gl = this._gl;
+  var extDrawBuffers = this.ext('WEBGL_draw_buffers');
+
+  this._caps.maxVertexTextures = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+  this._caps.maxFragUniforms = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
+  this._caps.maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+
+  this._caps.maxDrawBuffers = extDrawBuffers ? gl.getParameter(extDrawBuffers.MAX_DRAW_BUFFERS_WEBGL) : 1;
+  this._caps.maxColorAttachments = extDrawBuffers ? gl.getParameter(extDrawBuffers.MAX_COLOR_ATTACHMENTS_WEBGL) : 1;
+};
+
+Device.prototype._initStates = function _initStates () {
+  var gl = this._gl;
+
+  // gl.frontFace(gl.CCW);
+  gl.disable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ZERO);
+  gl.blendEquation(gl.FUNC_ADD);
+  gl.blendColor(1,1,1,1);
+
+  gl.colorMask(true, true, true, true);
+
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.LESS);
+  gl.depthMask(false);
+  gl.disable(gl.POLYGON_OFFSET_FILL);
+  gl.depthRange(0,1);
+
+  gl.disable(gl.STENCIL_TEST);
+  gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
+  gl.stencilMask(0xFF);
+  gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
+
+  // TODO:
+  // this.setAlphaToCoverage(false);
+  // this.setTransformFeedbackBuffer(null);
+  // this.setRaster(true);
+  // this.setDepthBias(false);
+
+  gl.clearDepth(1);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clearStencil(0);
+
+  gl.disable(gl.SCISSOR_TEST);
+};
+
+Device.prototype._restoreTexture = function _restoreTexture (unit) {
+  var gl = this._gl;
+
+  var texture = this._current.textureUnits[unit];
+  if (texture) {
+    gl.bindTexture(texture._target, texture._glID);
+  } else {
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  }
+};
+
+/**
+ * @method ext
+ * @param {string} name
+ */
+Device.prototype.ext = function ext (name) {
+  return this._extensions[name];
+};
+
+// ===============================
+// Immediate Settings
+// ===============================
+
+/**
+ * @method setFrameBuffer
+ * @param {FrameBuffer} fb - null means use the backbuffer
+ */
+Device.prototype.setFrameBuffer = function setFrameBuffer (fb) {
+    var this$1 = this;
+
+  if (this._framebuffer === fb) {
+    return;
+  }
+
+  this._framebuffer = fb;
+  var gl = this._gl;
+
+  if (fb === null) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    return;
+  }
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fb._glID);
+
+  var numColors = this._framebuffer._colors.length;
+  for (var i = 0; i < numColors; ++i) {
+    var colorBuffer = this$1._framebuffer._colors[i];
+    _attach(gl, gl.COLOR_ATTACHMENT0 + i, colorBuffer);
+
+    // TODO: what about cubemap face??? should be the target parameter for colorBuffer
+  }
+  for (var i$1 = numColors; i$1 < this._caps.maxColorAttachments; ++i$1) {
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0 + i$1,
+      gl.TEXTURE_2D,
+      null,
+      0
+    );
+  }
+
+  if (this._framebuffer._depth) {
+    _attach(gl, gl.DEPTH_ATTACHMENT, this._framebuffer._depth);
+  }
+
+  if (this._framebuffer._stencil) {
+    _attach(gl, gl.STENCIL_ATTACHMENT, fb._stencil);
+  }
+
+  if (this._framebuffer._depthStencil) {
+    _attach(gl, gl.DEPTH_STENCIL_ATTACHMENT, fb._depthStencil);
+  }
+};
+
+/**
+ * @method setViewport
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} w
+ * @param {Number} h
+ */
+Device.prototype.setViewport = function setViewport (x, y, w, h) {
+  if (
+    this._vx !== x ||
+    this._vy !== y ||
+    this._vw !== w ||
+    this._vh !== h
+  ) {
+    this._gl.viewport(x, y, w, h);
+    this._vx = x;
+    this._vy = y;
+    this._vw = w;
+    this._vh = h;
+  }
+};
+
+/**
+ * @method setScissor
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} w
+ * @param {Number} h
+ */
+Device.prototype.setScissor = function setScissor (x, y, w, h) {
+  if (
+    this._sx !== x ||
+    this._sy !== y ||
+    this._sw !== w ||
+    this._sh !== h
+  ) {
+    this._gl.scissor(x, y, w, h);
+    this._sx = x;
+    this._sy = y;
+    this._sw = w;
+    this._sh = h;
+  }
+};
+
+/**
+ * @method clear
+ * @param {Object} opts
+ * @param {Array} opts.color
+ * @param {Number} opts.depth
+ * @param {Number} opts.stencil
+ */
+Device.prototype.clear = function clear (opts) {
+  var gl = this._gl;
+  var flags = 0;
+
+  if (opts.color !== undefined) {
+    flags |= gl.COLOR_BUFFER_BIT;
+    gl.clearColor(opts.color[0], opts.color[1], opts.color[2], opts.color[3]);
+  }
+
+  if (opts.depth !== undefined) {
+    flags |= gl.DEPTH_BUFFER_BIT;
+    gl.clearDepth(opts.depth);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthMask(true);
+    gl.depthFunc(gl.ALWAYS);
+  }
+
+  if (opts.stencil !== undefined) {
+    flags |= gl.STENCIL_BUFFER_BIT;
+    gl.clearStencil(opts.stencil);
+  }
+
+  gl.clear(flags);
+
+  // restore depth-write
+  if (opts.depth !== undefined) {
+    if (this._current.depthTest === false) {
+      gl.disable(gl.DEPTH_TEST);
+    } else {
+      if (this._current.depthWrite === false) {
+        gl.depthMask(false);
+      }
+      if (this._current.depthFunc !== enums.DS_FUNC_ALWAYS) {
+        gl.depthFunc(this._current.depthFunc);
+      }
+    }
+  }
+};
+
+// ===============================
+// Deferred States
+// ===============================
+
+/**
+ * @method enableBlend
+ */
+Device.prototype.enableBlend = function enableBlend () {
+  this._next.blend = true;
+};
+
+/**
+ * @method enableDepthTest
+ */
+Device.prototype.enableDepthTest = function enableDepthTest () {
+  this._next.depthTest = true;
+};
+
+/**
+ * @method enableDepthWrite
+ */
+Device.prototype.enableDepthWrite = function enableDepthWrite () {
+  this._next.depthWrite = true;
+};
+
+/**
+ * @method enableStencilTest
+ */
+Device.prototype.enableStencilTest = function enableStencilTest () {
+  this._next.stencilTest = true;
+};
+
+/**
+ * @method setStencilFunc
+ * @param {DS_FUNC_*} func
+ * @param {Number} ref
+ * @param {Number} mask
+ */
+Device.prototype.setStencilFunc = function setStencilFunc (func, ref, mask) {
+  this._next.stencilSep = false;
+  this._next.stencilFuncFront = this._next.stencilFuncBack = func;
+  this._next.stencilRefFront = this._next.stencilRefBack = ref;
+  this._next.stencilMaskFront = this._next.stencilMaskBack = mask;
+};
+
+/**
+ * @method setStencilFuncFront
+ * @param {DS_FUNC_*} func
+ * @param {Number} ref
+ * @param {Number} mask
+ */
+Device.prototype.setStencilFuncFront = function setStencilFuncFront (func, ref, mask) {
+  this._next.stencilSep = true;
+  this._next.stencilFuncFront = func;
+  this._next.stencilRefFront = ref;
+  this._next.stencilMaskFront = mask;
+};
+
+/**
+ * @method setStencilFuncBack
+ * @param {DS_FUNC_*} func
+ * @param {Number} ref
+ * @param {Number} mask
+ */
+Device.prototype.setStencilFuncBack = function setStencilFuncBack (func, ref, mask) {
+  this._next.stencilSep = true;
+  this._next.stencilFuncBack = func;
+  this._next.stencilRefBack = ref;
+  this._next.stencilMaskBack = mask;
+};
+
+/**
+ * @method setStencilOp
+ * @param {STENCIL_OP_*} failOp
+ * @param {STENCIL_OP_*} zFailOp
+ * @param {STENCIL_OP_*} zPassOp
+ * @param {Number} writeMask
+ */
+Device.prototype.setStencilOp = function setStencilOp (failOp, zFailOp, zPassOp, writeMask) {
+  this._next.stencilFailOpFront = this._next.stencilFailOpBack = failOp;
+  this._next.stencilZFailOpFront = this._next.stencilZFailOpBack = zFailOp;
+  this._next.stencilZPassOpFront = this._next.stencilZPassOpBack = zPassOp;
+  this._next.stencilWriteMaskFront = this._next.stencilWriteMaskBack = writeMask;
+};
+
+/**
+ * @method setStencilOpFront
+ * @param {STENCIL_OP_*} failOp
+ * @param {STENCIL_OP_*} zFailOp
+ * @param {STENCIL_OP_*} zPassOp
+ * @param {Number} writeMask
+ */
+Device.prototype.setStencilOpFront = function setStencilOpFront (failOp, zFailOp, zPassOp, writeMask) {
+  this._next.stencilSep = true;
+  this._next.stencilFailOpFront = failOp;
+  this._next.stencilZFailOpFront = zFailOp;
+  this._next.stencilZPassOpFront = zPassOp;
+  this._next.stencilWriteMaskFront = writeMask;
+};
+
+/**
+ * @method setStencilOpBack
+ * @param {STENCIL_OP_*} failOp
+ * @param {STENCIL_OP_*} zFailOp
+ * @param {STENCIL_OP_*} zPassOp
+ * @param {Number} writeMask
+ */
+Device.prototype.setStencilOpBack = function setStencilOpBack (failOp, zFailOp, zPassOp, writeMask) {
+  this._next.stencilSep = true;
+  this._next.stencilFailOpBack = failOp;
+  this._next.stencilZFailOpBack = zFailOp;
+  this._next.stencilZPassOpBack = zPassOp;
+  this._next.stencilWriteMaskBack = writeMask;
+};
+
+/**
+ * @method setDepthFunc
+ * @param {DS_FUNC_*} depthFunc
+ */
+Device.prototype.setDepthFunc = function setDepthFunc (depthFunc) {
+  this._next.depthFunc = depthFunc;
+};
+
+/**
+ * @method setBlendColor32
+ * @param {Number} rgba
+ */
+Device.prototype.setBlendColor32 = function setBlendColor32 (rgba) {
+  this._next.blendColor = rgba;
+};
+
+/**
+ * @method setBlendColor
+ * @param {Number} r
+ * @param {Number} g
+ * @param {Number} b
+ * @param {Number} a
+ */
+Device.prototype.setBlendColor = function setBlendColor (r, g, b, a) {
+  this._next.blendColor = ((r * 255) << 24 | (g * 255) << 16 | (b * 255) << 8 | a * 255) >>> 0;
+};
+
+/**
+ * @method setBlendFunc
+ * @param {BELND_*} src
+ * @param {BELND_*} dst
+ */
+Device.prototype.setBlendFunc = function setBlendFunc (src, dst) {
+  this._next.blendSep = false;
+  this._next.blendSrc = src;
+  this._next.blendDst = dst;
+};
+
+/**
+ * @method setBlendFuncSep
+ * @param {BELND_*} src
+ * @param {BELND_*} dst
+ * @param {BELND_*} srcAlpha
+ * @param {BELND_*} dstAlpha
+ */
+Device.prototype.setBlendFuncSep = function setBlendFuncSep (src, dst, srcAlpha, dstAlpha) {
+  this._next.blendSep = true;
+  this._next.blendSrc = src;
+  this._next.blendDst = dst;
+  this._next.blendSrcAlpha = srcAlpha;
+  this._next.blendDstAlpha = dstAlpha;
+};
+
+/**
+ * @method setBlendEq
+ * @param {BELND_FUNC_*} eq
+ */
+Device.prototype.setBlendEq = function setBlendEq (eq) {
+  this._next.blendSep = false;
+  this._next.blendEq = eq;
+};
+
+/**
+ * @method setBlendEqSep
+ * @param {BELND_FUNC_*} eq
+ * @param {BELND_FUNC_*} alphaEq
+ */
+Device.prototype.setBlendEqSep = function setBlendEqSep (eq, alphaEq) {
+  this._next.blendSep = true;
+  this._next.blendEq = eq;
+  this._next.blendAlphaEq = alphaEq;
+};
+
+/**
+ * @method setCullMode
+ * @param {CULL_*} mode
+ */
+Device.prototype.setCullMode = function setCullMode (mode) {
+  this._next.cullMode = mode;
+};
+
+/**
+ * @method setVertexBuffer
+ * @param {Number} stream
+ * @param {VertexBuffer} buffer
+ * @param {Number} start - start vertex
+ */
+Device.prototype.setVertexBuffer = function setVertexBuffer (stream, buffer, start) {
+    if ( start === void 0 ) start = 0;
+
+  this._next.vertexBuffers[stream] = buffer;
+  this._next.vertexBufferOffsets[stream] = start;
+  if (this._next.maxStream < stream) {
+    this._next.maxStream = stream;
+  }
+};
+
+/**
+ * @method setIndexBuffer
+ * @param {IndexBuffer} buffer
+ */
+Device.prototype.setIndexBuffer = function setIndexBuffer (buffer) {
+  this._next.indexBuffer = buffer;
+};
+
+/**
+ * @method setProgram
+ * @param {Program} program
+ */
+Device.prototype.setProgram = function setProgram (program) {
+  this._next.program = program;
+};
+
+/**
+ * @method setTexture
+ * @param {String} name
+ * @param {Texture} texture
+ * @param {Number} slot
+ */
+Device.prototype.setTexture = function setTexture (name, texture, slot) {
+  if (slot >= this._caps.maxTextureUnits) {
+    console.warn(("Can not set texture " + name + " at stage " + slot + ", max texture exceed: " + (this._caps.maxTextureUnits)));
+    return;
+  }
+
+  this._next.textureUnits[slot] = texture;
+  this.setUniform(name, slot);
+};
+
+/**
+ * @method setUniform
+ * @param {String} name
+ * @param {*} value
+ */
+Device.prototype.setUniform = function setUniform (name, value) {
+  var uniform = this._uniforms[name];
+  if (!uniform) {
+    uniform = {
+      dirty: true,
+      value: value,
     };
+  } else {
+    uniform.dirty = true;
+    uniform.value = value;
+  }
+  this._uniforms[name] = uniform;
+};
 
-    // runtime
-    this._current = new State();
-    this._next = new State();
-    this._uniforms = {}; // name: { value, num, dirty }
-    this._vx = this._vy = this._vw = this._vh = 0;
-    this._sx = this._sy = this._sw = this._sh = 0;
-    this._framebuffer = null;
+/**
+ * @method setPrimitiveType
+ * @param {PT_*} type
+ */
+Device.prototype.setPrimitiveType = function setPrimitiveType (type) {
+  this._next.primitiveType = type;
+};
 
-    this._initExtensions([
-      'EXT_texture_filter_anisotropic',
-      'OES_standard_derivatives',
-      'OES_texture_float',
-      'OES_texture_float_linear',
-      'OES_texture_half_float',
-      'OES_texture_half_float_linear',
-      'OES_vertex_array_object',
-      'WEBGL_compressed_texture_atc',
-      'WEBGL_compressed_texture_etc1',
-      'WEBGL_compressed_texture_pvrtc',
-      'WEBGL_compressed_texture_s3tc',
-      'WEBGL_depth_texture',
-      'WEBGL_draw_buffers',
-    ]);
-    this._initCaps();
-    this._initStates();
+/**
+ * @method draw
+ * @param {Number} base
+ * @param {Number} count
+ */
+Device.prototype.draw = function draw (base, count) {
+    var this$1 = this;
+
+  var gl = this._gl;
+  var cur = this._current;
+  var next = this._next;
+
+  // commit blend
+  _commitBlendStates(gl, cur, next);
+
+  // commit depth
+  _commitDepthStates(gl, cur, next);
+
+  // commit stencil
+  _commitStencilStates(gl, cur, next);
+
+  // commit cull
+  _commitCullMode(gl, cur, next);
+
+  // commit vertex-buffer
+  _commitVertexBuffers(gl, cur, next);
+
+  // commit index-buffer
+  if (cur.indexBuffer !== next.indexBuffer) {
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, next.indexBuffer ? next.indexBuffer._glID : null);
   }
 
-  _initExtensions(extensions) {
-    const gl = this._gl;
-
-    for (let i = 0; i < extensions.length; ++i) {
-      let name = extensions[i];
-
-      try {
-        let ext = gl.getExtension(name);
-        if (ext) {
-          this._extensions[name] = ext;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }
-
-  _initCaps() {
-    const gl = this._gl;
-    const extDrawBuffers = this.ext('WEBGL_draw_buffers');
-
-    this._caps.maxVertexTextures = gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
-    this._caps.maxFragUniforms = gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
-    this._caps.maxTextureUnits = gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
-
-    this._caps.maxDrawBuffers = extDrawBuffers ? gl.getParameter(extDrawBuffers.MAX_DRAW_BUFFERS_WEBGL) : 1;
-    this._caps.maxColorAttachments = extDrawBuffers ? gl.getParameter(extDrawBuffers.MAX_COLOR_ATTACHMENTS_WEBGL) : 1;
-  }
-
-  _initStates() {
-    const gl = this._gl;
-
-    // gl.frontFace(gl.CCW);
-    gl.disable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ZERO);
-    gl.blendEquation(gl.FUNC_ADD);
-    gl.blendColor(1,1,1,1);
-
-    gl.colorMask(true, true, true, true);
-
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
-
-    gl.disable(gl.DEPTH_TEST);
-    gl.depthFunc(gl.LESS);
-    gl.depthMask(false);
-    gl.disable(gl.POLYGON_OFFSET_FILL);
-    gl.depthRange(0,1);
-
-    gl.disable(gl.STENCIL_TEST);
-    gl.stencilFunc(gl.ALWAYS, 0, 0xFF);
-    gl.stencilMask(0xFF);
-    gl.stencilOp(gl.KEEP, gl.KEEP, gl.KEEP);
-
-    // TODO:
-    // this.setAlphaToCoverage(false);
-    // this.setTransformFeedbackBuffer(null);
-    // this.setRaster(true);
-    // this.setDepthBias(false);
-
-    gl.clearDepth(1);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clearStencil(0);
-
-    gl.disable(gl.SCISSOR_TEST);
-  }
-
-  _restoreTexture (unit) {
-    const gl = this._gl;
-
-    let texture = this._current.textureUnits[unit];
-    if (texture) {
-      gl.bindTexture(texture._target, texture._glID);
-    } else {
-      gl.bindTexture(gl.TEXTURE_2D, null);
-    }
-  }
-
-  /**
-   * @method ext
-   * @param {string} name
-   */
-  ext(name) {
-    return this._extensions[name];
-  }
-
-  // ===============================
-  // Immediate Settings
-  // ===============================
-
-  /**
-   * @method setFrameBuffer
-   * @param {FrameBuffer} fb - null means use the backbuffer
-   */
-  setFrameBuffer(fb) {
-    if (this._framebuffer === fb) {
-      return;
-    }
-
-    this._framebuffer = fb;
-    const gl = this._gl;
-
-    if (fb === null) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-      return;
-    }
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb._glID);
-
-    let numColors = this._framebuffer._colors.length;
-    for (let i = 0; i < numColors; ++i) {
-      let colorBuffer = this._framebuffer._colors[i];
-      _attach(gl, gl.COLOR_ATTACHMENT0 + i, colorBuffer);
-
-      // TODO: what about cubemap face??? should be the target parameter for colorBuffer
-    }
-    for (let i = numColors; i < this._caps.maxColorAttachments; ++i) {
-      gl.framebufferTexture2D(
-        gl.FRAMEBUFFER,
-        gl.COLOR_ATTACHMENT0 + i,
-        gl.TEXTURE_2D,
-        null,
-        0
-      );
-    }
-
-    if (this._framebuffer._depth) {
-      _attach(gl, gl.DEPTH_ATTACHMENT, this._framebuffer._depth);
-    }
-
-    if (this._framebuffer._stencil) {
-      _attach(gl, gl.STENCIL_ATTACHMENT, fb._stencil);
-    }
-
-    if (this._framebuffer._depthStencil) {
-      _attach(gl, gl.DEPTH_STENCIL_ATTACHMENT, fb._depthStencil);
-    }
-  }
-
-  /**
-   * @method setViewport
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Number} w
-   * @param {Number} h
-   */
-  setViewport(x, y, w, h) {
-    if (
-      this._vx !== x ||
-      this._vy !== y ||
-      this._vw !== w ||
-      this._vh !== h
-    ) {
-      this._gl.viewport(x, y, w, h);
-      this._vx = x;
-      this._vy = y;
-      this._vw = w;
-      this._vh = h;
-    }
-  }
-
-  /**
-   * @method setScissor
-   * @param {Number} x
-   * @param {Number} y
-   * @param {Number} w
-   * @param {Number} h
-   */
-  setScissor(x, y, w, h) {
-    if (
-      this._sx !== x ||
-      this._sy !== y ||
-      this._sw !== w ||
-      this._sh !== h
-    ) {
-      this._gl.scissor(x, y, w, h);
-      this._sx = x;
-      this._sy = y;
-      this._sw = w;
-      this._sh = h;
-    }
-  }
-
-  /**
-   * @method clear
-   * @param {Object} opts
-   * @param {Array} opts.color
-   * @param {Number} opts.depth
-   * @param {Number} opts.stencil
-   */
-  clear(opts) {
-    const gl = this._gl;
-    let flags = 0;
-
-    if (opts.color !== undefined) {
-      flags |= gl.COLOR_BUFFER_BIT;
-      gl.clearColor(opts.color[0], opts.color[1], opts.color[2], opts.color[3]);
-    }
-
-    if (opts.depth !== undefined) {
-      flags |= gl.DEPTH_BUFFER_BIT;
-      gl.clearDepth(opts.depth);
-
-      gl.enable(gl.DEPTH_TEST);
-      gl.depthMask(true);
-      gl.depthFunc(gl.ALWAYS);
-    }
-
-    if (opts.stencil !== undefined) {
-      flags |= gl.STENCIL_BUFFER_BIT;
-      gl.clearStencil(opts.stencil);
-    }
-
-    gl.clear(flags);
-
-    // restore depth-write
-    if (opts.depth !== undefined) {
-      if (this._current.depthTest === false) {
-        gl.disable(gl.DEPTH_TEST);
-      } else {
-        if (this._current.depthWrite === false) {
-          gl.depthMask(false);
-        }
-        if (this._current.depthFunc !== enums.DS_FUNC_ALWAYS) {
-          gl.depthFunc(this._current.depthFunc);
-        }
-      }
-    }
-  }
-
-  // ===============================
-  // Deferred States
-  // ===============================
-
-  /**
-   * @method enableBlend
-   */
-  enableBlend() {
-    this._next.blend = true;
-  }
-
-  /**
-   * @method enableDepthTest
-   */
-  enableDepthTest() {
-    this._next.depthTest = true;
-  }
-
-  /**
-   * @method enableDepthWrite
-   */
-  enableDepthWrite() {
-    this._next.depthWrite = true;
-  }
-
-  /**
-   * @method enableStencilTest
-   */
-  enableStencilTest() {
-    this._next.stencilTest = true;
-  }
-
-  /**
-   * @method setStencilFunc
-   * @param {DS_FUNC_*} func
-   * @param {Number} ref
-   * @param {Number} mask
-   */
-  setStencilFunc(func, ref, mask) {
-    this._next.stencilSep = false;
-    this._next.stencilFuncFront = this._next.stencilFuncBack = func;
-    this._next.stencilRefFront = this._next.stencilRefBack = ref;
-    this._next.stencilMaskFront = this._next.stencilMaskBack = mask;
-  }
-
-  /**
-   * @method setStencilFuncFront
-   * @param {DS_FUNC_*} func
-   * @param {Number} ref
-   * @param {Number} mask
-   */
-  setStencilFuncFront(func, ref, mask) {
-    this._next.stencilSep = true;
-    this._next.stencilFuncFront = func;
-    this._next.stencilRefFront = ref;
-    this._next.stencilMaskFront = mask;
-  }
-
-  /**
-   * @method setStencilFuncBack
-   * @param {DS_FUNC_*} func
-   * @param {Number} ref
-   * @param {Number} mask
-   */
-  setStencilFuncBack(func, ref, mask) {
-    this._next.stencilSep = true;
-    this._next.stencilFuncBack = func;
-    this._next.stencilRefBack = ref;
-    this._next.stencilMaskBack = mask;
-  }
-
-  /**
-   * @method setStencilOp
-   * @param {STENCIL_OP_*} failOp
-   * @param {STENCIL_OP_*} zFailOp
-   * @param {STENCIL_OP_*} zPassOp
-   * @param {Number} writeMask
-   */
-  setStencilOp(failOp, zFailOp, zPassOp, writeMask) {
-    this._next.stencilFailOpFront = this._next.stencilFailOpBack = failOp;
-    this._next.stencilZFailOpFront = this._next.stencilZFailOpBack = zFailOp;
-    this._next.stencilZPassOpFront = this._next.stencilZPassOpBack = zPassOp;
-    this._next.stencilWriteMaskFront = this._next.stencilWriteMaskBack = writeMask;
-  }
-
-  /**
-   * @method setStencilOpFront
-   * @param {STENCIL_OP_*} failOp
-   * @param {STENCIL_OP_*} zFailOp
-   * @param {STENCIL_OP_*} zPassOp
-   * @param {Number} writeMask
-   */
-  setStencilOpFront(failOp, zFailOp, zPassOp, writeMask) {
-    this._next.stencilSep = true;
-    this._next.stencilFailOpFront = failOp;
-    this._next.stencilZFailOpFront = zFailOp;
-    this._next.stencilZPassOpFront = zPassOp;
-    this._next.stencilWriteMaskFront = writeMask;
-  }
-
-  /**
-   * @method setStencilOpBack
-   * @param {STENCIL_OP_*} failOp
-   * @param {STENCIL_OP_*} zFailOp
-   * @param {STENCIL_OP_*} zPassOp
-   * @param {Number} writeMask
-   */
-  setStencilOpBack(failOp, zFailOp, zPassOp, writeMask) {
-    this._next.stencilSep = true;
-    this._next.stencilFailOpBack = failOp;
-    this._next.stencilZFailOpBack = zFailOp;
-    this._next.stencilZPassOpBack = zPassOp;
-    this._next.stencilWriteMaskBack = writeMask;
-  }
-
-  /**
-   * @method setDepthFunc
-   * @param {DS_FUNC_*} depthFunc
-   */
-  setDepthFunc(depthFunc) {
-    this._next.depthFunc = depthFunc;
-  }
-
-  /**
-   * @method setBlendColor32
-   * @param {Number} rgba
-   */
-  setBlendColor32(rgba) {
-    this._next.blendColor = rgba;
-  }
-
-  /**
-   * @method setBlendColor
-   * @param {Number} r
-   * @param {Number} g
-   * @param {Number} b
-   * @param {Number} a
-   */
-  setBlendColor(r, g, b, a) {
-    this._next.blendColor = ((r * 255) << 24 | (g * 255) << 16 | (b * 255) << 8 | a * 255) >>> 0;
-  }
-
-  /**
-   * @method setBlendFunc
-   * @param {BELND_*} src
-   * @param {BELND_*} dst
-   */
-  setBlendFunc(src, dst) {
-    this._next.blendSep = false;
-    this._next.blendSrc = src;
-    this._next.blendDst = dst;
-  }
-
-  /**
-   * @method setBlendFuncSep
-   * @param {BELND_*} src
-   * @param {BELND_*} dst
-   * @param {BELND_*} srcAlpha
-   * @param {BELND_*} dstAlpha
-   */
-  setBlendFuncSep(src, dst, srcAlpha, dstAlpha) {
-    this._next.blendSep = true;
-    this._next.blendSrc = src;
-    this._next.blendDst = dst;
-    this._next.blendSrcAlpha = srcAlpha;
-    this._next.blendDstAlpha = dstAlpha;
-  }
-
-  /**
-   * @method setBlendEq
-   * @param {BELND_FUNC_*} eq
-   */
-  setBlendEq(eq) {
-    this._next.blendSep = false;
-    this._next.blendEq = eq;
-  }
-
-  /**
-   * @method setBlendEqSep
-   * @param {BELND_FUNC_*} eq
-   * @param {BELND_FUNC_*} alphaEq
-   */
-  setBlendEqSep(eq, alphaEq) {
-    this._next.blendSep = true;
-    this._next.blendEq = eq;
-    this._next.blendAlphaEq = alphaEq;
-  }
-
-  /**
-   * @method setCullMode
-   * @param {CULL_*} mode
-   */
-  setCullMode(mode) {
-    this._next.cullMode = mode;
-  }
-
-  /**
-   * @method setVertexBuffer
-   * @param {Number} stream
-   * @param {VertexBuffer} buffer
-   * @param {Number} start - start vertex
-   */
-  setVertexBuffer(stream, buffer, start = 0) {
-    this._next.vertexBuffers[stream] = buffer;
-    this._next.vertexBufferOffsets[stream] = start;
-    if (this._next.maxStream < stream) {
-      this._next.maxStream = stream;
-    }
-  }
-
-  /**
-   * @method setIndexBuffer
-   * @param {IndexBuffer} buffer
-   */
-  setIndexBuffer(buffer) {
-    this._next.indexBuffer = buffer;
-  }
-
-  /**
-   * @method setProgram
-   * @param {Program} program
-   */
-  setProgram(program) {
-    this._next.program = program;
-  }
-
-  /**
-   * @method setTexture
-   * @param {String} name
-   * @param {Texture} texture
-   * @param {Number} stage
-   */
-  setTexture(name, texture, stage) {
-    if (stage >= this._caps.maxTextureUnits) {
-      console.warn(`Can not set texture ${name} at stage ${stage}, max texture exceed: ${this._caps.maxTextureUnits}`);
-      return;
-    }
-
-    this._next.textureUnits[stage] = texture;
-    this.setUniform(name, stage);
-  }
-
-  /**
-   * @method setUniform
-   * @param {String} name
-   * @param {*} value
-   */
-  setUniform(name, value) {
-    let uniform = this._uniforms[name];
-    if (!uniform) {
-      uniform = {
-        dirty: true,
-        value: value,
-      };
-    } else {
-      uniform.dirty = true;
-      uniform.value = value;
-    }
-    this._uniforms[name] = uniform;
-  }
-
-  /**
-   * @method setPrimitiveType
-   * @param {PT_*} type
-   */
-  setPrimitiveType(type) {
-    this._next.primitiveType = type;
-  }
-
-  /**
-   * @method draw
-   * @param {Number} base
-   * @param {Number} count
-   */
-  draw(base, count) {
-    const gl = this._gl;
-    let cur = this._current;
-    let next = this._next;
-
-    // commit blend
-    _commitBlendStates(gl, cur, next);
-
-    // commit depth
-    _commitDepthStates(gl, cur, next);
-
-    // commit stencil
-    _commitStencilStates(gl, cur, next);
-
-    // commit cull
-    _commitCullMode(gl, cur, next);
-
-    // commit vertex-buffer
-    _commitVertexBuffers(gl, cur, next);
-
-    // commit index-buffer
-    if (cur.indexBuffer !== next.indexBuffer) {
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, next.indexBuffer ? next.indexBuffer._glID : null);
-    }
-
-    // commit program
-    let programDirty = false;
-    if (cur.program !== next.program) {
+  // commit program
+  var programDirty = false;
+  if (cur.program !== next.program) {
+    if (next.program._linked) {
       gl.useProgram(next.program._glID);
-      programDirty = true;
-    }
-
-    // commit texture/sampler
-    _commitTextures(gl, cur, next);
-
-    // commit uniforms
-    for (let i = 0; i < next.program._uniforms.length; ++i) {
-      let uniformInfo = next.program._uniforms[i];
-      let uniform = this._uniforms[uniformInfo.name];
-      if (!uniform) {
-        // console.warn(`Can not find uniform ${uniformInfo.name}`);
-        continue;
-      }
-
-      if (!programDirty && !uniform.dirty) {
-        continue;
-      }
-
-      uniform.dirty = false;
-
-      // TODO: please consider array uniform: uniformInfo.size > 0
-
-      let commitFunc = _type2uniformCommit[uniformInfo.type];
-      if (!commitFunc) {
-        console.warn(`Can not find commit function for uniform ${uniformInfo.name}`);
-        continue;
-      }
-
-      commitFunc(gl, uniformInfo.location, uniform.value);
-    }
-
-    // drawPrimitives
-    if (next.indexBuffer) {
-      gl.drawElements(
-        this._next.primitiveType,
-        count,
-        next.indexBuffer._format,
-        base * next.indexBuffer._bytes
-      );
     } else {
-      gl.drawArrays(
-        this._next.primitiveType,
-        base,
-        count
-      );
+      console.warn('Failed to use program: has not linked yet.');
+    }
+    programDirty = true;
+  }
+
+  // commit texture/sampler
+  _commitTextures(gl, cur, next);
+
+  // commit uniforms
+  for (var i = 0; i < next.program._uniforms.length; ++i) {
+    var uniformInfo = next.program._uniforms[i];
+    var uniform = this$1._uniforms[uniformInfo.name];
+    if (!uniform) {
+      // console.warn(`Can not find uniform ${uniformInfo.name}`);
+      continue;
     }
 
-    // TODO: autogen mipmap for color buffer
-    // if (this._framebuffer && this._framebuffer.colors[0].mipmap) {
-    //   gl.bindTexture(this._framebuffer.colors[i]._target, colors[i]._glID);
-    //   gl.generateMipmap(this._framebuffer.colors[i]._target);
-    // }
+    if (!programDirty && !uniform.dirty) {
+      continue;
+    }
 
-    // update stats
-    this._stats.drawcalls += 1;
+    uniform.dirty = false;
 
-    // reset states
-    cur.set(next);
-    next.reset();
+    // TODO: please consider array uniform: uniformInfo.size > 0
+
+    var commitFunc = _type2uniformCommit[uniformInfo.type];
+    if (!commitFunc) {
+      console.warn(("Can not find commit function for uniform " + (uniformInfo.name)));
+      continue;
+    }
+
+    commitFunc(gl, uniformInfo.location, uniform.value);
   }
-}
 
-let gfx = {
+  // drawPrimitives
+  if (next.indexBuffer) {
+    gl.drawElements(
+      this._next.primitiveType,
+      count,
+      next.indexBuffer._format,
+      base * next.indexBuffer._bytes
+    );
+  } else {
+    gl.drawArrays(
+      this._next.primitiveType,
+      base,
+      count
+    );
+  }
+
+  // TODO: autogen mipmap for color buffer
+  // if (this._framebuffer && this._framebuffer.colors[0].mipmap) {
+  // gl.bindTexture(this._framebuffer.colors[i]._target, colors[i]._glID);
+  // gl.generateMipmap(this._framebuffer.colors[i]._target);
+  // }
+
+  // update stats
+  this._stats.drawcalls += 1;
+
+  // reset states
+  cur.set(next);
+  next.reset();
+};
+
+var gfx = {
   // classes
-  VertexFormat,
-  IndexBuffer,
-  VertexBuffer,
-  Program,
-  Texture,
-  Texture2D,
-  TextureCube,
-  RenderBuffer,
-  FrameBuffer,
-  Device,
+  VertexFormat: VertexFormat,
+  IndexBuffer: IndexBuffer,
+  VertexBuffer: VertexBuffer,
+  Program: Program,
+  Texture: Texture,
+  Texture2D: Texture2D,
+  TextureCube: TextureCube,
+  RenderBuffer: RenderBuffer,
+  FrameBuffer: FrameBuffer,
+  Device: Device,
 
   // functions
-  attrTypeBytes,
-  glFilter,
-  glTextureFmt,
+  attrTypeBytes: attrTypeBytes,
+  glFilter: glFilter,
+  glTextureFmt: glTextureFmt,
 };
 Object.assign(gfx, enums);
 
