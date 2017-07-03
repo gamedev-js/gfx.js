@@ -86,4 +86,59 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
       t.end();
     });
   });
+
+  _initDevice(device => {
+    t.test('uniformArray', t => {
+
+      let program = new gfx.Program(device, {
+        vert: `
+          attribute vec3 a_position;
+          attribute vec2 a_uv0;
+
+          void main() {
+            vec4 position = vec4(a_uv0.xy, a_position.z, 1.0);
+            gl_Position = vec4( a_position, 1.0 );
+          }
+        `,
+        frag: `
+          precision mediump float;
+          uniform float farray[2];
+          uniform vec2 v2array[3];
+          uniform bool barray[4];
+          void main() {
+            gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
+            if(barray[3]) {
+              gl_FragColor.r = farray[0];
+            } else {
+              gl_FragColor.r = v2array[1].x;
+            }
+          }
+        `
+      });
+      program.link();
+      let uniforms = program._uniforms;
+      let gl = device._gl;
+      t.equal(uniforms.length, 3);
+      // the sequence will vary in different browsers, so let us define a table to check
+      let uniformTable = {
+        farray: {
+          type: gl.FLOAT,
+          size: 2
+        },
+        v2array: {
+          type: gl.FLOAT_VEC2,
+          size: 3
+        },
+        barray: {
+          type: gl.BOOL,
+          size: 4
+        }
+      };
+      uniforms.forEach(uniform => {
+        t.equal(uniform.type, uniformTable[uniform.name].type);
+        t.equal(uniform.size, uniformTable[uniform.name].size);
+      });
+      t.end();
+    });
+  });
 });
