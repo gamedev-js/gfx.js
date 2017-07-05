@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.6
+ * gfx.js v1.1.7
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -682,17 +682,22 @@ Program.prototype.link = function link () {
   var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
   for (var i$1 = 0; i$1 < numUniforms; ++i$1) {
     var info$1 = gl.getActiveUniform(program, i$1);
-    var location$1 = gl.getUniformLocation(program, info$1.name);
-
-    // NOTE:
-    // if we define an array uniform: float foobar[10]
-    // the uniform.name will be 'foobar[0]', and the size will be 10
+    var name = info$1.name;
+    var location$1 = gl.getUniformLocation(program, name);
+    var isArray = name.substr(name.length - 3) === '[0]';
+    if (isArray) {
+      if (info$1.type === gl.SAMPLER_2D || info$1.type === gl.SAMPLER_CUBE) {
+        console.error('sampler array is not supported!');
+        continue;
+      }
+      name = name.substr(0, name.length - 3);
+    }
 
     this$1._uniforms.push({
-      name: info$1.name,
+      name: name,
       location: location$1,
       type: info$1.type,
-      size: info$1.size, // used when uniform is an array
+      size: isArray ? info$1.size : undefined, // used when uniform is an array
     });
   }
 
@@ -1643,6 +1648,56 @@ _type2uniformCommit[GL_SAMPLER_CUBE] = function (gl, id, value) {
   };
 
 /**
+ * _type2uniformArrayCommit
+ */
+var _type2uniformArrayCommit = {};
+_type2uniformArrayCommit[GL_INT] = function (gl, id, value) {
+    gl.uniform1iv(id, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT$1] = function (gl, id, value) {
+    gl.uniform1fv(id, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT_VEC2] = function (gl, id, value) {
+    gl.uniform2fv(id, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT_VEC3] = function (gl, id, value) {
+    gl.uniform3fv(id, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT_VEC4] = function (gl, id, value) {
+    gl.uniform4fv(id, value);
+  };
+_type2uniformArrayCommit[GL_INT_VEC2] = function (gl, id, value) {
+    gl.uniform2iv(id, value);
+  };
+_type2uniformArrayCommit[GL_INT_VEC3] = function (gl, id, value) {
+    gl.uniform3iv(id, value);
+  };
+_type2uniformArrayCommit[GL_INT_VEC4] = function (gl, id, value) {
+    gl.uniform4iv(id, value);
+  };
+_type2uniformArrayCommit[GL_BOOL] = function (gl, id, value) {
+    gl.uniform1iv(id, value);
+  };
+_type2uniformArrayCommit[GL_BOOL_VEC2] = function (gl, id, value) {
+    gl.uniform2iv(id, value);
+  };
+_type2uniformArrayCommit[GL_BOOL_VEC3] = function (gl, id, value) {
+    gl.uniform3iv(id, value);
+  };
+_type2uniformArrayCommit[GL_BOOL_VEC4] = function (gl, id, value) {
+    gl.uniform4iv(id, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT_MAT2] = function (gl, id, value) {
+    gl.uniformMatrix2fv(id, false, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT_MAT3] = function (gl, id, value) {
+    gl.uniformMatrix3fv(id, false, value);
+  };
+_type2uniformArrayCommit[GL_FLOAT_MAT4] = function (gl, id, value) {
+    gl.uniformMatrix4fv(id, false, value);
+  };
+
+/**
  * _commitBlendStates
  */
 function _commitBlendStates(gl, cur, next) {
@@ -1915,6 +1970,12 @@ function _commitCullMode(gl, cur, next) {
  */
 function _commitVertexBuffers(gl, cur, next) {
   var attrsDirty = false;
+
+  // nothing changed for vertex buffer
+  if (next.maxStream === -1) {
+    console.warn('VertexBuffer not assigned, please call setVertexBuffer before every draw.');
+    return;
+  }
 
   if (cur.maxStream !== next.maxStream) {
     attrsDirty = true;
@@ -2645,7 +2706,7 @@ Device.prototype.draw = function draw (base, count) {
 
     // TODO: please consider array uniform: uniformInfo.size > 0
 
-    var commitFunc = _type2uniformCommit[uniformInfo.type];
+    var commitFunc = (uniformInfo.size === undefined) ? _type2uniformCommit[uniformInfo.type] : _type2uniformArrayCommit[uniformInfo.type];
     if (!commitFunc) {
       console.warn(("Can not find commit function for uniform " + (uniformInfo.name)));
       continue;
