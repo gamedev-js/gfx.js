@@ -107,7 +107,7 @@ suite(tap, 'helper', { timeout: 20000 }, t => {
           uniform bool barray[4];
           void main() {
             gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
-            if(barray[3]) {
+            if (barray[3]) {
               gl_FragColor.r = farray[0];
             } else {
               gl_FragColor.r = v2array[1].x;
