@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.7
+ * gfx.js v1.1.8
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */

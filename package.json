@@ -1,8 +1,9 @@
 {
   "name": "gfx.js",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "WebGL wrappings for Graphics",
   "main": "dist/gfx.js",
+  "jsnext:main" : "index.js",
   "scripts": {
     "build:dev": "rollup -c ./script/rollup.config.js",
     "build:min": "uglifyjs ./dist/gfx.dev.js --mangle --source-map url=gfx.min.js.map -o ./dist/gfx.min.js",
