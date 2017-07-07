@@ -50,12 +50,12 @@
         src: './assets/uv_checker_01.jpg'
       },
     },
-    onDone (assets) {
+    onDone(assets) {
       let image = assets.image;
       texture = new gfx.Texture2D(device, {
-        width : image.width,
-        height : image.height,
-        images : [image]
+        width: image.width,
+        height: image.height,
+        images: [image]
       });
     }
   });
@@ -82,7 +82,7 @@
     if (texture && canvasTexture) {
       device.setVertexBuffer(0, vertexBuffer);
       device.setUniform('color', new Float32Array([1, 0, 0, 1]));
-      device.setTextures('texture', [canvasTexture, texture], 0);
+      device.setTextures('texture', [canvasTexture, texture], 13);
       device.setUniform('transform', mat4.array(new Float32Array(16), transform));
       device.setProgram(program);
       device.draw(0, vertexBuffer.count);
