@@ -1,6 +1,6 @@
 
 /*
- * gfx.js v1.1.8
+ * gfx.js v1.1.9
  * (c) 2017 @Johnny Wu
  * Released under the MIT License.
  */
@@ -686,10 +686,6 @@ Program.prototype.link = function link () {
     var location$1 = gl.getUniformLocation(program, name);
     var isArray = name.substr(name.length - 3) === '[0]';
     if (isArray) {
-      if (info$1.type === gl.SAMPLER_2D || info$1.type === gl.SAMPLER_CUBE) {
-        console.error('sampler array is not supported!');
-        continue;
-      }
       name = name.substr(0, name.length - 3);
     }
 
@@ -701,7 +697,6 @@ Program.prototype.link = function link () {
     });
   }
 
-  //
   this._linked = true;
 };
 
@@ -1696,6 +1691,12 @@ _type2uniformArrayCommit[GL_FLOAT_MAT3] = function (gl, id, value) {
 _type2uniformArrayCommit[GL_FLOAT_MAT4] = function (gl, id, value) {
     gl.uniformMatrix4fv(id, false, value);
   };
+_type2uniformArrayCommit[GL_SAMPLER_2D] = function (gl, id, value) {
+    gl.uniform1iv(id, value);
+  };
+_type2uniformArrayCommit[GL_SAMPLER_CUBE] = function (gl, id, value) {
+    gl.uniform1iv(id, value);
+  };
 
 /**
  * _commitBlendStates
@@ -2033,7 +2034,7 @@ function _commitTextures(gl, cur, next) {
   for (var i = 0; i < next.textureUnits.length; ++i) {
     if (cur.textureUnits[i] !== next.textureUnits[i]) {
       var texture = next.textureUnits[i];
-      // gl.activeTexture(gl.TEXTURE0 + i);
+      gl.activeTexture(gl.TEXTURE0 + i);
       gl.bindTexture(texture._target, texture._glID);
     }
   }
@@ -2614,6 +2615,27 @@ Device.prototype.setTexture = function setTexture (name, texture, slot) {
 
   this._next.textureUnits[slot] = texture;
   this.setUniform(name, slot);
+};
+
+/**
+ * @method setTextureArray
+ * @param {String} name
+ * @param {Array} textures
+ * @param {Int32Array} slots
+ */
+Device.prototype.setTextureArray = function setTextureArray (name, textures, slots) {
+    var this$1 = this;
+
+  var len = textures.length;
+  if (len >= this._caps.maxTextureUnits) {
+    console.warn(("Can not set " + len + " textures for " + name + ", max texture exceed: " + (this._caps.maxTextureUnits)));
+    return;
+  }
+  for (var i = 0; i < len; ++i) {
+    var slot = slots[i];
+    this$1._next.textureUnits[slot] = textures[i];
+  }
+  this.setUniform(name, slots);
 };
 
 /**
