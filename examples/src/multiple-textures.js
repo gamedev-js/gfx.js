@@ -82,7 +82,7 @@
     if (texture && canvasTexture) {
       device.setVertexBuffer(0, vertexBuffer);
       device.setUniform('color', new Float32Array([1, 0, 0, 1]));
-      device.setTextureArray('texture', [canvasTexture, texture], 13);
+      device.setTextureArray('texture', [canvasTexture, texture], new Int32Array([6, 7]));
       device.setUniform('transform', mat4.array(new Float32Array(16), transform));
       device.setProgram(program);
       device.draw(0, vertexBuffer.count);
