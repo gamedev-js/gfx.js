@@ -1,6 +1,6 @@
 {
   "name": "gfx.js",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "WebGL wrappings for Graphics",
   "main": "dist/gfx.js",
   "module" : "index.js",
@@ -44,5 +44,9 @@
     "uglify-es": "^3.0.15",
     "vconsole": "^2.5.2",
     "vmath": "^1.3.1"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }
