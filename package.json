@@ -6,7 +6,7 @@
   "module" : "index.js",
   "jsnext:main" : "index.js",
   "scripts": {
-    "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "pretest": "npm run build:dev",
     "build": "npm run build:dev && npm run build:min",
     "build:dev": "rollup -c ./script/rollup.config.js",
