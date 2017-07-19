@@ -67,8 +67,7 @@
     vertexFmt,
     gfx.USAGE_STATIC,
     new Float32Array([-1, -1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1]),
-    6,
-    false
+    6
   );
   let transform = mat4.create();
   mat4.fromRTS(transform, quat.create(), vec3.new(0, 0, 0), vec3.new(0.5, 0.5, 0.5));

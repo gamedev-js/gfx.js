@@ -68,8 +68,7 @@
     vertexFmt,
     gfx.USAGE_STATIC,
     new Float32Array([-1, -1, 1, -1, 1, 1, 1, 1, -1, -1, -1, 1]),
-    6,
-    false
+    6
   );
   let transform0 = mat4.create();
   let transform1 = mat4.create();

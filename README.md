@@ -43,8 +43,7 @@ npm install gfx.js
     vertexFmt,
     gfx.USAGE_STATIC,
     new Float32Array([-1, 0, 0, -1, 1, 1]),
-    3,
-    false
+    3
   );
 
   // update

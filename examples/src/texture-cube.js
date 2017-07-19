@@ -95,16 +95,14 @@
     vertexFmt,
     gfx.USAGE_STATIC,
     new Float32Array(verts),
-    8,
-    false
+    8
   );
   let indexBuffer = new gfx.IndexBuffer(
     device,
     gfx.INDEX_FMT_UINT16,
     gfx.USAGE_STATIC,
     new Uint16Array(indices),
-    indices.length,
-    false
+    indices.length
   );
 
   let model = mat4.create();

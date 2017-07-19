@@ -45,16 +45,14 @@
          0.5,  0.5, 1, 1,
          0.5, -0.5, 1, 0,
       ]),
-      4,
-      false
+      4
     );
     let ib = new gfx.IndexBuffer(
       device,
       gfx.INDEX_FMT_UINT8,
       gfx.USAGE_STATIC,
       new Uint8Array([ 0, 3, 1, 1, 3, 2]),
-      6,
-      false
+      6
     );
 
     return {
@@ -98,8 +96,7 @@
       vertexFmt,
       gfx.USAGE_STATIC,
       new Float32Array([-1, 4, -1, -1, 4, -1]),
-      3,
-      false
+      3
     );
 
     return {

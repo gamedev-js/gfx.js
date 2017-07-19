@@ -71,8 +71,7 @@
         vertexFmt,
         gfx.USAGE_STATIC,
         new Float32Array(verts),
-        bunny.positions.length,
-        false
+        bunny.positions.length
       );
 
       indexBuffer = new gfx.IndexBuffer(
@@ -80,8 +79,7 @@
         gfx.INDEX_FMT_UINT16,
         gfx.USAGE_STATIC,
         new Uint16Array(indices),
-        indices.length,
-        false
+        indices.length
       );
 
       bunnyLoaded = true;

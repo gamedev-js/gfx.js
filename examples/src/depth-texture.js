@@ -44,8 +44,7 @@
       vertexFmt,
       gfx.USAGE_STATIC,
       new Float32Array([-1, 4, -1, -1, 4, -1]),
-      3,
-      false
+      3
     );
 
     return {
@@ -114,8 +113,7 @@
           vertexFmt,
           gfx.USAGE_STATIC,
           new Float32Array(verts),
-          bunny.positions.length,
-          false
+          bunny.positions.length
         );
 
         let ib = new gfx.IndexBuffer(
@@ -123,8 +121,7 @@
           gfx.INDEX_FMT_UINT16,
           gfx.USAGE_STATIC,
           new Uint16Array(indices),
-          indices.length,
-          false
+          indices.length
         );
 
         callback ({
