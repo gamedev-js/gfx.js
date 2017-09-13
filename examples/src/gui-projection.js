@@ -2,7 +2,26 @@
   let gfx = window.gfx;
   let device = window.device;
   let canvas = window.canvas;
-  let { vec2, mat23, mat4 } = window.vmath;
+  let resl = window.resl;
+  let { vec2, mat23, mat4, toRadian } = window.vmath;
+
+  let texture = null;
+  resl({
+    manifest: {
+      image: {
+        type: 'image',
+        src: './assets/uv_checker_02.jpg'
+      },
+    },
+    onDone (assets) {
+      let image = assets.image;
+      texture = new gfx.Texture2D(device, {
+        width : image.width,
+        height : image.height,
+        images : [image],
+      });
+    }
+  });
 
   // init resources
   let program = new gfx.Program(device, {
@@ -11,15 +30,22 @@
       uniform mat4 projection;
       uniform mat4 transform;
       attribute vec2 a_position;
+      attribute vec2 a_uv;
+      varying vec2 v_uv;
+
       void main () {
         gl_Position = projection * transform * vec4(a_position, 0, 1);
+        v_uv = a_uv;
       }
     `,
     frag: `
       precision highp float;
+      uniform sampler2D texture;
       uniform vec4 color;
+      varying vec2 v_uv;
+
       void main () {
-        gl_FragColor = color;
+        gl_FragColor = color * texture2D(texture, v_uv);
       }
     `,
   });
@@ -27,6 +53,7 @@
 
   let vertexFmt = new gfx.VertexFormat([
     { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 2 },
+    { name: gfx.ATTR_UV, type: gfx.ATTR_TYPE_FLOAT32, num: 2 },
   ]);
   let spriteWidth = 128;
   let spriteHeight = 128;
@@ -35,12 +62,12 @@
     vertexFmt,
     gfx.USAGE_STATIC,
     new Float32Array([
-      0, 0,
-      0, spriteHeight,
-      spriteWidth, spriteHeight,
-      0, 0,
-      spriteWidth, spriteHeight,
-      spriteWidth, 0
+      0, 0,                       0, 1,
+      0, spriteHeight,            0, 0,
+      spriteWidth, spriteHeight,  1, 0,
+      0, 0,                       0, 1,
+      spriteWidth, spriteHeight,  1, 0,
+      spriteWidth, 0,             1, 1
     ]),
     6
   );
@@ -48,6 +75,7 @@
   let affineTranslation = mat23.create();
   let affineRotation = mat23.create();
   let affineScale = mat23.create();
+
   /**
    * coordinates
    * .---------> x
@@ -65,7 +93,7 @@
     mat23.fromTranslation(affineTranslation, vec2.new(10, (canvas.height - spriteHeight) / 2));
 
     mat23.fromTranslation(affineRotation, vec2.new(10 + spriteWidth * 2, (canvas.height - spriteHeight) / 2));
-    mat23.rotate(affineRotation, affineRotation, Math.PI * 15 / 180);
+    mat23.rotate(affineRotation, affineRotation, toRadian(15));
 
     mat23.fromTranslation(affineScale, vec2.new(10 + spriteWidth * 4, (canvas.height - spriteHeight) / 2));
     mat23.scale(affineScale, affineScale, vec2.new(1.2, 0.5));
@@ -76,7 +104,12 @@
       depth: 1
     });
 
+    if (texture) {
+      device.setTexture('texture', texture, 0);
+    }
+
     // translation
+    device.setCullMode(gfx.CULL_NONE);
     device.setVertexBuffer(0, vertexBuffer);
     device.setUniform('color', new Float32Array([1, 0, 0, 1]));
     device.setUniform('projection', mat4.array(new Float32Array(16), projection));
@@ -85,6 +118,7 @@
     device.draw(0, vertexBuffer.count);
 
     // rotation
+    device.setCullMode(gfx.CULL_NONE);
     device.setVertexBuffer(0, vertexBuffer);
     device.setUniform('color', new Float32Array([0, 1, 0, 1]));
     device.setUniform('projection', mat4.array(new Float32Array(16), projection));
@@ -93,6 +127,7 @@
     device.draw(0, vertexBuffer.count);
 
     // scale
+    device.setCullMode(gfx.CULL_NONE);
     device.setVertexBuffer(0, vertexBuffer);
     device.setUniform('color', new Float32Array([0, 0, 1, 1]));
     device.setUniform('projection', mat4.array(new Float32Array(16), projection));

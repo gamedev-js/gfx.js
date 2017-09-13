@@ -43,7 +43,7 @@
     "spectorjs": "^0.2.3",
     "uglify-es": "^3.0.15",
     "vconsole": "^2.5.2",
-    "vmath": "^1.4.6"
+    "vmath": "^1.4.7"
   },
   "files": [
     "dist",

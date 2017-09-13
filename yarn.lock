@@ -2,10 +2,6 @@
 # yarn lockfile v1
 
 
-"@types/node@^7.0.18":
-  version "7.0.34"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.34.tgz#eed5c95291a9dddff6b9f5a72ca342b1e72f0ba2"
-
 "@types/node@^8.0.24":
   version "8.0.26"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.26.tgz#4d58be925306fd22b1141085535a0268b8beb189"
@@ -577,15 +573,7 @@ electron-node-tap@^1.1.4:
     tap-mocha-reporter electron-utils/tap-mocha-reporter#d3c1a0d
     yargs "^7.0.1"
 
-electron@^1.6.2:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-1.7.4.tgz#db8b85ae98dffb7a82938e5ea6eed3cb66f62a65"
-  dependencies:
-    "@types/node" "^7.0.18"
-    electron-download "^3.0.1"
-    extract-zip "^1.0.3"
-
-electron@^1.8.0:
+electron@^1.6.2, electron@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/electron/-/electron-1.8.0.tgz#896f429b1e664f496f62b9cc7ee6a67a71375f31"
   dependencies:
@@ -2446,9 +2434,9 @@ vlq@^0.2.1:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-0.2.2.tgz#e316d5257b40b86bb43cb8d5fea5d7f54d6b0ca1"
 
-vmath@^1.4.6:
-  version "1.4.6"
-  resolved "https://registry.yarnpkg.com/vmath/-/vmath-1.4.6.tgz#b68cc0e1fe4cdefce302750b9a97f887441b6642"
+vmath@^1.4.7:
+  version "1.4.7"
+  resolved "https://registry.yarnpkg.com/vmath/-/vmath-1.4.7.tgz#6604b7d749423cad7d0708e5b89aa3f7183e22ff"
 
 which-module@^1.0.0:
   version "1.0.0"
