@@ -2,17 +2,17 @@
   let gfx = window.gfx;
   let device = window.device;
   let canvas = window.canvas;
-  let resl = window.resl;
-  let { vec3, mat4 } = window.vmath;
+  let { vec2, mat23, mat4 } = window.vmath;
 
   // init resources
   let program = new gfx.Program(device, {
     vert: `
       precision highp float;
       uniform mat4 projection;
+      uniform mat4 transform;
       attribute vec2 a_position;
       void main () {
-        gl_Position = projection * vec4(a_position, 0, 1);
+        gl_Position = projection * transform * vec4(a_position, 0, 1);
       }
     `,
     frag: `
@@ -45,6 +45,9 @@
     6
   );
   let projection = mat4.create();
+  let affineTranslation = mat23.create();
+  let affineRotation = mat23.create();
+  let affineScale = mat23.create();
   /**
    * coordinates
    * .---------> x
@@ -54,27 +57,46 @@
    * |
    * V y
    */
-  let designSize = { width: 480, height: 320 };
-  let left = 0;
-  let right = designSize.width;
-  let top = 0;
-  let bottom = designSize.height;
-  let tmps = mat4.create();
-  mat4.fromTranslation(tmps, vec3.new(-(left + right) / 2, -(top + bottom) / 2, 1));
-  mat4.fromScaling(projection, vec3.new(2 / (right - left), -2 / (bottom - top), 1));
-  mat4.multiply(projection, projection, tmps);
 
   // tick
   return function tick() {
+    mat4.ortho(projection, 0, canvas.width, canvas.height, 0, -100, 100);
+
+    mat23.fromTranslation(affineTranslation, vec2.new(10, (canvas.height - spriteHeight) / 2));
+
+    mat23.fromTranslation(affineRotation, vec2.new(10 + spriteWidth * 2, (canvas.height - spriteHeight) / 2));
+    mat23.rotate(affineRotation, affineRotation, Math.PI * 15 / 180);
+
+    mat23.fromTranslation(affineScale, vec2.new(10 + spriteWidth * 4, (canvas.height - spriteHeight) / 2));
+    mat23.scale(affineScale, affineScale, vec2.new(1.2, 0.5));
+
     device.setViewport(0, 0, canvas.width, canvas.height);
     device.clear({
       color: [0.1, 0.1, 0.1, 1],
       depth: 1
     });
 
+    // translation
     device.setVertexBuffer(0, vertexBuffer);
     device.setUniform('color', new Float32Array([1, 0, 0, 1]));
     device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+    device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineTranslation));
+    device.setProgram(program);
+    device.draw(0, vertexBuffer.count);
+
+    // rotation
+    device.setVertexBuffer(0, vertexBuffer);
+    device.setUniform('color', new Float32Array([0, 1, 0, 1]));
+    device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+    device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineRotation));
+    device.setProgram(program);
+    device.draw(0, vertexBuffer.count);
+
+    // scale
+    device.setVertexBuffer(0, vertexBuffer);
+    device.setUniform('color', new Float32Array([0, 0, 1, 1]));
+    device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+    device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineScale));
     device.setProgram(program);
     device.draw(0, vertexBuffer.count);
   };
