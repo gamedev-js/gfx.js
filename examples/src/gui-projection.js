@@ -27,7 +27,6 @@
 
   let vertexFmt = new gfx.VertexFormat([
     { name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 2 },
-    // { name: gfx.ATTR_COLOR, type: gfx.ATTR_TYPE_FLOAT32, num: 3 },
   ]);
   let spriteWidth = 128;
   let spriteHeight = 128;
