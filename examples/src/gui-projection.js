@@ -62,12 +62,12 @@
     vertexFmt,
     gfx.USAGE_STATIC,
     new Float32Array([
-      0, 0,                       0, 1,
-      0, spriteHeight,            0, 0,
-      spriteWidth, spriteHeight,  1, 0,
-      0, 0,                       0, 1,
-      spriteWidth, spriteHeight,  1, 0,
-      spriteWidth, 0,             1, 1
+      0, 0,                       0, 0,
+      0, spriteHeight,            0, 1,
+      spriteWidth, spriteHeight,  1, 1,
+      0, 0,                       0, 0,
+      spriteWidth, spriteHeight,  1, 1,
+      spriteWidth, 0,             1, 0
     ]),
     6
   );
@@ -78,17 +78,17 @@
 
   /**
    * coordinates
-   * .---------> x
+   * ^ y
    * |
    * |
    * |
    * |
-   * V y
+   * .-----------> x
    */
 
   // tick
   return function tick() {
-    mat4.ortho(projection, 0, canvas.width, canvas.height, 0, -100, 100);
+    mat4.ortho(projection, 0, canvas.width, 0, canvas.height, -100, 100);
 
     mat23.fromTranslation(affineTranslation, vec2.new(10, (canvas.height - spriteHeight) / 2));
 
@@ -106,33 +106,33 @@
 
     if (texture) {
       device.setTexture('texture', texture, 0);
+
+      // translation
+      device.setCullMode(gfx.CULL_NONE);
+      device.setVertexBuffer(0, vertexBuffer);
+      device.setUniform('color', new Float32Array([1, 0, 0, 1]));
+      device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+      device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineTranslation));
+      device.setProgram(program);
+      device.draw(0, vertexBuffer.count);
+
+      // rotation
+      device.setCullMode(gfx.CULL_NONE);
+      device.setVertexBuffer(0, vertexBuffer);
+      device.setUniform('color', new Float32Array([0, 1, 0, 1]));
+      device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+      device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineRotation));
+      device.setProgram(program);
+      device.draw(0, vertexBuffer.count);
+
+      // scale
+      device.setCullMode(gfx.CULL_NONE);
+      device.setVertexBuffer(0, vertexBuffer);
+      device.setUniform('color', new Float32Array([0, 0, 1, 1]));
+      device.setUniform('projection', mat4.array(new Float32Array(16), projection));
+      device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineScale));
+      device.setProgram(program);
+      device.draw(0, vertexBuffer.count);
     }
-
-    // translation
-    device.setCullMode(gfx.CULL_NONE);
-    device.setVertexBuffer(0, vertexBuffer);
-    device.setUniform('color', new Float32Array([1, 0, 0, 1]));
-    device.setUniform('projection', mat4.array(new Float32Array(16), projection));
-    device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineTranslation));
-    device.setProgram(program);
-    device.draw(0, vertexBuffer.count);
-
-    // rotation
-    device.setCullMode(gfx.CULL_NONE);
-    device.setVertexBuffer(0, vertexBuffer);
-    device.setUniform('color', new Float32Array([0, 1, 0, 1]));
-    device.setUniform('projection', mat4.array(new Float32Array(16), projection));
-    device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineRotation));
-    device.setProgram(program);
-    device.draw(0, vertexBuffer.count);
-
-    // scale
-    device.setCullMode(gfx.CULL_NONE);
-    device.setVertexBuffer(0, vertexBuffer);
-    device.setUniform('color', new Float32Array([0, 0, 1, 1]));
-    device.setUniform('projection', mat4.array(new Float32Array(16), projection));
-    device.setUniform('transform', mat23.array4x4(new Float32Array(16), affineScale));
-    device.setProgram(program);
-    device.draw(0, vertexBuffer.count);
   };
 })();
