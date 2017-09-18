@@ -69,13 +69,6 @@ npm install gfx.js
 
 TODO
 
-## TODO
-
-  - [] Better shader compile & link error (regl is a good reference)
-  - [] Update sub-image
-  - [] stats of device._stats.texture
-  - [] Check commit variable when commit uniforms
-
 ## License
 
 MIT © 2017 Johnny Wu
