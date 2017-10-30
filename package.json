@@ -1,6 +1,6 @@
 {
   "name": "gfx.js",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "description": "WebGL wrappings for Graphics",
   "main": "dist/gfx.js",
   "module": "index.js",
@@ -32,7 +32,7 @@
   "homepage": "https://github.com/gamedev-js/gfx.js/issues",
   "dependencies": {},
   "devDependencies": {
-    "electron": "^1.8.0",
+    "electron": "^1.8.1",
     "electron-node-tap": "^1.1.4",
     "fs-jetpack": "^0.13.0",
     "lstats.js": "^1.2.5",
