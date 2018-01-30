@@ -138,6 +138,12 @@
 
   let bg = _bigTriangle(device);
 
+  let colorBuffer = new gfx.RenderBuffer(
+    device,
+    gfx.RB_FMT_RGB565,
+    canvas.width,
+    canvas.height
+  );
   let depthTexture = new gfx.Texture2D(device, {
     width: canvas.width,
     height: canvas.height,
@@ -147,6 +153,7 @@
     wrapT: gfx.WRAP_CLAMP,
   });
   let frameBuffer = new gfx.FrameBuffer(device, canvas.width, canvas.height, {
+    colors: [colorBuffer],
     depth: depthTexture
   });
 
